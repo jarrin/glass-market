@@ -1,7 +1,6 @@
 <?php
 // Blurry glass navbar include
-// Usage: <?php include __DIR__ . '/includes/navbar.php'; ?> or include_once
-?>
+// Usage: <?php include __DIR__ . '/includes/navbar.php'; ?>
 
 <style>
 /* Navbar root */
