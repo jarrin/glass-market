@@ -41,17 +41,45 @@
     <h1 class="page-title">Browse Collection</h1>
     <p class="subtitle">Discover unique glass art from artisans worldwide</p>
 
+    <?php
+        // static products array (more items than the original mock)
+        $products = [];
+        for($i=1;$i<=24;$i++){
+            // simple price spread for demo
+            $price = rand(25, 950);
+            $products[] = [
+                'id'=>$i,
+                'title'=>"Glass Item #$i",
+                'category'=>($i%3==0)?'Tableware':(($i%3==1)?'Vases':'Sculptures'),
+                'image'=>"https://picsum.photos/seed/glass{$i}/800/800",
+                'price'=>$price
+            ];
+        }
+    ?>
+
     <div class="layout">
         <aside class="sidebar">
             <div class="panel">
                 <h4>Categories</h4>
-                <ul class="filter-list">
-                    <li><span>Vases &amp; Vessels</span><span>234</span></li>
-                    <li><span>Sculptures</span><span>156</span></li>
-                    <li><span>Tableware</span><span>412</span></li>
-                    <li><span>Lighting</span><span>89</span></li>
-                    <li><span>Decorative</span><span>178</span></li>
-                    <li><span>Jewelry</span><span>203</span></li>
+                <ul class="filter-list" id="categories-list">
+                    <?php
+                        $allCategories = ['Vases & Vessels','Sculptures','Tableware','Lighting','Decorative','Jewelry'];
+                        // compute counts from products (if products not defined yet we'll set to 0 temporarily)
+                        $categoryCounts = array_fill_keys($allCategories, 0);
+                        if(isset($products) && is_array($products)){
+                            foreach($products as $pp){
+                                if(isset($pp['category']) && isset($categoryCounts[$pp['category']])){
+                                    $categoryCounts[$pp['category']]++;
+                                }
+                            }
+                        }
+                        foreach($allCategories as $cat){
+                            $count = isset($categoryCounts[$cat]) ? $categoryCounts[$cat] : 0;
+                            // sanitize id for input
+                            $id = 'cat_' . preg_replace('/[^a-z0-9]+/i','_', strtolower($cat));
+                            echo "<li><label><input type=\"checkbox\" class=\"cat-filter\" id=\"$id\" value=\"".htmlspecialchars($cat,ENT_QUOTES,'UTF-8')."\"> <span>".htmlspecialchars($cat,ENT_QUOTES,'UTF-8')."</span></label> <span class=\"count\">$count</span></li>";
+                        }
+                    ?>
                 </ul>
             </div>
 
@@ -60,12 +88,20 @@
             <div class="panel">
                 <h4>Price Range</h4>
                 <div style="padding:6px 0">
-                    <div style="height:8px;background:#f0ece9;border-radius:8px;position:relative">
-                        <div style="position:absolute;left:4px;top:-6px;width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid #333"></div>
-                        <div style="position:absolute;right:4px;top:-6px;width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid #333"></div>
-                        <div style="position:absolute;left:0;right:0;top:1px;height:6px;background:#2b241f;opacity:0.9;border-radius:6px;margin:0 12px"></div>
+                    <?php
+                        // determine price bounds from products
+                        $minPrice = 0; $maxPrice = 1000;
+                        if(isset($products) && count($products)){
+                            $prices = array_column($products,'price');
+                            $minPrice = (int)min($prices);
+                            $maxPrice = (int)max($prices);
+                        }
+                    ?>
+                    <div style="display:flex;gap:8px;align-items:center">
+                        <input id="minRange" type="range" min="0" max="1000" value="0">
+                        <input id="maxRange" type="range" min="0" max="1000" value="1000">
                     </div>
-                    <div style="display:flex;justify-content:space-between;color:#6b6460;margin-top:8px"><span>$0</span><span>$1000</span></div>
+                    <div style="display:flex;justify-content:space-between;color:#6b6460;margin-top:8px"><span id="minVal">$0</span><span id="maxVal">$1000</span></div>
                 </div>
             </div>
 
@@ -107,34 +143,96 @@
                 </div>
             </div>
 
-            <?php
-                // static products array (more items than the original mock)
-                $products = [];
-                for($i=1;$i<=24;$i++){
-                    $products[] = [
-                        'id'=>$i,
-                        'title'=>"Glass Item #$i",
-                        'category'=>($i%3==0)?'Tableware':(($i%3==1)?'Vases':'Sculptures'),
-                        'image'=>"https://picsum.photos/seed/glass{$i}/800/800"
-                    ];
-                }
-            ?>
+            <!-- products are defined above so category counts can be computed before rendering the sidebar -->
 
             <div class="grid">
                 <?php foreach($products as $p): ?>
-                    <article class="card">
+                    <article class="card" data-category="<?php echo htmlspecialchars($p['category'], ENT_QUOTES, 'UTF-8'); ?>" data-price="<?php echo (int)$p['price']; ?>">
                         <div class="media" role="img" aria-label="<?php echo htmlspecialchars($p['title'], ENT_QUOTES, 'UTF-8'); ?>">
                             <img src="<?php echo htmlspecialchars($p['image'], ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($p['title'], ENT_QUOTES, 'UTF-8'); ?>" style="width:100%;height:100%;object-fit:cover;display:block">
                         </div>
                         <div class="meta">
                             <div class="cat"><?php echo htmlspecialchars(strtoupper($p['category']), ENT_QUOTES, 'UTF-8'); ?></div>
                             <div class="title"><?php echo htmlspecialchars($p['title'], ENT_QUOTES, 'UTF-8'); ?></div>
+                            <div class="price" style="margin-top:6px;color:#6b6460">$<?php echo number_format($p['price'],0); ?></div>
                         </div>
                     </article>
                 <?php endforeach; ?>
             </div>
         </section>
     </div>
+
+    <script>
+        (function(){
+            const checkboxes = Array.from(document.querySelectorAll('.cat-filter'));
+            const minRange = document.getElementById('minRange');
+            const maxRange = document.getElementById('maxRange');
+            const minVal = document.getElementById('minVal');
+            const maxVal = document.getElementById('maxVal');
+            const cards = Array.from(document.querySelectorAll('.grid .card'));
+            const itemsCount = document.querySelector('.items-count');
+
+            function applyFilters(){
+                const activeCats = checkboxes.filter(cb=>cb.checked).map(cb=>cb.value);
+                const min = parseInt(minRange.value,10);
+                const max = parseInt(maxRange.value,10);
+                let shown = 0;
+
+                // compute counts per category for the current price range
+                const counts = {};
+                cards.forEach(c=>{
+                    const cat = c.getAttribute('data-category');
+                    const price = parseInt(c.getAttribute('data-price'),10);
+                    if(!(cat in counts)) counts[cat]=0;
+                    if(price >= min && price <= max) counts[cat]++;
+                });
+
+                cards.forEach(c=>{
+                    const cat = c.getAttribute('data-category');
+                    const price = parseInt(c.getAttribute('data-price'),10);
+                    const catMatch = activeCats.length ? activeCats.indexOf(cat) !== -1 : true;
+                    const priceMatch = price >= min && price <= max;
+                    if(catMatch && priceMatch){
+                        c.style.display = '';
+                        shown++;
+                    } else {
+                        c.style.display = 'none';
+                    }
+                });
+                itemsCount.textContent = shown + ' items';
+
+                // update count labels in sidebar
+                document.querySelectorAll('#categories-list .count').forEach(el=>{
+                    const li = el.closest('li');
+                    const input = li.querySelector('.cat-filter');
+                    const cat = input.value;
+                    el.textContent = counts[cat] !== undefined ? counts[cat] : 0;
+                });
+            }
+
+            // keep min <= max
+            function syncRanges(e){
+                let a = parseInt(minRange.value,10);
+                let b = parseInt(maxRange.value,10);
+                if(a > b){
+                    if(e.target === minRange) maxRange.value = a;
+                    else minRange.value = b;
+                }
+                minVal.textContent = '$' + minRange.value;
+                maxVal.textContent = '$' + maxRange.value;
+                applyFilters();
+            }
+
+            checkboxes.forEach(cb=>cb.addEventListener('change', applyFilters));
+            minRange.addEventListener('input', syncRanges);
+            maxRange.addEventListener('input', syncRanges);
+
+            // initialize values
+            minVal.textContent = '$' + minRange.value;
+            maxVal.textContent = '$' + maxRange.value;
+            applyFilters();
+        })();
+    </script>
 
 </main>
 </body>
