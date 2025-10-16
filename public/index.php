@@ -38,8 +38,8 @@
     <main>
         <section class="hero">
             <div class="container">
-                <h1 class="hero-title">Discover Exquisite<br/>Glass Artistry</h1>
-                <p class="hero-subtitle">Connect with master artisans and discover unique glass pieces that transform spaces into works of art</p>
+                <h1 class="hero-title">Glass Market<br>The best place<br>to buy and sell glass</h1>
+                <p class="hero-subtitle">Find the perfect glass piece or start selling your own</p>
                 <div class="hero-cta">
                     <a class="btn btn-primary" href="#">Explore Collection</a>
                     <a class="btn btn-secondary" href="#">Start Selling</a>
@@ -49,7 +49,7 @@
 
         <section class="section">
             <div class="container section-head">
-                <h2>Featured Pieces</h2>
+                <h2>browse the glass market</h2>
                 <a class="link" href="#">View All →</a>
             </div>
             <div class="container grid grid-4">
@@ -87,42 +87,7 @@
                 </article>
             </div>
         </section>
-        <section class="section">
-            <div class="container">
-                <h2 class="center">Shop by Category</h2>
-                <p class="center muted">Explore our curated collections</p>
-            </div>
-            <div class="container grid grid-4">
-                <a class="card card-link" href="#">
-                    <img src="https://picsum.photos/seed/cat1/900/600" alt="Vases & Vessels" />
-                    <div class="card-body">
-                        <h3 class="card-title">Vases & Vessels</h3>
-                        <div class="card-meta">234 items</div>
-                    </div>
-                </a>
-                <a class="card card-link" href="#">
-                    <img src="https://picsum.photos/seed/cat2/900/600" alt="Sculptures" />
-                    <div class="card-body">
-                        <h3 class="card-title">Sculptures</h3>
-                        <div class="card-meta">156 items</div>
-                    </div>
-                </a>
-                <a class="card card-link" href="#">
-                    <img src="https://picsum.photos/seed/cat3/900/600" alt="Tableware" />
-                    <div class="card-body">
-                        <h3 class="card-title">Tableware</h3>
-                        <div class="card-meta">412 items</div>
-                    </div>
-                </a>
-                <a class="card card-link" href="#">
-                    <img src="https://picsum.photos/seed/cat4/900/600" alt="Lighting" />
-                    <div class="card-body">
-                        <h3 class="card-title">Lighting</h3>
-                        <div class="card-meta">89 items</div>
-                    </div>
-                </a>
-            </div>
-        </section>
+
         <section class="section values">
             <div class="container values-grid">
                 <div class="value">
