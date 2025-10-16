@@ -1,23 +1,39 @@
+<!-- Browse collection page - static mockup -->
 <!doctype html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Browse Collection</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
     <style>
         body{font-family: Arial, Helvetica, sans-serif; background:#f6f0eb; color:#111; margin:0}
-        .glass-navbar { position: relative; width:100%; display:flex; align-items:center; gap:16px; padding:12px 20px; background:rgba(255,255,255,0.35); backdrop-filter: blur(8px); border-bottom:1px solid rgba(0,0,0,0.04)}
-        .brand{font-family:Georgia, serif;font-weight:700}
         .container{max-width:1200px;margin:40px auto;padding:0 20px}
         .page-title{font-family: Georgia, 'Times New Roman', serif; font-size:48px; margin-bottom:6px}
         .subtitle{color:#6b6460;margin-bottom:18px}
         .layout{display:flex;gap:30px}
-        .sidebar{width:260px}
+        /* Sidebar */
+        .sidebar{width:260px;position:sticky;top:20px;height:fit-content}
         .panel{background:transparent;padding:12px 0}
         .panel h4{margin:0 0 12px 0;font-size:16px}
         .filter-list{list-style:none;padding:0;margin:0}
         .filter-list li{display:flex;justify-content:space-between;padding:8px 6px;color:#6b6460}
         .divider{height:1px;background:#e3dad3;margin:18px 0}
+
+        /* Enhanced Price Range */
+        .price-range-container{margin:12px 0}
+        .price-range-display{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;font-weight:600;color:#2a2623}
+        .price-inputs{display:flex;gap:12px;align-items:center}
+        .price-input-group{display:flex;align-items:center}
+        .price-input{ width:80px;padding:8px;border:1px solid #d4c5b3;border-radius:6px;text-align:center;font-size:14px;background:#fff;color:#2a2623}
+        .price-input:focus{outline:none;border-color:#8c8278}
+        .price-slider-container{margin:16px 0}
+        .price-slider{background:linear-gradient(to right, #e3dad3 0%, #e3dad3 100%);height:6px;border-radius:3px;position:relative}
+        .price-slider-fill{background:#8c8278;height:100%;border-radius:3px;position:absolute;left:0;right:0}
+        .price-slider-thumb{position:absolute;top:50%;transform:translateY(-50%);width:20px;height:20px;background:#fff;border:2px solid #8c8278;border-radius:50%;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.1)}
+        .price-slider-thumb:hover{box-shadow:0 4px 12px rgba(0,0,0,0.15)}
+
+        /* Grid */
         .content{flex:1}
         .toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
         .items-count{color:#6b6460}
@@ -27,146 +43,382 @@
         .card .meta{padding:12px}
         .card .meta .cat{font-size:12px;color:#8b8683}
         .card .meta .title{font-weight:700;margin-top:6px}
+
+        /* Styled Select Dropdown */
+        .toolbar select {
+            padding: 8px 12px;
+            border: 1px solid #d4c5b3;
+            border-radius: 6px;
+            background: #fff;
+            color: #2a2623;
+            font-size: 14px;
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.2s ease;
+            min-width: 180px;
+        }
+        .toolbar select:focus {
+            border-color: #8c8278;
+        }
+        .toolbar select:hover {
+            border-color: #8c8278;
+        }
+
         @media (max-width:980px){.grid{grid-template-columns:repeat(2,1fr)}}
         @media (max-width:640px){.layout{flex-direction:column}.sidebar{width:100%}.grid{grid-template-columns:1fr}}
     </style>
 </head>
 <body>
-    <header class="glass-navbar">
-        <div class="brand">|| GLASS MARKET</div>
-        <nav style="margin-left:16px;">
-            <a href="#">Browse</a> &nbsp; <a href="#">Categories</a> &nbsp; <a href="#">Sellers</a>
-        </nav>
-        <div style="margin-left:auto;"> <input type="search" placeholder="Search glass art, crystals..." style="padding:8px;border-radius:6px;border:1px solid rgba(0,0,0,0.08)"></div>
-    </header>
+    <?php include __DIR__ . '/../includes/navbar.php'; ?>
+<main class="container">
+    <h1 class="page-title">Browse Collection</h1>
+    <p class="subtitle">Discover unique glass art from artisans worldwide</p>
 
-    <main class="container">
-        <h1 class="page-title">Browse Collection</h1>
-        <p class="subtitle">Discover unique glass art from artisans worldwide</p>
+    <?php
+        // static products array (more items than the original mock)
+        $products = [];
+        $styles = ['Contemporary', 'Vintage', 'Art Deco', 'Murano', 'Bohemian'];
+        $conditions = ['New', 'Like New', 'Vintage'];
+        for($i=1;$i<=24;$i++){
+            // simple price spread for demo
+            $price = rand(25, 950);
+            $products[] = [
+                'id'=>$i,
+                'title'=>"Glass Item #$i",
+                'category'=>($i%3==0)?'Tableware':(($i%3==1)?'Vases':'Sculptures'),
+                'image'=>"https://picsum.photos/seed/glass{$i}/800/800",
+                'price'=>$price,
+                'style'=>$styles[array_rand($styles)],
+                'condition'=>$conditions[array_rand($conditions)]
+            ];
+        }
+    ?>
 
-        <div class="layout">
-            <aside class="sidebar">
-                <div class="panel">
-                    <h4>Categories</h4>
-                    <ul class="filter-list" id="categories-list"></ul>
-                </div>
-                <div class="divider"></div>
-                <div class="panel">
-                    <h4>Price Range</h4>
-                    <div style="padding:6px 0">
-                        <div style="display:flex;gap:8px;align-items:center">
-                            <input id="minRange" type="range" min="0" max="1000" value="0">
-                            <input id="maxRange" type="range" min="0" max="1000" value="1000">
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="panel">
+                <h4>Categories</h4>
+                <ul class="filter-list" id="categories-list">
+                    <?php
+                        $allCategories = ['Vases & Vessels','Sculptures','Tableware','Lighting','Decorative','Jewelry'];
+                        // compute counts from products (if products not defined yet we'll set to 0 temporarily)
+                        $categoryCounts = array_fill_keys($allCategories, 0);
+                        if(isset($products) && is_array($products)){
+                            foreach($products as $pp){
+                                if(isset($pp['category']) && isset($categoryCounts[$pp['category']])){
+                                    $categoryCounts[$pp['category']]++;
+                                }
+                            }
+                        }
+                        foreach($allCategories as $cat){
+                            $count = isset($categoryCounts[$cat]) ? $categoryCounts[$cat] : 0;
+                            // sanitize id for input
+                            $id = 'cat_' . preg_replace('/[^a-z0-9]+/i','_', strtolower($cat));
+                            echo "<li><label><input type=\"checkbox\" class=\"cat-filter\" id=\"$id\" value=\"".htmlspecialchars($cat,ENT_QUOTES,'UTF-8')."\"> <span>".htmlspecialchars($cat,ENT_QUOTES,'UTF-8')."</span></label> <span class=\"count\">$count</span></li>";
+                        }
+                    ?>
+                </ul>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="panel">
+                <h4>Price Range</h4>
+                <div class="price-range-container">
+                    <?php
+                        // determine price bounds from products
+                        $minPrice = 0; $maxPrice = 1000;
+                        if(isset($products) && count($products)){
+                            $prices = array_column($products,'price');
+                            $minPrice = (int)min($prices);
+                            $maxPrice = (int)max($prices);
+                        }
+                    ?>
+                    <div class="price-range-display">
+                        <span id="minPriceLabel">$0</span>
+                        <span id="maxPriceLabel">$1000</span>
+                    </div>
+
+                    <div class="price-inputs">
+                        <div class="price-input-group">
+                            <label for="minPrice" style="font-size:12px;color:#6b6460;margin-right:4px">Min</label>
+                            <input id="minPrice" type="number" class="price-input" min="0" max="1000" value="0">
                         </div>
-                        <div style="display:flex;justify-content:space-between;color:#6b6460;margin-top:8px"><span id="minVal">$0</span><span id="maxVal">$1000</span></div>
+                        <span style="color:#6b6460">-</span>
+                        <div class="price-input-group">
+                            <label for="maxPrice" style="font-size:12px;color:#6b6460;margin-right:4px">Max</label>
+                            <input id="maxPrice" type="number" class="price-input" min="0" max="1000" value="1000">
+                        </div>
                     </div>
-                </div>
-                <div class="divider"></div>
-                <div class="panel">
-                    <h4>Style</h4>
-                    <ul class="filter-list">
-                        <li><span>Contemporary</span><span>345</span></li>
-                        <li><span>Vintage</span><span>234</span></li>
-                        <li><span>Art Deco</span><span>156</span></li>
-                    </ul>
-                </div>
-            </aside>
 
-            <section class="content">
-                <div class="toolbar">
-                    <div class="items-count">0 items</div>
-                    <div>
-                        <select aria-label="Sort">
-                            <option>Featured</option>
-                            <option>Newest</option>
-                        </select>
+                    <div class="price-slider-container">
+                        <div class="price-slider">
+                            <div class="price-slider-fill" id="priceFill"></div>
+                            <div class="price-slider-thumb" id="minThumb" style="left:0%"></div>
+                            <div class="price-slider-thumb" id="maxThumb" style="left:100%"></div>
+                        </div>
                     </div>
-                </div>
 
-                <div class="grid" id="productGrid"></div>
-            </section>
-        </div>
-    </main>
+                    <!-- Hidden range inputs for compatibility -->
+                    <input id="minRange" type="range" min="0" max="1000" value="0" style="display:none">
+                    <input id="maxRange" type="range" min="0" max="1000" value="1000" style="display:none">
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="panel">
+                <h4>Style</h4>
+                <ul class="filter-list" id="styles-list">
+                    <?php
+                        $allStyles = ['Contemporary', 'Vintage', 'Art Deco', 'Murano', 'Bohemian'];
+                        // compute counts from products
+                        $styleCounts = array_fill_keys($allStyles, 0);
+                        if(isset($products) && is_array($products)){
+                            foreach($products as $pp){
+                                if(isset($pp['style']) && isset($styleCounts[$pp['style']])){
+                                    $styleCounts[$pp['style']]++;
+                                }
+                            }
+                        }
+                        foreach($allStyles as $style){
+                            $count = isset($styleCounts[$style]) ? $styleCounts[$style] : 0;
+                            // sanitize id for input
+                            $id = 'style_' . preg_replace('/[^a-z0-9]+/i','_', strtolower($style));
+                            echo "<li><label><input type=\"checkbox\" class=\"style-filter\" id=\"$id\" value=\"".htmlspecialchars($style,ENT_QUOTES,'UTF-8')."\"> <span>".htmlspecialchars($style,ENT_QUOTES,'UTF-8')."</span></label> <span class=\"count\">$count</span></li>";
+                        }
+                    ?>
+                </ul>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="panel">
+                <h4>Condition</h4>
+                <ul class="filter-list" id="conditions-list">
+                    <?php
+                        $allConditions = ['New', 'Like New', 'Vintage'];
+                        // compute counts from products
+                        $conditionCounts = array_fill_keys($allConditions, 0);
+                        if(isset($products) && is_array($products)){
+                            foreach($products as $pp){
+                                if(isset($pp['condition']) && isset($conditionCounts[$pp['condition']])){
+                                    $conditionCounts[$pp['condition']]++;
+                                }
+                            }
+                        }
+                        foreach($allConditions as $condition){
+                            $count = isset($conditionCounts[$condition]) ? $conditionCounts[$condition] : 0;
+                            // sanitize id for input
+                            $id = 'condition_' . preg_replace('/[^a-z0-9]+/i','_', strtolower($condition));
+                            echo "<li><label><input type=\"checkbox\" class=\"condition-filter\" id=\"$id\" value=\"".htmlspecialchars($condition,ENT_QUOTES,'UTF-8')."\"> <span>".htmlspecialchars($condition,ENT_QUOTES,'UTF-8')."</span></label> <span class=\"count\">$count</span></li>";
+                        }
+                    ?>
+                </ul>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="panel">
+                <button id="clear-filters" style="width:100%;padding:10px;border:1px solid #6b6460;background:#fff;color:#6b6460;border-radius:4px;cursor:pointer;">Clear All Filters</button>
+            </div>
+        </aside>
+
+        <section class="content">
+            <div class="toolbar">
+                <div class="items-count">24 items</div>
+                <div>
+                    <select aria-label="Sort">
+                        <option>Featured</option>
+                        <option>Newest</option>
+                        <option>Price: Low to High</option>
+                        <option>Price: High to Low</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- products are defined above so category counts can be computed before rendering the sidebar -->
+
+            <div class="grid">
+                <?php foreach($products as $p): ?>
+                    <article class="card" data-category="<?php echo htmlspecialchars($p['category'], ENT_QUOTES, 'UTF-8'); ?>" data-price="<?php echo (int)$p['price']; ?>" data-style="<?php echo htmlspecialchars($p['style'], ENT_QUOTES, 'UTF-8'); ?>" data-condition="<?php echo htmlspecialchars($p['condition'], ENT_QUOTES, 'UTF-8'); ?>">
+                        <div class="media" role="img" aria-label="<?php echo htmlspecialchars($p['title'], ENT_QUOTES, 'UTF-8'); ?>">
+                            <img src="<?php echo htmlspecialchars($p['image'], ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($p['title'], ENT_QUOTES, 'UTF-8'); ?>" style="width:100%;height:100%;object-fit:cover;display:block">
+                        </div>
+                        <div class="meta">
+                            <div class="cat"><?php echo htmlspecialchars(strtoupper($p['category']), ENT_QUOTES, 'UTF-8'); ?></div>
+                            <div class="title"><?php echo htmlspecialchars($p['title'], ENT_QUOTES, 'UTF-8'); ?></div>
+                            <div class="price" style="margin-top:6px;color:#6b6460">$<?php echo number_format($p['price'],0); ?></div>
+                        </div>
+                    </article>
+                <?php endforeach; ?>
+            </div>
+        </section>
+    </div>
 
     <script>
-        // static data and client-side rendering
-        const products = [];
-        for(let i=1;i<=48;i++){
-            const cats = ['Vases & Vessels','Sculptures','Tableware','Lighting','Decorative','Jewelry'];
-            products.push({
-                id:i,
-                title:`Glass Item #${i}`,
-                category:cats[i%cats.length],
-                price: Math.floor(Math.random()*900)+50,
-                image:`https://picsum.photos/seed/glass${i}/800/800`
-            });
-        }
-
-        const catList = Array.from(new Set(products.map(p=>p.category)));
-        const categoriesListEl = document.getElementById('categories-list');
-        catList.forEach(cat=>{
-            const li = document.createElement('li');
-            li.innerHTML = `<label><input type='checkbox' class='cat-filter' value='${cat}'> <span>${cat}</span></label> <span class='count'>0</span>`;
-            categoriesListEl.appendChild(li);
-        });
-
-        const grid = document.getElementById('productGrid');
-        function renderProducts(items){
-            grid.innerHTML = '';
-            items.forEach(p=>{
-                const a = document.createElement('article');
-                a.className = 'card';
-                a.dataset.category = p.category;
-                a.dataset.price = p.price;
-                a.innerHTML = `<div class='media'><img src='${p.image}' alt='${p.title}' style='width:100%;height:100%;object-fit:cover;display:block'></div><div class='meta'><div class='cat'>${p.category.toUpperCase()}</div><div class='title'>${p.title}</div><div class='price' style='margin-top:6px;color:#6b6460'>$${p.price}</div></div>`;
-                grid.appendChild(a);
-            });
-        }
-
-        const checkboxes = ()=>Array.from(document.querySelectorAll('.cat-filter'));
-        const minRange = document.getElementById('minRange');
-        const maxRange = document.getElementById('maxRange');
-        const minVal = document.getElementById('minVal');
-        const maxVal = document.getElementById('maxVal');
-        const itemsCount = document.querySelector('.items-count');
-
-        function applyFilters(){
-            const activeCats = checkboxes().filter(cb=>cb.checked).map(cb=>cb.value);
-            const min = parseInt(minRange.value,10);
-            const max = parseInt(maxRange.value,10);
+        (function(){
+            const catCheckboxes = Array.from(document.querySelectorAll('.cat-filter'));
+            const styleCheckboxes = Array.from(document.querySelectorAll('.style-filter'));
+            const conditionCheckboxes = Array.from(document.querySelectorAll('.condition-filter'));
+            const minRange = document.getElementById('minRange');
+            const maxRange = document.getElementById('maxRange');
+            const minPrice = document.getElementById('minPrice');
+            const maxPrice = document.getElementById('maxPrice');
+            const minPriceLabel = document.getElementById('minPriceLabel');
+            const maxPriceLabel = document.getElementById('maxPriceLabel');
+            const priceFill = document.getElementById('priceFill');
+            const minThumb = document.getElementById('minThumb');
+            const maxThumb = document.getElementById('maxThumb');
             const cards = Array.from(document.querySelectorAll('.grid .card'));
-            let shown = 0;
-            const counts = {};
-            cards.forEach(c=>{
-                const cat = c.dataset.category;
-                const price = parseInt(c.dataset.price,10);
-                if(!(cat in counts)) counts[cat]=0;
-                if(price>=min && price<=max) counts[cat]++;
-            });
-            cards.forEach(c=>{
-                const cat = c.dataset.category;
-                const price = parseInt(c.dataset.price,10);
-                const catMatch = activeCats.length ? activeCats.indexOf(cat)!==-1 : true;
-                const priceMatch = price>=min && price<=max;
-                if(catMatch && priceMatch){ c.style.display=''; shown++; } else c.style.display='none';
-            });
-            itemsCount.textContent = shown + ' items';
-            // update counts
-            document.querySelectorAll('#categories-list .count').forEach((el, idx)=>{
-                const cat = catList[idx];
-                el.textContent = counts[cat]||0;
-            });
-        }
+            const itemsCount = document.querySelector('.items-count');
 
-        // wire events
-        document.addEventListener('change', e=>{ if(e.target.classList && e.target.classList.contains('cat-filter')) applyFilters(); });
-        minRange.addEventListener('input', ()=>{ if(parseInt(minRange.value)>parseInt(maxRange.value)) maxRange.value = minRange.value; minVal.textContent = '$'+minRange.value; applyFilters(); });
-        maxRange.addEventListener('input', ()=>{ if(parseInt(maxRange.value)<parseInt(minRange.value)) minRange.value = maxRange.value; maxVal.textContent = '$'+maxRange.value; applyFilters(); });
+            function applyFilters(){
+                const activeCats = catCheckboxes.filter(cb=>cb.checked).map(cb=>cb.value);
+                const activeStyles = styleCheckboxes.filter(cb=>cb.checked).map(cb=>cb.value);
+                const activeConditions = conditionCheckboxes.filter(cb=>cb.checked).map(cb=>cb.value);
+                const min = parseInt(minRange.value,10);
+                const max = parseInt(maxRange.value,10);
+                let shown = 0;
 
-        // initial render
-        renderProducts(products);
-        minVal.textContent = '$'+minRange.value; maxVal.textContent = '$'+maxRange.value;
-        applyFilters();
+                // compute counts per category, style, condition for the current filters
+                const catCounts = {};
+                const styleCounts = {};
+                const conditionCounts = {};
+                cards.forEach(c=>{
+                    const cat = c.getAttribute('data-category');
+                    const style = c.getAttribute('data-style');
+                    const condition = c.getAttribute('data-condition');
+                    const price = parseInt(c.getAttribute('data-price'),10);
+                    const priceMatch = price >= min && price <= max;
+                    const catMatch = activeCats.length ? activeCats.indexOf(cat) !== -1 : true;
+                    const styleMatch = activeStyles.length ? activeStyles.indexOf(style) !== -1 : true;
+                    const conditionMatch = activeConditions.length ? activeConditions.indexOf(condition) !== -1 : true;
+                    if(priceMatch && styleMatch && conditionMatch){
+                        if(!(cat in catCounts)) catCounts[cat]=0;
+                        catCounts[cat]++;
+                    }
+                    if(priceMatch && catMatch && conditionMatch){
+                        if(!(style in styleCounts)) styleCounts[style]=0;
+                        styleCounts[style]++;
+                    }
+                    if(priceMatch && catMatch && styleMatch){
+                        if(!(condition in conditionCounts)) conditionCounts[condition]=0;
+                        conditionCounts[condition]++;
+                    }
+                });
+
+                cards.forEach(c=>{
+                    const cat = c.getAttribute('data-category');
+                    const style = c.getAttribute('data-style');
+                    const condition = c.getAttribute('data-condition');
+                    const price = parseInt(c.getAttribute('data-price'),10);
+                    const catMatch = activeCats.length ? activeCats.indexOf(cat) !== -1 : true;
+                    const styleMatch = activeStyles.length ? activeStyles.indexOf(style) !== -1 : true;
+                    const conditionMatch = activeConditions.length ? activeConditions.indexOf(condition) !== -1 : true;
+                    const priceMatch = price >= min && price <= max;
+                    if(catMatch && styleMatch && conditionMatch && priceMatch){
+                        c.style.display = '';
+                        shown++;
+                    } else {
+                        c.style.display = 'none';
+                    }
+                });
+                itemsCount.textContent = shown + ' items';
+
+                // update count labels in sidebar
+                document.querySelectorAll('#categories-list .count').forEach(el=>{
+                    const li = el.closest('li');
+                    const input = li.querySelector('.cat-filter');
+                    const cat = input.value;
+                    el.textContent = catCounts[cat] !== undefined ? catCounts[cat] : 0;
+                });
+                document.querySelectorAll('#styles-list .count').forEach(el=>{
+                    const li = el.closest('li');
+                    const input = li.querySelector('.style-filter');
+                    const style = input.value;
+                    el.textContent = styleCounts[style] !== undefined ? styleCounts[style] : 0;
+                });
+                document.querySelectorAll('#conditions-list .count').forEach(el=>{
+                    const li = el.closest('li');
+                    const input = li.querySelector('.condition-filter');
+                    const condition = input.value;
+                    el.textContent = conditionCounts[condition] !== undefined ? conditionCounts[condition] : 0;
+                });
+            }
+
+            // sync number inputs with range inputs and update visual slider
+            function syncRanges(e){
+                let min = parseInt(minPrice.value,10) || 0;
+                let max = parseInt(maxPrice.value,10) || 1000;
+
+                // ensure min <= max
+                if(min > max){
+                    if(e && e.target === minPrice) {
+                        max = min;
+                        maxPrice.value = min;
+                    } else {
+                        min = max;
+                        minPrice.value = max;
+                    }
+                }
+
+                // update hidden range inputs for compatibility
+                minRange.value = min;
+                maxRange.value = max;
+
+                // update display labels
+                minPriceLabel.textContent = '$' + min;
+                maxPriceLabel.textContent = '$' + max;
+
+                // update visual slider
+                updateVisualSlider(min, max);
+
+                applyFilters();
+            }
+
+            // update visual slider appearance
+            function updateVisualSlider(min, max) {
+                const minPercent = (min / 1000) * 100;
+                const maxPercent = (max / 1000) * 100;
+
+                minThumb.style.left = minPercent + '%';
+                maxThumb.style.left = maxPercent + '%';
+
+                // update fill between thumbs
+                priceFill.style.left = minPercent + '%';
+                priceFill.style.right = (100 - maxPercent) + '%';
+            }
+
+            function clearAllFilters(){
+                catCheckboxes.forEach(cb=>cb.checked = false);
+                styleCheckboxes.forEach(cb=>cb.checked = false);
+                conditionCheckboxes.forEach(cb=>cb.checked = false);
+                minPrice.value = 0;
+                maxPrice.value = 1000;
+                minRange.value = 0;
+                maxRange.value = 1000;
+                minPriceLabel.textContent = '$0';
+                maxPriceLabel.textContent = '$1000';
+                updateVisualSlider(0, 1000);
+                applyFilters();
+            }
+
+            catCheckboxes.forEach(cb=>cb.addEventListener('change', applyFilters));
+            styleCheckboxes.forEach(cb=>cb.addEventListener('change', applyFilters));
+            conditionCheckboxes.forEach(cb=>cb.addEventListener('change', applyFilters));
+            minPrice.addEventListener('input', syncRanges);
+            maxPrice.addEventListener('input', syncRanges);
+            minRange.addEventListener('input', syncRanges);
+            maxRange.addEventListener('input', syncRanges);
+            document.getElementById('clear-filters').addEventListener('click', clearAllFilters);
+
+            // initialize values
+            syncRanges();
+            applyFilters();
+        })();
     </script>
+
+</main>
 </body>
 </html>
