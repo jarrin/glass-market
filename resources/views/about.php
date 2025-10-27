@@ -14,7 +14,15 @@
     <section class="hero">
       <div class="container">
         <h1 class="hero-title">Over Glass Market</h1>
-        <p class="hero-subtitle">De wereldwijde marktplaats voor glas, kristallen en handgemaakt glaswerk. Verbinding tussen kunstenaars en verzamelaars sinds 2020.</p>
+        <p class="hero-subtitle">De wereldwijde marktplaats voor handgemaakt glas
+
+Sinds 2020 brengen wij glaskunstenaars en verzamelaars van over de hele wereld samen op één gespecialiseerd platform. Onze marktplaats is volledig gericht op handgemaakt glas van artistieke sculpturen en objecten tot designstukken en functioneel glaswerk.
+
+Wij bieden een professionele omgeving waarin glaskunstenaars hun werk internationaal kunnen presenteren en verkopen, met aandacht voor kwaliteit, authenticiteit en vakmanschap. Verzamelaars en liefhebbers krijgen toegang tot een zorgvuldig geselecteerde collectie van originele werken, rechtstreeks van de maker.
+
+Ons doel is om de glaswereld te verbinden en te versterken door middel van digitale innovatie, transparante handel en wereldwijde zichtbaarheid. Wij ondersteunen kunstenaars in hun groei en bieden kopers een betrouwbare plek om te ontdekken, te investeren en te verzamelen.
+
+Met een focus op ambacht, duurzaamheid en artistieke waarde bouwen wij aan de toekomst van glaskunst één uniek stuk tegelijk.</p>
       </div>
     </section>
 
