@@ -1,8 +1,3 @@
-<?php
-// Blurry glass navbar include
-// Usage: <?php include __DIR__ . '/includes/navbar.php'; ?> or include_once
-?>
-
 <style>
 /* Navbar root */
 .glass-navbar {
@@ -120,7 +115,6 @@
   <nav class="nav-links" role="navigation" aria-label="Primary">
     <a href="/browse">Browse</a>
     <a href="/categories">Categories</a>
-    <a href="/sellers">Sellers</a>
     <a href="/about">About</a>
   </nav>
 

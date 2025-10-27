@@ -225,6 +225,7 @@
     display: flex;
     align-items: baseline;
     justify-content: space-between;
+    padding-bottom: 10px;
   }
   
   .section-head h2 {
@@ -240,7 +241,12 @@
   .link:hover {
     text-decoration: underline;
   }
-  
+
+  .section.values {
+    padding-top: 75px;
+    padding-bottom: 75px;
+  }
+
   /* ---------- Grid & Cards ---------- */
   .grid {
     display: grid;
@@ -395,6 +401,141 @@
     display: flex;
     gap: 16px;
   }
+
+  /* ---------- Sellers Page (Discover Sellers) ---------- */
+  .page {
+    padding-top: 0;
+  }
+
+  .hero.hero-muted {
+    padding: 120px 0 56px;
+    background: #f4efe7;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .text-center {
+    text-align: center;
+  }
+
+  .page-title {
+    font-size: 40px;
+    line-height: 1.15;
+    margin: 0 0 8px;
+    font-weight: 800;
+  }
+
+  .page-subtitle {
+    max-width: 820px;
+    margin: 0 auto 18px;
+    color: var(--muted);
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  .search-large {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border: 1px solid var(--ring);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.75);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.06);
+  }
+
+  .search-large input {
+    border: none;
+    outline: none;
+    width: 520px;
+    max-width: 70vw;
+    background: transparent;
+    font-family: inherit;
+    font-size: 14px;
+  }
+
+  .stats {
+    padding: 22px 0 32px;
+    background: #faf6ef;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    text-align: center;
+  }
+
+  .stat .num {
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+
+  .stat .label {
+    color: var(--muted);
+    font-size: 12px;
+    letter-spacing: 0.02em;
+  }
+
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    padding: 36px 0 22px;
+  }
+
+  .seller-card {
+    align-items: center;
+    padding: 18px 16px 20px;
+    text-align: center;
+  }
+
+  .seller-card .avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    margin: 18px auto 12px;
+    background: linear-gradient(135deg, #e5ddd1, #f7f1e8);
+    border: 1px solid var(--border);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+  }
+
+  .seller-name {
+    margin: 0 0 6px;
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .seller-meta {
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+
+  .btn.btn-outline {
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--ring);
+    border-radius: var(--radius);
+  }
+
+  .cta-band {
+    margin-top: 36px;
+    padding: 48px 0 64px;
+    background: #faf6ef;
+    color: #fff;
+  }
+
+  .cta-band .btn-primary {
+    background: white;
+    color: #201b15;
+  }
+
+  .container.text-center {
+    color: black;
+  }
   
   /* ==================================================================== */
   /* 4) Utilities */
@@ -433,6 +574,12 @@
     .footer-top {
       flex-direction: column;
     }
+    .cards-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .stats-row {
+      grid-template-columns: repeat(2, 1fr);
+    }
   }
   
   @media (max-width: 900px) {
@@ -442,6 +589,21 @@
   
     .hero-title {
       font-size: 40px;
+    }
+    .page-title {
+      font-size: 32px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .cards-grid {
+      grid-template-columns: 1fr;
+    }
+    .stats-row {
+      grid-template-columns: 1fr 1fr;
+    }
+    .search-large input {
+      width: 70vw;
     }
   }
   

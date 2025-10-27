@@ -2,7 +2,7 @@
     <div class="container footer-top">
         <div class="footer-brand">
             <a class="brand" href="#"><span class="brand-mark"></span><span>GLASS MARKET</span></a>
-            <p>Discover unique glass art and crystal pieces from artisans worldwide.</p>
+            <p>Discover all types of glass for every job!<br>The best place to buy and sell glass</p>
         </div>
         <div class="footer-cols">
             <div class="footer-col">
