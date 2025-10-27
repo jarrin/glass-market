@@ -16,8 +16,8 @@
                 <h1 class="hero-title">Glass Market<br>The best place<br>to buy and sell glass</h1>
                 <p class="hero-subtitle">Find the perfect glass piece or start selling your own</p>
                 <div class="hero-cta">
-                    <a class="btn btn-primary" href="#">Explore Collection</a>
-                    <a class="btn btn-secondary" href="#">Start Selling</a>
+                    <a class="btn btn-primary" href="../resources/views/browse.php">Explore Collection</a>
+                    <a class="btn btn-secondary" href="../resources/views/selling-page.php">Start Selling</a>
                 </div>
             </div>
         </section>
@@ -25,7 +25,7 @@
         <section class="section">
             <div class="container section-head">
                 <h2>browse the glass market</h2>
-                <a class="link" href="#">View All →</a>
+                <a class="link" href="../resources/views/browse.php">View All →</a>
             </div>
             <div class="container grid grid-4">
                 <article class="card">
@@ -86,7 +86,7 @@
             <div class="container center">
                 <h2>Join Our Community<br/>of Glass Artisans</h2>
                 <p class="muted">Start selling your glass creations to collectors and enthusiasts worldwide</p>
-                <a class="btn btn-primary" href="#">Become a Seller</a>
+                <a class="btn btn-primary" href="../resources/views/selling-page.php">Start Selling</a>
             </div>
         </section>
         <?php include __DIR__ . '/../includes/footer.php'; ?>
