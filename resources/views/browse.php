@@ -426,6 +426,26 @@
                 let min = parseInt(minPrice.value,10) || 0;
                 let max = parseInt(maxPrice.value,10) || 1000;
 
+                // enforce boundaries for min price (0-1000)
+                if(min < 0){
+                    min = 0;
+                    minPrice.value = 0;
+                }
+                if(min > 1000){
+                    min = 1000;
+                    minPrice.value = 1000;
+                }
+
+                // enforce boundaries for max price (0-1000)
+                if(max < 0){
+                    max = 0;
+                    maxPrice.value = 0;
+                }
+                if(max > 1000){
+                    max = 1000;
+                    maxPrice.value = 1000;
+                }
+
                 // ensure min <= max
                 if(min > max){
                     if(e && e.target === minPrice) {
