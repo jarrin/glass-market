@@ -77,8 +77,19 @@
         .pagination .page-number.active{background:#2a2623;color:#fff;border-color:#2a2623;font-weight:600}
         .pagination .page-ellipsis{padding:8px;color:#6b6460}
 
+        /* Filter toggle button for mobile */
+        .filter-toggle-btn{display:none;width:100%;padding:12px 16px;margin-bottom:16px;background:#2a2623;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:14px;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
+        .filter-toggle-btn:hover{background:#1a1614}
+        .filter-toggle-btn:active{transform:scale(0.98)}
+        
         @media (max-width:980px){.grid{grid-template-columns:repeat(2,1fr)}}
-        @media (max-width:640px){.layout{flex-direction:column}.sidebar{width:100%}.grid{grid-template-columns:1fr}}
+        @media (max-width:640px){
+            .layout{flex-direction:column}
+            .sidebar{width:100%;display:none;margin-bottom:20px;position:relative;z-index:10;background:#f6f0eb;padding:16px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.1)}
+            .sidebar.show{display:block}
+            .grid{grid-template-columns:1fr}
+            .filter-toggle-btn{display:block}
+        }
     </style>
 </head>
 <body>
@@ -88,27 +99,135 @@
     <p class="subtitle">Discover unique glass art from artisans worldwide</p>
 
     <?php
-        // static products array (more items than the original mock)
+        // Fetch products from database
+        require_once __DIR__ . '/../../includes/db_connect.php';
+        
         $products = [];
-        $styles = ['Contemporary', 'Vintage', 'Art Deco', 'Murano', 'Bohemian'];
-        $conditions = ['New', 'Like New', 'Vintage'];
-        for($i=1;$i<=24;$i++){
-            // simple price spread for demo
-            $price = rand(25, 950);
-            $products[] = [
-                'id'=>$i,
-                'title'=>"Glass Item #$i",
-                'category'=>($i%3==0)?'Tableware':(($i%3==1)?'Vases':'Sculptures'),
-                'image'=>"https://picsum.photos/seed/glass{$i}/800/800",
-                'price'=>$price,
-                'style'=>$styles[array_rand($styles)],
-                'condition'=>$conditions[array_rand($conditions)]
+        
+        try {
+            // Fetch all published listings from the database
+            $stmt = $pdo->query("
+                SELECT 
+                    l.id,
+                    l.glass_type,
+                    l.glass_type_other,
+                    l.price_text,
+                    l.currency,
+                    l.quantity_tons,
+                    l.side,
+                    l.recycled,
+                    l.tested,
+                    l.storage_location,
+                    l.quality_notes,
+                    c.name as company_name
+                FROM listings l
+                LEFT JOIN companies c ON l.company_id = c.id
+                WHERE l.published = 1
+                ORDER BY l.created_at DESC
+            ");
+            
+            $listings = $stmt->fetchAll();
+            
+            // Map database listings to product format expected by browse page
+            $categoryMapping = [
+                'Clear Cullet' => 'Vases',
+                'Brown Cullet' => 'Tableware',
+                'Mixed Cullet' => 'Decorative',
+                'Green Cullet' => 'Vases & Vessels',
+                'Flat Glass' => 'Tableware',
+                'Container Glass' => 'Tableware'
             ];
+            
+            foreach ($listings as $index => $listing) {
+                // Extract numeric price from price_text (e.g., "€120/ton CIF" -> 120)
+                $price = 0;
+                if (preg_match('/[\d,]+/', $listing['price_text'], $matches)) {
+                    $price = (int)str_replace(',', '', $matches[0]);
+                }
+                
+                // Map glass type to category
+                $glassType = $listing['glass_type_other'] ?: $listing['glass_type'];
+                $category = $categoryMapping[$listing['glass_type']] ?? 'Decorative';
+                
+                // Determine style based on recycled/tested status
+                $style = 'Contemporary';
+                if ($listing['recycled'] === 'recycled' && $listing['tested'] === 'tested') {
+                    $style = 'Art Deco';
+                } elseif ($listing['recycled'] === 'recycled') {
+                    $style = 'Murano';
+                } elseif ($listing['tested'] === 'tested') {
+                    $style = 'Contemporary';
+                } else {
+                    $style = 'Vintage';
+                }
+                
+                // Determine condition
+                $condition = 'New';
+                if ($listing['tested'] === 'tested') {
+                    $condition = 'New';
+                } elseif ($listing['tested'] === 'untested') {
+                    $condition = 'Vintage';
+                } else {
+                    $condition = 'Like New';
+                }
+                
+                $products[] = [
+                    'id' => $listing['id'],
+                    'title' => $glassType,
+                    'tons' => $listing['quantity_tons'],
+                    'category' => $category,
+                    'image' => "https://picsum.photos/seed/glass{$listing['id']}/800/800",
+                    'price' => $price,
+                    'style' => $style,
+                    'condition' => $condition,
+                    'description' => $listing['quality_notes'] ?: 'Quality glass material',
+                    'location' => $listing['storage_location']
+                ];
+            }
+            
+            // If no products in database, add some demo products
+            if (empty($products)) {
+                $styles = ['Contemporary', 'Vintage', 'Art Deco', 'Murano', 'Bohemian'];
+                $conditions = ['New', 'Like New', 'Vintage'];
+                for($i=1;$i<=24;$i++){
+                    $price = rand(25, 950);
+                    $products[] = [
+                        'id'=>$i,
+                        'title'=>"Glass Item #$i",
+                        'category'=>($i%3==0)?'Tableware':(($i%3==1)?'Vases':'Sculptures'),
+                        'image'=>"https://picsum.photos/seed/glass{$i}/800/800",
+                        'price'=>$price,
+                        'style'=>$styles[array_rand($styles)],
+                        'condition'=>$conditions[array_rand($conditions)]
+                    ];
+                }
+            }
+            
+        } catch (PDOException $e) {
+            // If database query fails, use demo products
+            error_log("Database error in browse.php: " . $e->getMessage());
+            $styles = ['Contemporary', 'Vintage', 'Art Deco', 'Murano', 'Bohemian'];
+            $conditions = ['New', 'Like New', 'Vintage'];
+            for($i=1;$i<=24;$i++){
+                $price = rand(25, 950);
+                $products[] = [
+                    'id'=>$i,
+                    'title'=>"Glass Item #$i",
+                    'category'=>($i%3==0)?'Tableware':(($i%3==1)?'Vases':'Sculptures'),
+                    'image'=>"https://picsum.photos/seed/glass{$i}/800/800",
+                    'price'=>$price,
+                    'style'=>$styles[array_rand($styles)],
+                    'condition'=>$conditions[array_rand($conditions)]
+                ];
+            }
         }
     ?>
 
+    <!-- Filter toggle button (visible only on mobile) -->
+    <button class="filter-toggle-btn" id="filterToggle">🔍 Filters tonen/verbergen</button>
+    
     <div class="layout">
-        <aside class="sidebar">
+        <aside class="sidebar" id="filterSidebar">
             <div class="panel">
                 <h4>Categories</h4>
                 <ul class="filter-list" id="categories-list">
@@ -261,7 +380,10 @@
                         <div class="meta">
                             <div class="cat"><?php echo htmlspecialchars(strtoupper($p['category']), ENT_QUOTES, 'UTF-8'); ?></div>
                             <div class="title"><?php echo htmlspecialchars($p['title'], ENT_QUOTES, 'UTF-8'); ?></div>
-                            <div class="price" style="margin-top:6px;color:#6b6460">$<?php echo number_format($p['price'],0); ?></div>
+                            <?php if(isset($p['tons'])): ?>
+                            <div class="tons" style="margin-top:4px;color:#8b8683;font-size:14px"><?php echo number_format($p['tons'], 2); ?> tons</div>
+                            <?php endif; ?>
+                            <div class="price" style="margin-top:6px;color:#6b6460">€<?php echo number_format($p['price'],0); ?></div>
                         </div>
                     </article>
                 <?php endforeach; ?>
@@ -275,6 +397,16 @@
 
     <script>
         (function(){
+            // Mobile filter toggle
+            const filterToggleBtn = document.getElementById('filterToggle');
+            const filterSidebar = document.getElementById('filterSidebar');
+            
+            if (filterToggleBtn && filterSidebar) {
+                filterToggleBtn.addEventListener('click', function() {
+                    filterSidebar.classList.toggle('show');
+                });
+            }
+            
             const catCheckboxes = Array.from(document.querySelectorAll('.cat-filter'));
             const styleCheckboxes = Array.from(document.querySelectorAll('.style-filter'));
             const conditionCheckboxes = Array.from(document.querySelectorAll('.condition-filter'));

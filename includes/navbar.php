@@ -2,10 +2,7 @@
 // Blurry glass navbar include
 // Usage: <?php include __DIR__ . '/includes/navbar.php'; ?>
 
-// Load config if not already loaded
-if (!defined('BASE_URL')) {
-    require_once __DIR__ . '/../config.php';
-}
+
 
 <style>
 /* Navbar root */
