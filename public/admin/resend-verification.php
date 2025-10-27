@@ -2,9 +2,6 @@
 session_start();
 
 // Database connection
-require_once __DIR__ . '/../../config.php';
-
-// Database credentials from .env or hardcoded
 $db_host = '127.0.0.1';
 $db_name = 'glass_market';
 $db_user = 'root';
@@ -16,42 +13,43 @@ $success_message = '';
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
-    $password = $_POST['password'] ?? '';
     
-    if (empty($email) || empty($password)) {
-        $error_message = 'Please enter both email and password.';
+    if (empty($email)) {
+        $error_message = 'Please enter your email address.';
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $error_message = 'Please enter a valid email address.';
     } else {
         try {
             $pdo = new PDO("mysql:host=$db_host;dbname=$db_name", $db_user, $db_pass);
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             
-            // Check user credentials
-            $stmt = $pdo->prepare("SELECT * FROM users WHERE email = :email LIMIT 1");
+            // Find user
+            $stmt = $pdo->prepare("SELECT * FROM users WHERE email = :email");
             $stmt->execute(['email' => $email]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
             
-            if ($user && password_verify($password, $user['password'])) {
-                // Check if this is the admin account
-                if ($user['email'] !== 'admin@glassmarket.com') {
-                    $error_message = 'This login is for administrators only. Please login through the main website.';
-                } elseif (empty($user['email_verified_at'])) {
-                    $error_message = 'Your account is pending approval.';
+            if ($user) {
+                if (!empty($user['email_verified_at'])) {
+                    $error_message = 'This account is already verified. You can login now.';
                 } else {
-                    // Login successful
-                    $_SESSION['admin_logged_in'] = true;
-                    $_SESSION['admin_user_id'] = $user['id'];
-                    $_SESSION['admin_user_name'] = $user['name'];
-                    $_SESSION['admin_user_email'] = $user['email'];
+                    // Generate new verification token
+                    $verification_token = bin2hex(random_bytes(32));
                     
-                    // Redirect to dashboard
-                    header('Location: dashboard.php');
-                    exit;
+                    $stmt = $pdo->prepare("UPDATE users SET remember_token = :token WHERE id = :id");
+                    $stmt->execute(['token' => $verification_token, 'id' => $user['id']]);
+                    
+                    // In a real application, send email here
+                    $success_message = 'Verification link has been sent to your email.';
+                    
+                    // For demo purposes, show the link
+                    $_SESSION['demo_verification_link'] = 'verify-account.php?token=' . $verification_token . '&email=' . urlencode($email);
                 }
             } else {
-                $error_message = 'Invalid email or password.';
+                // For security, don't reveal if email exists or not
+                $success_message = 'If an account exists with this email, a verification link has been sent.';
             }
         } catch (PDOException $e) {
-            $error_message = 'Database connection failed: ' . $e->getMessage();
+            $error_message = 'An error occurred. Please try again.';
         }
     }
 }
@@ -61,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login - Glass Market</title>
+    <title>Resend Verification - Glass Market</title>
     <style>
         * {
             margin: 0;
@@ -79,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             padding: 20px;
         }
 
-        .login-container {
+        .resend-container {
             background: white;
             border-radius: 8px;
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
@@ -89,21 +87,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border: 1px solid rgba(0, 0, 0, 0.06);
         }
 
-        .login-header {
+        .resend-header {
             background: #201b15;
             padding: 40px 30px;
             text-align: center;
             color: white;
         }
 
-        .login-header h1 {
+        .resend-header h1 {
             font-size: 28px;
             font-weight: 800;
             margin-bottom: 8px;
             letter-spacing: 0.02em;
         }
 
-        .login-header p {
+        .resend-header p {
             font-size: 14px;
             opacity: 0.9;
         }
@@ -125,7 +123,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             stroke: white;
         }
 
-        .login-body {
+        .resend-body {
             padding: 40px 30px;
         }
 
@@ -146,6 +144,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             background: #f0fdf4;
             color: #166534;
             border: 1px solid #bbf7d0;
+        }
+
+        .demo-link {
+            margin-top: 12px;
+            padding: 10px;
+            background: #fffbeb;
+            border: 1px solid #fcd34d;
+            border-radius: 6px;
+            font-size: 12px;
+            word-break: break-all;
+        }
+
+        .demo-link strong {
+            display: block;
+            margin-bottom: 6px;
+            color: #92400e;
+        }
+
+        .demo-link a {
+            color: #1e40af;
         }
 
         .form-group {
@@ -175,44 +193,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             box-shadow: 0 0 0 3px rgba(42, 38, 35, 0.08);
         }
 
-        .form-group input.error {
-            border-color: #ef4444;
-        }
-
-        .remember-forgot {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-        }
-
-        .remember-me {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-            color: #6b7280;
-        }
-
-        .remember-me input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-            accent-color: #2a2623;
-        }
-
-        .forgot-password {
-            font-size: 14px;
-            color: #2a2623;
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .forgot-password:hover {
-            text-decoration: underline;
-        }
-
-        .btn-login {
+        .btn-resend {
             width: 100%;
             padding: 14px;
             font-size: 16px;
@@ -225,45 +206,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             transition: background 0.2s ease;
         }
 
-        .btn-login:hover {
+        .btn-resend:hover {
             background: #161311;
         }
 
-        .btn-login:active {
-            background: #0f0c0a;
-        }
-
-        .login-footer {
+        .resend-footer {
             text-align: center;
             padding: 20px 30px 30px;
             font-size: 14px;
             color: #6b7280;
         }
 
-        .login-footer a {
+        .resend-footer a {
             color: #2a2623;
             text-decoration: none;
             font-weight: 500;
         }
 
-        .login-footer a:hover {
+        .resend-footer a:hover {
             text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-header">
+    <div class="resend-container">
+        <div class="resend-header">
             <div class="icon-wrapper">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
                 </svg>
             </div>
-            <h1>Admin Login</h1>
-            <p>Welcome back! Please login to your account.</p>
+            <h1>Resend Verification</h1>
+            <p>Enter your email to receive a new verification link</p>
         </div>
 
-        <div class="login-body">
+        <div class="resend-body">
             <?php if ($error_message): ?>
                 <div class="alert alert-danger">
                     <?php echo htmlspecialchars($error_message); ?>
@@ -273,6 +250,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php if ($success_message): ?>
                 <div class="alert alert-success">
                     <?php echo htmlspecialchars($success_message); ?>
+                    <?php if (isset($_SESSION['demo_verification_link'])): ?>
+                        <div class="demo-link">
+                            <strong>Demo: Click this link to verify</strong>
+                            <a href="<?php echo htmlspecialchars($_SESSION['demo_verification_link']); ?>">
+                                <?php echo htmlspecialchars($_SESSION['demo_verification_link']); ?>
+                            </a>
+                        </div>
+                        <?php unset($_SESSION['demo_verification_link']); ?>
+                    <?php endif; ?>
                 </div>
             <?php endif; ?>
 
@@ -284,40 +270,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         id="email" 
                         name="email" 
                         value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>"
-                        placeholder="admin@glassmarket.com"
+                        placeholder="your@email.com"
                         required 
                         autofocus
                     >
                 </div>
 
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input 
-                        type="password" 
-                        id="password" 
-                        name="password" 
-                        placeholder="Enter your password"
-                        required
-                    >
-                </div>
-
-                <div class="remember-forgot">
-                    <label class="remember-me">
-                        <input type="checkbox" name="remember">
-                        <span>Remember me</span>
-                    </label>
-                    <a href="#" class="forgot-password">Forgot password?</a>
-                </div>
-
-                <button type="submit" class="btn-login">
-                    Sign In
+                <button type="submit" class="btn-resend">
+                    Resend Verification Link
                 </button>
             </form>
         </div>
 
-        <div class="login-footer">
-            <strong>Admin Access Only</strong><br>
-            Only admin@glassmarket.com can access this dashboard • <a href="#">Contact Support</a>
+        <div class="resend-footer">
+            <a href="login.php">Back to Login</a> • <a href="register.php">Register</a>
         </div>
     </div>
 </body>
