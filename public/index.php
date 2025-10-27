@@ -1,15 +1,16 @@
+<?php require_once __DIR__ . '/../config.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../resources/css/app.css">
+    <link rel="stylesheet" href="<?php echo CSS_URL; ?>/app.css">
     <title>Glass Market</title>
 </head>
 <body>
     <?php include __DIR__ . '/../includes/navbar.php'; ?>
 
-    <main>
+    <main style="padding-top: 70px;">
         <section class="hero">
             <div class="container">
                 <h1 class="hero-title">Glass Market<br>The best place<br>to buy and sell glass</h1>

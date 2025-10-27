@@ -1,7 +1,13 @@
+<?php
+// Load config if not already loaded
+if (!defined('BASE_URL')) {
+    require_once __DIR__ . '/../config.php';
+}
+?>
 <footer class="footer">
     <div class="container footer-top">
         <div class="footer-brand">
-            <a class="brand" href="#"><span class="brand-mark"></span><span>GLASS MARKET</span></a>
+            <a class="brand" href="<?php echo PUBLIC_URL; ?>/index.php"><span class="brand-mark"></span><span>GLASS MARKET</span></a>
             <p>Discover all types of glass for every job!<br>The best place to buy and sell glass</p>
         </div>
         <div class="footer-cols">

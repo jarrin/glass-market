@@ -2,23 +2,33 @@
 // Blurry glass navbar include
 // Usage: <?php include __DIR__ . '/includes/navbar.php'; ?>
 
+// Load config if not already loaded
+if (!defined('BASE_URL')) {
+    require_once __DIR__ . '/../config.php';
+}
+
 <style>
 /* Navbar root */
 .glass-navbar {
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
   width: 100%;
   z-index: 1000;
   display: flex;
   align-items: center;
   gap: 24px;
-  padding: 10px 22px;
+  padding: 12px 24px;
   box-sizing: border-box;
-  /* semi-transparent background to sit on top of page content */
-  background: rgba(255,255,255,0.35);
-  -webkit-backdrop-filter: blur(8px) saturate(120%);
-  backdrop-filter: blur(8px) saturate(120%);
-  border-bottom: 1px solid rgba(255,255,255,0.25);
-  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  /* Liquid glass effect */
+  background: rgba(255, 255, 255, 0.25);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 
+              inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Fallback for browsers without backdrop-filter */
@@ -34,6 +44,9 @@
   font-weight: 700;
   color: #101010;
   text-decoration: none;
+  padding: 6px 10px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
 }
 
 .glass-navbar .brand .logo-bars {
@@ -54,12 +67,18 @@
   color: rgba(10,10,10,0.9);
   text-decoration: none;
   font-size: 14px;
-  padding: 6px 8px;
-  border-radius: 6px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  position: relative;
 }
 
 .glass-navbar .nav-links a:hover {
-  background: rgba(0,0,0,0.05);
+  background: rgba(255,255,255,0.4);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  color: rgba(10,10,10,1);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
 .glass-navbar .search {
@@ -76,9 +95,18 @@
   padding: 10px 14px;
   border-radius: 8px;
   border: 1px solid rgba(16,16,16,0.08);
-  background: rgba(255,255,255,0.6);
+  background: rgba(255,255,255,0.4);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
   outline: none;
   font-size: 13px;
+  transition: all 0.2s ease;
+}
+
+.glass-navbar .search input[type="search"]:focus {
+  background: rgba(255,255,255,0.6);
+  border-color: rgba(16,16,16,0.15);
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.3);
 }
 
 .glass-navbar .icons {
@@ -94,8 +122,19 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  background: rgba(255,255,255,0.3);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.3);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.icon-circle:hover {
   background: rgba(255,255,255,0.5);
-  border: 1px solid rgba(0,0,0,0.06);
+  border-color: rgba(255,255,255,0.5);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
 /* Responsive adjustments */
@@ -108,18 +147,39 @@
   .glass-navbar { padding: 8px 12px; }
   .glass-navbar .search { display: none; }
 }
+
+/* Scrolled state - extra glassmorphism */
+.glass-navbar.scrolled {
+  background: rgba(255, 255, 255, 0.2);
+  -webkit-backdrop-filter: blur(24px) saturate(200%);
+  backdrop-filter: blur(24px) saturate(200%);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1), 
+              inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
 </style>
 
+<script>
+// Add scroll effect
+window.addEventListener('scroll', function() {
+  const navbar = document.querySelector('.glass-navbar');
+  if (window.scrollY > 50) {
+    navbar.classList.add('scrolled');
+  } else {
+    navbar.classList.remove('scrolled');
+  }
+});
+</script>
+
 <header class="glass-navbar" role="banner">
-  <a href="/" class="brand" aria-label="Glass Market home">
+  <a href="<?php echo PUBLIC_URL; ?>/index.php" class="brand" aria-label="Glass Market home">
     <span class="logo-bars" aria-hidden="true"></span>
     <span style="font-size:16px;">GLASS MARKET</span>
   </a>
 
   <nav class="nav-links" role="navigation" aria-label="Primary">
-    <a href="/browse">Browse</a>
-    <a href="/categories">Categories</a>
-    <a href="/about">About</a>
+    <a href="<?php echo VIEWS_URL; ?>/browse.php">Browse</a>
+    <a href="<?php echo VIEWS_URL; ?>/categories.php">Categories</a>
+    <a href="<?php echo VIEWS_URL; ?>/about.php">About</a>
   </nav>
 
   <div class="search" role="search">

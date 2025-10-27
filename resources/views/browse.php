@@ -1,3 +1,4 @@
+<?php require_once __DIR__ . '/../../config.php'; ?>
 <!-- Browse collection page - static mockup -->
 <!doctype html>
 <html lang="en">
@@ -5,6 +6,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Browse Collection</title>
+    <link rel="stylesheet" href="<?php echo CSS_URL; ?>/app.css">
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <style>
         body{font-family: Arial, Helvetica, sans-serif; background:#f6f0eb; color:#111; margin:0}
@@ -80,8 +82,8 @@
     </style>
 </head>
 <body>
-    <?php include __DIR__ . '/../includes/navbar.php'; ?>
-<main class="container">
+    <?php include __DIR__ . '/../../includes/navbar.php'; ?>
+<main class="container" style="padding-top: 70px;">
     <h1 class="page-title">Browse Collection</h1>
     <p class="subtitle">Discover unique glass art from artisans worldwide</p>
 
