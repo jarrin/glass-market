@@ -164,7 +164,7 @@
   
   /* ---------- Hero ---------- */
   .hero {
-    padding: 140px 0 80px;
+    padding: 140px 0 0;
     background: var(--bg);
   }
   
