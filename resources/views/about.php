@@ -3,45 +3,42 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="../resources/css/about.css">
+  <link rel="stylesheet" href="../css/app.css">
   <title>Glass Market</title>
 </head>
 <body>
+  <?php include __DIR__ . '/../../includes/navbar.php'; ?>
 
-  <header>
-    <h1>GLASS MARKET</h1>
-    <nav>
-      <a href="#">Browse</a>
-      <a href="#">Categories</a>
-      <a href="#">Sellers</a>
-      <a href="#">About</a>
-    </nav>
-    <input class="search" type="text" placeholder="Search glass art, crystals...">
-  </header>
+  <main style="margin-top: 70px;">
+    <section class="section about">
+      <div class="container">
+        <h2>About Glass Market</h2>
+        <p class="center" style="max-width:650px;margin:0 auto;">The world's premier marketplace for glass art, crystals, and handcrafted glassware. Connecting artisans with collectors since 2020.</p>
+      </div>
+    </section>
 
-  <section class="about">
-    <h2>About Glass Market</h2>
-    <p>The world's premier marketplace for glass art, crystals, and handcrafted glassware. Connecting artisans with collectors since 2020.</p>
-  </section>
+    <section class="section">
+      <div class="container grid grid-4" style="text-align:center;">
+        <div class="stat">
+          <h3 style="font-size:2.2rem;">10K+</h3>
+          <p class="muted">Active Sellers</p>
+        </div>
+        <div class="stat">
+          <h3 style="font-size:2.2rem;">50K+</h3>
+          <p class="muted">Products Listed</p>
+        </div>
+        <div class="stat">
+          <h3 style="font-size:2.2rem;">100+</h3>
+          <p class="muted">Countries</p>
+        </div>
+        <div class="stat">
+          <h3 style="font-size:2.2rem;">4.8</h3>
+          <p class="muted">Average Rating</p>
+        </div>
+      </div>
+    </section>
+  </main>
 
-  <section class="stats">
-    <div class="stat">
-      <h3>10K+</h3>
-      <p>Active Sellers</p>
-    </div>
-    <div class="stat">
-      <h3>50K+</h3>
-      <p>Products Listed</p>
-    </div>
-    <div class="stat">
-      <h3>100+</h3>
-      <p>Countries</p>
-    </div>
-    <div class="stat">
-      <h3>4.8</h3>
-      <p>Average Rating</p>
-    </div>
-  </section>
-
+  <?php include __DIR__ . '/../../includes/footer.php'; ?>
 </body>
 </html>
