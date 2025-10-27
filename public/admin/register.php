@@ -13,15 +13,23 @@ $success_message = '';
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim($_POST['name'] ?? '');
-    $email = trim($_POST['email'] ?? '');
+    $company_name = trim($_POST['company_name'] ?? '');
+    $address = trim($_POST['address'] ?? '');
+    $city = trim($_POST['city'] ?? '');
+    $country = trim($_POST['country'] ?? '');
+    $notification_email = trim($_POST['notification_email'] ?? '');
+    $communication_email = trim($_POST['communication_email'] ?? '');
     $password = $_POST['password'] ?? '';
     $confirm_password = $_POST['confirm_password'] ?? '';
     
     // Validation
-    if (empty($name) || empty($email) || empty($password) || empty($confirm_password)) {
+    if (empty($name) || empty($company_name) || empty($address) || empty($city) || empty($country) || 
+        empty($notification_email) || empty($communication_email) || empty($password) || empty($confirm_password)) {
         $error_message = 'All fields are required.';
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $error_message = 'Please enter a valid email address.';
+    } elseif (!filter_var($notification_email, FILTER_VALIDATE_EMAIL)) {
+        $error_message = 'Please enter a valid notification email address.';
+    } elseif (!filter_var($communication_email, FILTER_VALIDATE_EMAIL)) {
+        $error_message = 'Please enter a valid communication email address.';
     } elseif (strlen($password) < 8) {
         $error_message = 'Password must be at least 8 characters long.';
     } elseif ($password !== $confirm_password) {
@@ -32,8 +40,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             
             // Check if email already exists
-            $stmt = $pdo->prepare("SELECT id FROM users WHERE email = :email");
-            $stmt->execute(['email' => $email]);
+            $stmt = $pdo->prepare("SELECT id FROM users WHERE email = :email OR email = :comm_email");
+            $stmt->execute(['email' => $notification_email, 'comm_email' => $communication_email]);
             
             if ($stmt->fetch()) {
                 $error_message = 'This email is already registered.';
@@ -41,6 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $hashed_password = password_hash($password, PASSWORD_DEFAULT);
                 
                 // Insert user with email_verified_at as NULL (pending admin approval)
+                // Note: Adjust column names based on your actual database schema
                 $stmt = $pdo->prepare("
                     INSERT INTO users (name, email, password, email_verified_at) 
                     VALUES (:name, :email, :password, NULL)
@@ -48,12 +57,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 $stmt->execute([
                     'name' => $name,
-                    'email' => $email,
+                    'email' => $notification_email,
                     'password' => $hashed_password
                 ]);
                 
                 // Set success message
-                $success_message = 'Registration successful! Your account is pending admin approval. You will be able to login once an administrator verifies your account.';
+                $success_message = 'Registration successful! Your account is pending admin approval. You will be able to access the platform once an administrator verifies your account.';
             }
         } catch (PDOException $e) {
             $error_message = 'Registration failed: ' . $e->getMessage();
@@ -75,8 +84,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         body {
-            font-family: ui-serif, Georgia, 'Times New Roman', Times, serif;
-            background: #f3eee6;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -86,52 +95,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         .register-container {
             background: white;
-            border-radius: 8px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
             width: 100%;
-            max-width: 480px;
+            max-width: 520px;
             overflow: hidden;
-            border: 1px solid rgba(0, 0, 0, 0.06);
+            border: 1px solid #e0e0e0;
         }
 
         .register-header {
-            background: #201b15;
-            padding: 40px 30px;
-            text-align: center;
-            color: white;
+            padding: 32px 32px 20px;
+            border-bottom: 2px solid #f5f5f5;
+            background: #fafafa;
         }
 
         .register-header h1 {
-            font-size: 28px;
+            font-size: 20px;
             font-weight: 800;
-            margin-bottom: 8px;
-            letter-spacing: 0.02em;
+            margin-bottom: 10px;
+            color: #000;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        .register-header p {
-            font-size: 14px;
-            opacity: 0.9;
+        .register-header .subtitle {
+            font-size: 13px;
+            color: #555;
+            background: white;
+            padding: 10px 16px;
+            border-radius: 6px;
+            text-align: center;
+            border: 1px solid #e0e0e0;
         }
 
-        .icon-wrapper {
-            width: 64px;
-            height: 64px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px;
-        }
-
-        .icon-wrapper svg {
-            width: 32px;
-            height: 32px;
-            stroke: white;
+        .section-title {
+            font-size: 12px;
+            font-weight: 800;
+            color: #000;
+            margin: 28px 0 16px;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #000;
         }
 
         .register-body {
-            padding: 40px 30px;
+            padding: 32px;
         }
 
         .alert {
@@ -154,92 +163,163 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 18px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
         }
 
         .form-group label {
             display: block;
-            font-size: 14px;
-            font-weight: 500;
-            color: #374151;
+            font-size: 12px;
+            font-weight: 600;
+            color: #222;
             margin-bottom: 8px;
+        }
+
+        .form-group label .required {
+            color: #e53e3e;
+        }
+
+        .form-group .helper-text {
+            font-size: 10px;
+            color: #999;
+            margin-top: 2px;
         }
 
         .form-group input {
             width: 100%;
-            padding: 12px 16px;
-            font-size: 15px;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            transition: all 0.3s ease;
+            padding: 12px 14px;
+            font-size: 14px;
+            border: 1.5px solid #ddd;
+            border-radius: 6px;
+            transition: all 0.2s ease;
             outline: none;
+            background: #fafafa;
         }
 
         .form-group input:focus {
-            border-color: #2a2623;
-            box-shadow: 0 0 0 3px rgba(42, 38, 35, 0.08);
+            border-color: #000;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.08);
         }
 
-        .form-group input.error {
-            border-color: #ef4444;
+        .form-group input::placeholder {
+            color: #bbb;
         }
 
-        .password-requirements {
-            font-size: 12px;
-            color: #6b5f56;
-            margin-top: 6px;
-        }
-
-        .btn-register {
-            width: 100%;
-            padding: 14px;
-            font-size: 16px;
-            font-weight: 600;
-            color: white;
-            background: #2a2623;
-            border: none;
+        .credit-card-section {
+            background: #fafafa;
+            border: 1.5px solid #e0e0e0;
             border-radius: 8px;
+            padding: 20px;
+            margin: 16px 0;
+        }
+
+        .card-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 12px;
+        }
+
+        .card-icon {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .card-icon svg {
+            width: 32px;
+            height: 20px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 4px;
             cursor: pointer;
-            transition: background 0.2s ease;
-            margin-top: 10px;
+            transition: all 0.2s ease;
+            border: none;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        .btn-register:hover {
-            background: #161311;
+        .btn-primary {
+            flex: 1;
+            background: #000;
+            color: white;
+            font-weight: 700;
         }
 
-        .btn-register:active {
-            background: #0f0c0a;
+        .btn-primary:hover {
+            background: #333;
+        }
+
+        .btn-secondary {
+            padding: 12px 24px;
+            background: transparent;
+            color: #666;
+            border: none;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-secondary:hover {
+            color: #000;
         }
 
         .register-footer {
             text-align: center;
-            padding: 20px 30px 30px;
-            font-size: 14px;
-            color: #6b7280;
-        }
-
-        .register-footer a {
-            color: #2a2623;
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .register-footer a:hover {
-            text-decoration: underline;
+            padding: 20px 32px 28px;
+            font-size: 12px;
+            color: #888;
+            background: #fafafa;
+            border-top: 2px solid #f5f5f5;
         }
     </style>
+    <script>
+        // Format card number with spaces
+        document.addEventListener('DOMContentLoaded', function() {
+            const cardNumber = document.getElementById('card_number');
+            const cardExpiry = document.getElementById('card_expiry');
+            
+            if (cardNumber) {
+                cardNumber.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\s/g, '');
+                    let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+                    e.target.value = formattedValue;
+                });
+            }
+            
+            if (cardExpiry) {
+                cardExpiry.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\D/g, '');
+                    if (value.length >= 2) {
+                        value = value.slice(0, 2) + '/' + value.slice(2, 4);
+                    }
+                    e.target.value = value;
+                });
+            }
+        });
+    </script>
 </head>
 <body>
     <div class="register-container">
         <div class="register-header">
-            <div class="icon-wrapper">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z" />
-                </svg>
-            </div>
             <h1>Create Account</h1>
-            <p>Register for Glass Market Customer Access</p>
+            <div class="subtitle">First 3 months FREE, then subscription required</div>
         </div>
 
         <div class="register-body">
@@ -256,64 +336,216 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php endif; ?>
 
             <form method="POST" action="">
+                <!-- Personal Information -->
+                <div class="section-title">Personal Information</div>
+                
                 <div class="form-group">
-                    <label for="name">Full Name</label>
+                    <label for="name">Full name <span class="required">*</span></label>
                     <input 
                         type="text" 
                         id="name" 
                         name="name" 
                         value="<?php echo htmlspecialchars($_POST['name'] ?? ''); ?>"
-                        placeholder="John Doe"
+                        placeholder="Full name..."
                         required 
                         autofocus
                     >
                 </div>
 
                 <div class="form-group">
-                    <label for="email">Email Address</label>
+                    <label for="company_name">Company name <span class="required">*</span></label>
                     <input 
-                        type="email" 
-                        id="email" 
-                        name="email" 
-                        value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>"
-                        placeholder="john@example.com"
+                        type="text" 
+                        id="company_name" 
+                        name="company_name" 
+                        value="<?php echo htmlspecialchars($_POST['company_name'] ?? ''); ?>"
+                        placeholder="Company name..."
                         required
                     >
                 </div>
 
                 <div class="form-group">
-                    <label for="password">Password</label>
+                    <label for="address">Address <span class="required">*</span></label>
+                    <input 
+                        type="text" 
+                        id="address" 
+                        name="address" 
+                        value="<?php echo htmlspecialchars($_POST['address'] ?? ''); ?>"
+                        placeholder="Address"
+                        required
+                    >
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="city">City <span class="required">*</span></label>
+                        <input 
+                            type="text" 
+                            id="city" 
+                            name="city" 
+                            value="<?php echo htmlspecialchars($_POST['city'] ?? ''); ?>"
+                            placeholder="City"
+                            required
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="country">Country <span class="required">*</span></label>
+                        <input 
+                            type="text" 
+                            id="country" 
+                            name="country" 
+                            value="<?php echo htmlspecialchars($_POST['country'] ?? ''); ?>"
+                            placeholder="Country"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <!-- Email Addresses -->
+                <div class="section-title">Email Addresses</div>
+                
+                <div class="form-group">
+                    <label for="notification_email">Notification Email <span class="required">*</span></label>
+                    <div class="helper-text">For new listing alerts</div>
+                    <input 
+                        type="email" 
+                        id="notification_email" 
+                        name="notification_email" 
+                        value="<?php echo htmlspecialchars($_POST['notification_email'] ?? ''); ?>"
+                        placeholder="Notification Email"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="communication_email">Communication Email <span class="required">*</span></label>
+                    <div class="helper-text">For team-wide messages</div>
+                    <input 
+                        type="email" 
+                        id="communication_email" 
+                        name="communication_email" 
+                        value="<?php echo htmlspecialchars($_POST['communication_email'] ?? ''); ?>"
+                        placeholder="Communication Email"
+                        required
+                    >
+                </div>
+
+                <!-- Security -->
+                <div class="section-title">Security</div>
+                
+                <div class="form-group">
+                    <label for="password">Password <span class="required">*</span></label>
                     <input 
                         type="password" 
                         id="password" 
                         name="password" 
-                        placeholder="Create a strong password"
+                        placeholder="Password"
                         required
                     >
-                    <div class="password-requirements">
-                        Must be at least 8 characters long
-                    </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="confirm_password">Confirm Password</label>
+                    <label for="confirm_password">Confirm Password <span class="required">*</span></label>
                     <input 
                         type="password" 
                         id="confirm_password" 
                         name="confirm_password" 
-                        placeholder="Re-enter your password"
+                        placeholder="Confirm Password"
                         required
                     >
                 </div>
 
-                <button type="submit" class="btn-register">
-                    Create Account
-                </button>
+                <!-- Payment Method -->
+                <div class="section-title">Payment Method</div>
+                
+                <div class="credit-card-section">
+                    <div class="card-icon">
+                        <!-- Visa -->
+                        <svg viewBox="0 0 48 32" fill="none">
+                            <rect width="48" height="32" rx="4" fill="#1434CB"/>
+                            <path d="M21.5 20.5L19.5 11.5H17L19.5 20.5H21.5ZM28 11.8L26.2 16.5L25.8 14.5L24.8 11.8C24.7 11.6 24.5 11.5 24.3 11.5H20.5L20.4 11.8C21.5 12 22.5 12.5 23.3 13.2L25.8 20.5H28.2L31.5 11.5H29.2L28 11.8ZM34 20.5L35.5 11.5H33.2L31.7 20.5H34ZM15.5 11.5L13 20.5H15.3L17.8 11.5H15.5Z" fill="white"/>
+                        </svg>
+                        <!-- Mastercard -->
+                        <svg viewBox="0 0 48 32" fill="none">
+                            <rect width="48" height="32" rx="4" fill="#EB001B"/>
+                            <circle cx="19" cy="16" r="8" fill="#FF5F00"/>
+                            <circle cx="29" cy="16" r="8" fill="#F79E1B"/>
+                        </svg>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="card_number">Card Number <span class="required">*</span></label>
+                        <input 
+                            type="text" 
+                            id="card_number" 
+                            name="card_number" 
+                            placeholder="1234 5678 9012 3456"
+                            maxlength="19"
+                            pattern="[0-9\s]*"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="card_name">Cardholder Name <span class="required">*</span></label>
+                        <input 
+                            type="text" 
+                            id="card_name" 
+                            name="card_name" 
+                            placeholder="JOHN DOE"
+                            style="text-transform: uppercase;"
+                        >
+                    </div>
+
+                    <div class="card-row">
+                        <div class="form-group">
+                            <label for="card_expiry">Expiry Date <span class="required">*</span></label>
+                            <input 
+                                type="text" 
+                                id="card_expiry" 
+                                name="card_expiry" 
+                                placeholder="MM/YY"
+                                maxlength="5"
+                                pattern="[0-9/]*"
+                            >
+                        </div>
+                        <div class="form-group">
+                            <label for="card_cvv">CVV <span class="required">*</span></label>
+                            <input 
+                                type="text" 
+                                id="card_cvv" 
+                                name="card_cvv" 
+                                placeholder="123"
+                                maxlength="4"
+                                pattern="[0-9]*"
+                            >
+                        </div>
+                        <div class="form-group">
+                            <label for="card_zip">ZIP Code <span class="required">*</span></label>
+                            <input 
+                                type="text" 
+                                id="card_zip" 
+                                name="card_zip" 
+                                placeholder="12345"
+                                maxlength="10"
+                            >
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        Create an Account
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="window.location.href='login.php'">
+                        Cancel
+                    </button>
+                </div>
             </form>
         </div>
 
         <div class="register-footer">
-            Already have an account? <a href="login.php">Sign In</a>
+            Account required approval before activation
         </div>
     </div>
 </body>
