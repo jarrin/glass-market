@@ -62,17 +62,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
                 // Column already exists, ignore error
             }
             
-            $stmt = $pdo->prepare('UPDATE users SET name = :name, company_name = :company_name WHERE id = :id');
+            // Add avatar column if it doesn't exist
+            try {
+                $pdo->exec("ALTER TABLE users ADD COLUMN avatar VARCHAR(500) NULL AFTER email");
+            } catch (PDOException $e) {
+                // Column already exists, ignore error
+            }
+            
+            $avatar_path = $user['avatar']; // Keep existing avatar by default
+            
+            // Handle avatar upload
+            if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] === UPLOAD_ERR_OK) {
+                $upload_dir = __DIR__ . '/../../public/uploads/avatars/';
+                
+                // Create directory if it doesn't exist
+                if (!is_dir($upload_dir)) {
+                    mkdir($upload_dir, 0755, true);
+                }
+                
+                $file_extension = strtolower(pathinfo($_FILES['avatar']['name'], PATHINFO_EXTENSION));
+                $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+                
+                if (in_array($file_extension, $allowed_extensions)) {
+                    $new_filename = 'avatar_' . $user['id'] . '_' . time() . '.' . $file_extension;
+                    $upload_path = $upload_dir . $new_filename;
+                    
+                    if (move_uploaded_file($_FILES['avatar']['tmp_name'], $upload_path)) {
+                        $avatar_path = PUBLIC_URL . '/uploads/avatars/' . $new_filename;
+                    }
+                }
+            }
+            
+            $stmt = $pdo->prepare('UPDATE users SET name = :name, company_name = :company_name, avatar = :avatar WHERE id = :id');
             $stmt->execute([
                 'name' => $name,
                 'company_name' => $company_name,
+                'avatar' => $avatar_path,
                 'id' => $user['id']
             ]);
             
             // Update session
             $_SESSION['user_name'] = $name;
+            $_SESSION['user_avatar'] = $avatar_path;
             $user['name'] = $name;
             $user['company_name'] = $company_name;
+            $user['avatar'] = $avatar_path;
             
             $success_message = 'Profile updated successfully!';
         } catch (PDOException $e) {
@@ -642,7 +676,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_listing'])) {
                     </div>
                 <?php endif; ?>
 
-                <form method="POST" action="">
+                <form method="POST" action="" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="avatar">Profile Picture</label>
+                        <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 12px;">
+                            <div style="width: 80px; height: 80px; border-radius: 50%; overflow: hidden; background: #f0f0f0; display: flex; align-items: center; justify-content: center;">
+                                <?php if (!empty($user['avatar'])): ?>
+                                    <img src="<?php echo htmlspecialchars($user['avatar']); ?>" alt="Current avatar" style="width: 100%; height: 100%; object-fit: cover;">
+                                <?php else: ?>
+                                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="12" cy="7" r="4"></circle>
+                                    </svg>
+                                <?php endif; ?>
+                            </div>
+                            <div style="flex: 1;">
+                                <input
+                                    type="file"
+                                    id="avatar"
+                                    name="avatar"
+                                    accept="image/*"
+                                    style="width: 100%; padding: 10px; font-size: 13px; border: 1.5px solid #ddd; border-radius: 6px; background: #fafafa;"
+                                >
+                                <small style="font-size: 11px; color: #999; display: block; margin-top: 6px;">
+                                    JPG, PNG, GIF, or WEBP. Max 5MB.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="form-group">
                         <label for="name">Full Name</label>
                         <input
