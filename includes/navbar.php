@@ -2,8 +2,17 @@
 // Blurry glass navbar include
 // Usage: <?php include __DIR__ . '/includes/navbar.php'; ?>
 
+// Start session if not already started
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-
+// Check if user is logged in
+$is_logged_in = isset($_SESSION['user_logged_in']) && $_SESSION['user_logged_in'] === true;
+$user_name = $is_logged_in ? ($_SESSION['user_name'] ?? 'User') : '';
+$user_email = $is_logged_in ? ($_SESSION['user_email'] ?? '') : '';
+$user_avatar = $is_logged_in ? ($_SESSION['user_avatar'] ?? '') : '';
+?>
 <style>
 /* Navbar root */
 .glass-navbar {
@@ -134,6 +143,174 @@
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
+/* Auth buttons */
+.auth-buttons {
+  display: flex;
+  gap: 10px;
+  margin-left: 12px;
+}
+
+.btn-login, .btn-register {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-login {
+  color: rgba(10,10,10,0.9);
+  background: rgba(255,255,255,0.4);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(16,16,16,0.08);
+}
+
+.btn-login:hover {
+  background: rgba(255,255,255,0.6);
+  border-color: rgba(16,16,16,0.15);
+  color: rgba(10,10,10,1);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.btn-register {
+  color: white;
+  background: rgba(16,16,16,0.85);
+  border: 1px solid rgba(16,16,16,0.9);
+}
+
+.btn-register:hover {
+  background: rgba(10,10,10,0.95);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transform: translateY(-1px);
+}
+
+/* User profile section */
+.user-profile {
+  position: relative;
+  margin-left: 12px;
+}
+
+.profile-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.3);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.profile-avatar:hover {
+  border-color: rgba(255,255,255,0.7);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-avatar-default {
+  width: 20px;
+  height: 20px;
+  color: #111;
+}
+
+/* Dropdown menu */
+.profile-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 220px;
+  background: rgba(255, 255, 255, 0.95);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1001;
+}
+
+.user-profile:hover .profile-dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.dropdown-header {
+  padding: 16px;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.dropdown-header .user-name {
+  font-weight: 600;
+  color: #111;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.dropdown-header .user-email {
+  font-size: 12px;
+  color: rgba(0,0,0,0.6);
+}
+
+.dropdown-menu {
+  padding: 8px;
+}
+
+.dropdown-menu a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  color: rgba(10,10,10,0.9);
+  text-decoration: none;
+  font-size: 14px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.dropdown-menu a:hover {
+  background: rgba(0,0,0,0.05);
+  color: rgba(10,10,10,1);
+}
+
+.dropdown-menu a svg {
+  width: 16px;
+  height: 16px;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: rgba(0,0,0,0.05);
+  margin: 8px 0;
+}
+
+.dropdown-menu .logout-link {
+  color: #dc2626;
+}
+
+.dropdown-menu .logout-link:hover {
+  background: rgba(220, 38, 38, 0.08);
+}
+
 /* Responsive adjustments */
 @media (max-width: 820px) {
   .glass-navbar .search { min-width: 180px; max-width: 260px; }
@@ -143,6 +320,13 @@
 @media (max-width: 480px) {
   .glass-navbar { padding: 8px 12px; }
   .glass-navbar .search { display: none; }
+  .btn-login, .btn-register { 
+    padding: 6px 12px; 
+    font-size: 13px; 
+  }
+  .auth-buttons { margin-left: auto; }
+  .user-profile { margin-left: auto; }
+  .profile-dropdown { min-width: 200px; }
 }
 
 /* Scrolled state - extra glassmorphism */
@@ -183,12 +367,23 @@ window.addEventListener('scroll', function() {
     <input type="search" placeholder="Search glass art, crystals..." aria-label="Search">
   </div>
 
-  <div class="icons" aria-hidden="false">
-    <a class="icon-circle" href="/account" title="Account">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <path d="M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5z" stroke="#111" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M20 22c0-3.314-2.686-6-6-6H10c-3.314 0-6 2.686-6 6" stroke="#111" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
+  <!-- Profile Icon (always visible) -->
+  <div class="auth-buttons">
+    <a href="<?php echo VIEWS_URL; ?>/profile.php" class="icon-circle" title="Profile">
+      <?php if (isset($is_logged_in) && $is_logged_in && !empty($user_avatar)): ?>
+        <img src="<?php echo htmlspecialchars($user_avatar); ?>" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+      <?php else: ?>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+      <?php endif; ?>
     </a>
+    <?php if (isset($is_logged_in) && $is_logged_in): ?>
+      <a href="<?php echo VIEWS_URL; ?>/logout.php" class="btn-login">Logout</a>
+    <?php else: ?>
+      <a href="<?php echo VIEWS_URL; ?>/login.php" class="btn-login">Login</a>
+      <a href="<?php echo VIEWS_URL; ?>/register.php" class="btn-register">Register</a>
+    <?php endif; ?>
   </div>
 </header>
