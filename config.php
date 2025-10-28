@@ -17,5 +17,6 @@ if (count($pathParts) > 0) {
 define('BASE_URL', $BASE_PATH);
 define('PUBLIC_URL', BASE_URL . '/public');
 define('VIEWS_URL', BASE_URL . '/resources/views');
-define('CSS_URL', BASE_URL . '/resources/css');
-define('JS_URL', BASE_URL . '/resources/js');
+// Serve compiled/public assets from the public folder so they are web-accessible
+define('CSS_URL', PUBLIC_URL . '/css');
+define('JS_URL', PUBLIC_URL . '/js');
