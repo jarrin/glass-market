@@ -7,6 +7,12 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
     exit;
 }
 
+// Check if user is admin
+if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] != 1) {
+    header('Location: login.php');
+    exit;
+}
+
 // Database connection
 $db_host = '127.0.0.1';
 $db_name = 'glass_market';
@@ -42,11 +48,18 @@ try {
             if ($action === 'approve') {
                 $stmt = $pdo->prepare("UPDATE users SET email_verified_at = NOW() WHERE id = :id");
                 $stmt->execute(['id' => $user_id]);
-                $success_message = 'User has been approved successfully!';
-            } elseif ($action === 'reject') {
-                $stmt = $pdo->prepare("DELETE FROM users WHERE id = :id");
+                
+                // Ensure user has a trial subscription
+                require_once __DIR__ . '/../../../database/classes/subscriptions.php';
+                if (!Subscription::hasActiveSubscription($pdo, $user_id)) {
+                    Subscription::createTrialSubscription($pdo, $user_id);
+                }
+                
+                $success_message = 'User has been approved successfully and granted 3-month trial!';
+            } elseif ($action === 'reject' || $action === 'delete') {
+                $stmt = $pdo->prepare("DELETE FROM users WHERE id = :id AND email != 'admin@glassmarket.com'");
                 $stmt->execute(['id' => $user_id]);
-                $success_message = 'User registration has been rejected and removed.';
+                $success_message = $action === 'reject' ? 'User registration has been rejected and removed.' : 'User has been deleted successfully.';
             }
         }
         
@@ -351,6 +364,24 @@ $admin_name = $_SESSION['admin_user_name'] ?? 'Admin';
 
         .btn-reject:hover {
             background: #fecaca;
+        }
+
+        .btn-delete {
+            background: #fca5a5;
+            color: #7f1d1d;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .btn-delete:hover {
+            background: #f87171;
+            color: white;
+            transform: translateY(-1px);
         }
 
         .btn-view {
