@@ -12,6 +12,7 @@ $is_logged_in = isset($_SESSION['user_logged_in']) && $_SESSION['user_logged_in'
 $user_name = $is_logged_in ? ($_SESSION['user_name'] ?? 'User') : '';
 $user_email = $is_logged_in ? ($_SESSION['user_email'] ?? '') : '';
 $user_avatar = $is_logged_in ? ($_SESSION['user_avatar'] ?? '') : '';
+$is_admin = $is_logged_in ? ($_SESSION['is_admin'] ?? 0) : 0;
 ?>
 <style>
 /* Navbar root */
@@ -380,6 +381,16 @@ window.addEventListener('scroll', function() {
       <?php endif; ?>
     </a>
     <?php if (isset($is_logged_in) && $is_logged_in): ?>
+      <?php if ($is_admin == 1): ?>
+        <a href="<?php echo VIEWS_URL; ?>/admin/dashboard.php" class="btn-register" style="display: flex; align-items: center; gap: 6px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+            <path d="M2 17l10 5 10-5"></path>
+            <path d="M2 12l10 5 10-5"></path>
+          </svg>
+          Admin
+        </a>
+      <?php endif; ?>
       <a href="<?php echo VIEWS_URL; ?>/logout.php" class="btn-login">Logout</a>
     <?php else: ?>
       <a href="<?php echo VIEWS_URL; ?>/login.php" class="btn-login">Login</a>

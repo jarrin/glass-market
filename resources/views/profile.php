@@ -108,11 +108,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
             $user['company_name'] = $company_name;
             $user['avatar'] = $avatar_path;
             
-            $success_message = 'Profile updated successfully!';
+            $_SESSION['profile_success'] = 'Profile updated successfully!';
+            
+            // Redirect to prevent form resubmission
+            header('Location: ' . $_SERVER['PHP_SELF']);
+            exit;
         } catch (PDOException $e) {
             $error_message = 'Failed to update profile: ' . $e->getMessage();
         }
     }
+}
+
+// Get profile success message from session
+if (isset($_SESSION['profile_success'])) {
+    if (empty($success_message)) {
+        $success_message = $_SESSION['profile_success'];
+    }
+    unset($_SESSION['profile_success']);
 }
 
 // Handle email management
@@ -330,12 +342,12 @@ try {
 // Handle new glass listing
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_listing'])) {
     $title = trim($_POST['glass_title'] ?? '');
-    $description = trim($_POST['glass_description'] ?? '');
+    $glass_type = trim($_POST['glass_type'] ?? '');
     $tons = $_POST['glass_tons'] ?? '';
-    $glass_type = $_POST['glass_type'] ?? '';
+    $description = trim($_POST['glass_description'] ?? '');
     
-    if (empty($title) || empty($description) || empty($tons) || empty($glass_type)) {
-        $error_message = 'All listing fields are required.';
+    if (empty($title) || empty($glass_type) || empty($tons)) {
+        $error_message = 'Title, glass type and tonnage are required.';
     } elseif (!is_numeric($tons) || $tons <= 0) {
         $error_message = 'Please enter a valid tonnage.';
     } else {
@@ -343,42 +355,78 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_listing'])) {
             $pdo = new PDO("mysql:host=$db_host;dbname=$db_name", $db_user, $db_pass);
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             
-            // Handle image upload (placeholder - would need proper image handling)
-            $image_path = 'https://picsum.photos/seed/' . uniqid() . '/900/600';
+            // Get or create company_id for user
+            $stmt = $pdo->prepare('SELECT company_id FROM users WHERE id = :user_id');
+            $stmt->execute(['user_id' => $user['id']]);
+            $user_data = $stmt->fetch(PDO::FETCH_ASSOC);
+            $company_id = $user_data['company_id'] ?? null;
             
-            // Create listings table if it doesn't exist
-            $pdo->exec("CREATE TABLE IF NOT EXISTS listings (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                user_id INT NOT NULL,
-                title VARCHAR(255) NOT NULL,
-                description TEXT,
-                tons DECIMAL(10,2) NOT NULL,
-                glass_type VARCHAR(50) NOT NULL,
-                image_url VARCHAR(255),
-                status VARCHAR(20) DEFAULT 'pending',
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )");
+            // If user doesn't have a company, create one
+            if (!$company_id) {
+                $company_name = !empty($user['company_name']) ? $user['company_name'] : $user['name'] . "'s Company";
+                
+                $stmt = $pdo->prepare('
+                    INSERT INTO companies (name, company_type, created_at)
+                    VALUES (:name, :type, NOW())
+                ');
+                $stmt->execute([
+                    'name' => $company_name,
+                    'type' => 'Other'
+                ]);
+                
+                $company_id = $pdo->lastInsertId();
+                
+                // Update user with company_id
+                $stmt = $pdo->prepare('UPDATE users SET company_id = :company_id WHERE id = :user_id');
+                $stmt->execute([
+                    'company_id' => $company_id,
+                    'user_id' => $user['id']
+                ]);
+            }
             
+            // Map glass type to proper format
+            $glass_type_mapped = ucfirst($glass_type) . ' Glass';
+            
+            // Insert into existing listings table structure
             $stmt = $pdo->prepare('
-                INSERT INTO listings (user_id, title, description, tons, glass_type, image_url, status)
-                VALUES (:user_id, :title, :description, :tons, :glass_type, :image_url, :status)
+                INSERT INTO listings (
+                    company_id, 
+                    side, 
+                    glass_type, 
+                    quantity_tons,
+                    quantity_note,
+                    quality_notes, 
+                    published,
+                    created_at
+                )
+                VALUES (:company_id, :side, :glass_type, :quantity_tons, :quantity_note, :quality_notes, :published, NOW())
             ');
             
             $stmt->execute([
-                'user_id' => $user['id'],
-                'title' => $title,
-                'description' => $description,
-                'tons' => $tons,
-                'glass_type' => $glass_type,
-                'image_url' => $image_path,
-                'status' => 'pending'
+                'company_id' => $company_id,
+                'side' => 'WTS', // Want To Sell
+                'glass_type' => $glass_type_mapped,
+                'quantity_tons' => $tons,
+                'quantity_note' => $title,
+                'quality_notes' => $description,
+                'published' => 0 // Unpublished until admin approval
             ]);
             
-            $success_message = 'Glass listing created successfully! Price will be negotiated. Pending admin approval.';
+            $_SESSION['listing_success'] = 'Glass listing created successfully! Your listing is pending admin approval.';
+            
+            // Redirect to prevent form resubmission
+            header('Location: ' . $_SERVER['PHP_SELF']);
+            exit;
         } catch (PDOException $e) {
             $error_message = 'Failed to create listing: ' . $e->getMessage();
         }
     }
+}
+
+// Get listing success message from session
+if (isset($_SESSION['listing_success'])) {
+    $success_message = $_SESSION['listing_success'];
+    unset($_SESSION['listing_success']);
 }
 ?>
 <!DOCTYPE html>
@@ -1051,14 +1099,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_listing'])) {
                 <div class="section-title">Add New Glass Listing</div>
                 <p style="font-size: 13px; color: #666; margin-bottom: 20px;">List your green, white, or brown glass. Price will be negotiated after listing.</p>
                 
-                <form method="POST" action="" enctype="multipart/form-data">
+                <?php if ($error_message): ?>
+                    <div class="alert alert-danger">
+                        <?php echo htmlspecialchars($error_message); ?>
+                    </div>
+                <?php endif; ?>
+
+                <?php if ($success_message): ?>
+                    <div class="alert alert-success">
+                        <?php echo htmlspecialchars($success_message); ?>
+                    </div>
+                <?php endif; ?>
+                
+                <form method="POST" action="">
                     <div class="form-group">
                         <label for="glass_title">Listing Title</label>
                         <input
                             type="text"
                             id="glass_title"
                             name="glass_title"
-                            placeholder="e.g., Green Glass Bottles - Premium Quality"
+                            placeholder="e.g., Premium Green Glass - High Quality"
                             required
                         >
                     </div>
@@ -1075,6 +1135,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_listing'])) {
                             <option value="green">Green Glass</option>
                             <option value="white">White Glass</option>
                             <option value="brown">Brown Glass</option>
+                            <option value="clear">Clear Glass</option>
+                            <option value="mixed">Mixed Glass</option>
                         </select>
                     </div>
 
@@ -1093,26 +1155,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_listing'])) {
                     </div>
 
                     <div class="form-group">
-                        <label for="glass_description">Description</label>
+                        <label for="glass_description">Quality Notes / Description</label>
                         <textarea
                             id="glass_description"
                             name="glass_description"
                             rows="4"
                             placeholder="Describe the glass quality, condition, source, etc..."
                             style="width: 100%; padding: 12px 14px; font-size: 14px; border: 1.5px solid #ddd; border-radius: 6px; background: #fafafa; font-family: inherit; resize: vertical;"
-                            required
                         ></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="glass_image">Product Image (Optional)</label>
-                        <input
-                            type="file"
-                            id="glass_image"
-                            name="glass_image"
-                            accept="image/*"
-                            style="width: 100%; padding: 12px 14px; font-size: 14px; border: 1.5px solid #ddd; border-radius: 6px; background: #fafafa;"
-                        >
+                        <small style="font-size: 11px; color: #999;">Optional - Add any quality notes or additional information</small>
                     </div>
 
                     <div style="background: #fffbeb; padding: 12px; border-radius: 6px; margin-bottom: 20px; font-size: 12px; color: #92400e;">
