@@ -240,8 +240,17 @@ $admin_name = $_SESSION['user_name'] ?? 'Admin';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Users - Glass Market Admin</title>
     <link rel="stylesheet" href="/glass-market/public/css/admin-dashboard.css">
-    <style>
-        .user-table {
+    <!-- Manage Users CSS Files -->
+    <link rel="stylesheet" href="css/manage-users-base.css">
+    <link rel="stylesheet" href="css/manage-users-header.css">
+    <link rel="stylesheet" href="css/manage-users-stats.css">
+    <link rel="stylesheet" href="css/manage-users-search.css">
+    <link rel="stylesheet" href="css/manage-users-bulk.css">
+    <link rel="stylesheet" href="css/manage-users-table.css">
+    <link rel="stylesheet" href="css/manage-users-responsive.css">
+</head>
+<body>
+    <!-- Temporarily removed inline styles - now using external CSS -->
             width: 100%;
             border-collapse: collapse;
             background: white;
