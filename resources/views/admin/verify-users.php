@@ -543,7 +543,6 @@ $admin_name = $_SESSION['admin_user_name'] ?? 'Admin';
                             <th>Email</th>
                             <th>Verified On</th>
                             <th>Status</th>
-                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -563,13 +562,6 @@ $admin_name = $_SESSION['admin_user_name'] ?? 'Admin';
                                 <td><?php echo htmlspecialchars($user['email']); ?></td>
                                 <td><?php echo date('M d, Y \a\t H:i', strtotime($user['email_verified_at'])); ?></td>
                                 <td><span class="badge success">Verified</span></td>
-                                <td>
-                                    <form method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this user? This action cannot be undone.');">
-                                        <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
-                                        <input type="hidden" name="action" value="delete">
-                                        <button type="submit" class="btn-delete">Delete</button>
-                                    </form>
-                                </td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
