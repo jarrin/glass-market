@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Gegenereerd op: 27 okt 2025 om 13:43
+-- Gegenereerd op: 29 okt 2025 om 11:06
 -- Serverversie: 10.4.32-MariaDB
 -- PHP-versie: 8.0.30
 
@@ -265,6 +265,30 @@ INSERT INTO `maintenance_events` (`id`, `location_id`, `start_datetime`, `end_da
 -- --------------------------------------------------------
 
 --
+-- Tabelstructuur voor tabel `payment_cards`
+--
+
+CREATE TABLE `payment_cards` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `card_last4` varchar(4) NOT NULL,
+  `card_brand` varchar(20) DEFAULT NULL,
+  `card_holder` varchar(255) NOT NULL,
+  `card_expiry` varchar(7) NOT NULL,
+  `is_default` tinyint(1) DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Gegevens worden geëxporteerd voor tabel `payment_cards`
+--
+
+INSERT INTO `payment_cards` (`id`, `user_id`, `card_last4`, `card_brand`, `card_holder`, `card_expiry`, `is_default`, `created_at`) VALUES
+(1, 5, '3456', 'Visa', 'Cornelis wim poort', '05/50', 1, '2025-10-28 13:12:55');
+
+-- --------------------------------------------------------
+
+--
 -- Tabelstructuur voor tabel `recycled_statuses`
 --
 
@@ -352,8 +376,12 @@ CREATE TABLE `users` (
   `company_id` bigint(20) DEFAULT NULL,
   `created_by` bigint(20) DEFAULT NULL,
   `email` varchar(255) NOT NULL,
+  `avatar` varchar(500) DEFAULT NULL,
+  `email_verified_at` timestamp NULL DEFAULT NULL,
   `password` varchar(255) DEFAULT NULL,
+  `remember_token` varchar(100) DEFAULT NULL,
   `name` varchar(255) DEFAULT NULL,
+  `company_name` varchar(255) DEFAULT NULL,
   `phone` varchar(50) DEFAULT NULL,
   `roles` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`roles`)),
   `is_admin` tinyint(1) DEFAULT 0,
@@ -361,18 +389,45 @@ CREATE TABLE `users` (
   `approved_at` timestamp NULL DEFAULT NULL,
   `approved_by` bigint(20) DEFAULT NULL,
   `last_login` timestamp NULL DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Gegevens worden geëxporteerd voor tabel `users`
 --
 
-INSERT INTO `users` (`id`, `company_id`, `created_by`, `email`, `password`, `name`, `phone`, `roles`, `is_admin`, `is_approved`, `approved_at`, `approved_by`, `last_login`, `created_at`) VALUES
-(1, 1, NULL, 'alice@grb.example', NULL, 'Alice', NULL, '[\"admin\"]', 0, 0, NULL, NULL, NULL, '2025-10-15 11:48:18'),
-(2, 2, NULL, 'bob@gfnl.example', NULL, 'Bob', NULL, '[\"broker\"]', 0, 0, NULL, NULL, NULL, '2025-10-15 11:48:18'),
-(3, 3, NULL, 'carol@ccbe.example', NULL, 'Carol', NULL, '[\"operator\"]', 0, 0, NULL, NULL, NULL, '2025-10-15 11:48:18'),
-(4, NULL, NULL, 'admin@glassmarket.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Admin', NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-10-27 12:29:44');
+INSERT INTO `users` (`id`, `company_id`, `created_by`, `email`, `avatar`, `email_verified_at`, `password`, `remember_token`, `name`, `company_name`, `phone`, `roles`, `is_admin`, `is_approved`, `approved_at`, `approved_by`, `last_login`, `created_at`, `updated_at`) VALUES
+(4, NULL, NULL, 'admin@glassmarket.com', NULL, '2025-10-27 13:08:53', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', NULL, 'Admin', NULL, NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-10-27 12:29:44', NULL),
+(5, NULL, NULL, 'colinpoort@hotmail.com', '/glass-market/public/uploads/avatars/avatar_5_1761660214.jpg', '2025-10-27 13:14:36', '$2y$10$3le7iqImsFG85PwGuK60i.KcZpRP0wxk9MoHF3iBFXjpRx3oaJxpq', '30804072962d6ccea488d67d676f56a61fda774d49489c2114982b317eef78c9', 'Cornelis Wim Poort', 'CP Company', NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-10-27 13:13:58', '2025-10-28 14:03:34'),
+(6, NULL, NULL, 'gijs@gmail.com', NULL, '2025-10-27 13:33:45', '$2y$10$qiL225fIXPba/gq8Z/mZwOGOaXBiYU8lmIjQzBMy4vn6mZ4X0fWoa', NULL, 'Gijsje Radijsje', NULL, NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-10-27 13:33:06', '2025-10-27 13:33:45'),
+(7, NULL, NULL, 'Kaj@gmail.com', NULL, '2025-10-27 14:04:47', '$2y$10$e3IsWujghleCxhlVwmlOwOph2Ijlq3gOfOMc8EcTxIUJVkZL6wpdq', NULL, 'Kaj', NULL, NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-10-27 13:56:22', '2025-10-27 14:04:47'),
+(8, NULL, NULL, 'MusieMulugeta@hotmail.com', NULL, '2025-10-28 12:41:27', '$2y$10$mnpJLRo/ZxPMJVeo93Ifl.cS1z7a5foe.fJwCkrh1FsStvpRCESIS', NULL, 'Musie Mulugeta', NULL, NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-10-28 12:39:31', '2025-10-28 12:41:27'),
+(9, NULL, NULL, 'colinpoort12@hotmail.com', NULL, '2025-10-28 14:16:24', '$2y$10$5LuxQblwc2OqwTw7tzQU7eDA3g1QV4L/.3rn6XsQSn5301dSLpcQ.', NULL, 'Colin', NULL, NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-10-28 14:15:57', '2025-10-28 14:16:24');
+
+-- --------------------------------------------------------
+
+--
+-- Tabelstructuur voor tabel `user_emails`
+--
+
+CREATE TABLE `user_emails` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `email_address` varchar(255) NOT NULL,
+  `email_type` varchar(50) NOT NULL,
+  `email_label` varchar(100) DEFAULT NULL,
+  `is_verified` tinyint(1) DEFAULT 0,
+  `is_primary` tinyint(1) DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Gegevens worden geëxporteerd voor tabel `user_emails`
+--
+
+INSERT INTO `user_emails` (`id`, `user_id`, `email_address`, `email_type`, `email_label`, `is_verified`, `is_primary`, `created_at`) VALUES
+(2, 5, 'CpNotif@hotmail.com', 'notifications', 'Notifications email', 1, 0, '2025-10-28 13:21:02');
 
 -- --------------------------------------------------------
 
@@ -385,15 +440,6 @@ CREATE TABLE `user_locations` (
   `location_id` bigint(20) NOT NULL,
   `can_edit` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Gegevens worden geëxporteerd voor tabel `user_locations`
---
-
-INSERT INTO `user_locations` (`user_id`, `location_id`, `can_edit`) VALUES
-(1, 1, 1),
-(2, 2, 1),
-(3, 3, 0);
 
 -- --------------------------------------------------------
 
@@ -485,6 +531,12 @@ ALTER TABLE `maintenance_events`
   ADD KEY `location_id` (`location_id`);
 
 --
+-- Indexen voor tabel `payment_cards`
+--
+ALTER TABLE `payment_cards`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexen voor tabel `recycled_statuses`
 --
 ALTER TABLE `recycled_statuses`
@@ -510,6 +562,12 @@ ALTER TABLE `users`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `email` (`email`),
   ADD KEY `company_id` (`company_id`);
+
+--
+-- Indexen voor tabel `user_emails`
+--
+ALTER TABLE `user_emails`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexen voor tabel `user_locations`
@@ -565,6 +623,12 @@ ALTER TABLE `maintenance_events`
   MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
+-- AUTO_INCREMENT voor een tabel `payment_cards`
+--
+ALTER TABLE `payment_cards`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
 -- AUTO_INCREMENT voor een tabel `subscriptions`
 --
 ALTER TABLE `subscriptions`
@@ -574,7 +638,13 @@ ALTER TABLE `subscriptions`
 -- AUTO_INCREMENT voor een tabel `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+
+--
+-- AUTO_INCREMENT voor een tabel `user_emails`
+--
+ALTER TABLE `user_emails`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- Beperkingen voor geëxporteerde tabellen
