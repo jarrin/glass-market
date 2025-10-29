@@ -9,6 +9,7 @@
 </head>
 <body>
   <?php include __DIR__ . '/../../includes/navbar.php'; ?>
+  <?php include __DIR__ . '/../../includes/subscription-notification.php'; ?>
 
   <main style="padding-top: 70px;">
     <section class="hero hero-muted text-center">

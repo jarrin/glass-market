@@ -1,17 +1,6 @@
 <?php
-session_start();
-
-// Check if user is logged in
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-    header('Location: login.php');
-    exit;
-}
-
-// Check if user is admin
-if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] != 1) {
-    header('Location: login.php');
-    exit;
-}
+// Admin guard - ensures only admins can access
+require_once __DIR__ . '/../../../includes/admin-guard.php';
 
 // Database connection
 $db_host = '127.0.0.1';

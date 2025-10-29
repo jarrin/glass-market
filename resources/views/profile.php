@@ -695,6 +695,7 @@ if (isset($_SESSION['listing_success'])) {
 </head>
 <body>
     <?php include __DIR__ . '/../../includes/navbar.php'; ?>
+    <?php include __DIR__ . '/../../includes/subscription-notification.php'; ?>
 
     <main style="padding-top: 80px;">
         <div class="profile-container">

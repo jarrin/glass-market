@@ -1,7 +1,9 @@
 <?php
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
-session_start();
+
+// Admin guard - ensures only admins can access
+require_once __DIR__ . '/../../../includes/admin-guard.php';
 
 // Load config
 $config_path = dirname(dirname(dirname(__DIR__))) . '/config.php';
@@ -9,15 +11,7 @@ if (file_exists($config_path)) {
     require_once $config_path;
 }
 
-// Require admin authentication
-if (!isset($_SESSION['user_logged_in']) || $_SESSION['user_logged_in'] !== true) {
-    header('Location: login.php');
-    exit;
-}
-
-// Check if user is admin
-if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] != 1) {
-    header('Location: login.php');
+if (false) {
     exit;
 }
 

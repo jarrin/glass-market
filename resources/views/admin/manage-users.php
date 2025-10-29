@@ -1,16 +1,11 @@
 <?php
-session_start();
+// Admin guard - ensures only admins can access
+require_once __DIR__ . '/../../../includes/admin-guard.php';
 
 // Load config
 $config_path = dirname(dirname(dirname(__DIR__))) . '/config.php';
 if (file_exists($config_path)) {
     require_once $config_path;
-}
-
-// Require admin authentication
-if (!isset($_SESSION['user_logged_in']) || $_SESSION['user_logged_in'] !== true) {
-    header('Location: ' . VIEWS_URL . '/login.php');
-    exit;
 }
 
 // Database connection

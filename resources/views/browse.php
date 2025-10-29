@@ -94,6 +94,7 @@
 </head>
 <body>
     <?php include __DIR__ . '/../../includes/navbar.php'; ?>
+    <?php include __DIR__ . '/../../includes/subscription-notification.php'; ?>
 <main class="container" style="padding-top: 70px;">
     <h1 class="page-title">Browse Collection</h1>
 
