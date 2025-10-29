@@ -54,6 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_SESSION['user_name'] = $user['name'];
                     $_SESSION['user_email'] = $user['email'];
                     $_SESSION['user_avatar'] = $user['avatar'] ?? '';
+                    $_SESSION['is_admin'] = $user['is_admin'] ?? 0;
                     
                     // Handle remember me
                     if ($remember) {
