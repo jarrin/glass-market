@@ -310,45 +310,62 @@ $admin_name = $_SESSION['user_name'] ?? 'Admin';
         }
 
         .btn {
-            padding: 8px 16px;
-            border-radius: 8px;
+            padding: 7px 14px;
+            border-radius: 5px;
             font-size: 12px;
-            font-weight: 700;
+            font-weight: 600;
             cursor: pointer;
-            border: none;
-            transition: all 0.3s ease;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            letter-spacing: 0.3px;
         }
 
         .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            opacity: 0.9;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #2563eb;
             color: white;
+            border-color: #2563eb;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
         }
 
         .btn-success {
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            background: #059669;
             color: white;
+            border-color: #059669;
+        }
+
+        .btn-success:hover {
+            background: #047857;
         }
 
         .btn-warning {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            background: #f59e0b;
             color: white;
+            border-color: #f59e0b;
+        }
+
+        .btn-warning:hover {
+            background: #d97706;
         }
 
         .btn-danger {
-            background: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);
+            background: #dc2626;
             color: white;
+            border-color: #dc2626;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
         }
 
         .btn-sm {
@@ -447,10 +464,11 @@ $admin_name = $_SESSION['user_name'] ?? 'Admin';
         }
 
         .search-filter-bar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #ffffff;
             padding: 24px;
-            border-radius: 12px;
-            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.2);
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             margin-bottom: 24px;
             display: flex;
             gap: 16px;
@@ -466,24 +484,24 @@ $admin_name = $_SESSION['user_name'] ?? 'Admin';
 
         .search-box input {
             width: 100%;
-            padding: 14px 48px 14px 20px;
-            border: none;
-            border-radius: 10px;
-            font-size: 15px;
-            transition: all 0.3s;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            font-weight: 500;
+            padding: 12px 48px 12px 16px;
+            border: 1.5px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.2s;
+            font-weight: 400;
+            background: #f9fafb;
         }
 
         .search-box input::placeholder {
-            color: #999;
+            color: #9ca3af;
             font-weight: 400;
         }
 
         .search-box input:focus {
             outline: none;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-            transform: translateY(-2px);
+            border-color: #000;
+            background: #fff;
         }
 
         .search-icon {
@@ -504,14 +522,13 @@ $admin_name = $_SESSION['user_name'] ?? 'Admin';
 
         .filter-group select {
             padding: 12px 36px 12px 16px;
-            border: none;
-            border-radius: 10px;
+            border: 1.5px solid #d1d5db;
+            border-radius: 6px;
             font-size: 14px;
-            font-weight: 600;
-            background: white;
+            font-weight: 500;
+            background: #f9fafb;
             cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.2s;
             appearance: none;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
@@ -519,25 +536,26 @@ $admin_name = $_SESSION['user_name'] ?? 'Admin';
         }
 
         .filter-group select:hover {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            transform: translateY(-2px);
+            border-color: #9ca3af;
+            background: #fff;
         }
 
         .filter-group select:focus {
             outline: none;
-            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+            border-color: #000;
+            background: #fff;
         }
 
         .bulk-actions-bar {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            padding: 18px 24px;
-            border-radius: 12px;
+            background: #f3f4f6;
+            padding: 16px 20px;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
             margin-bottom: 20px;
             display: none;
             align-items: center;
             gap: 16px;
-            box-shadow: 0 4px 16px rgba(245, 87, 108, 0.25);
-            animation: slideDown 0.3s ease;
+            animation: slideDown 0.2s ease;
         }
 
         @keyframes slideDown {
@@ -556,54 +574,57 @@ $admin_name = $_SESSION['user_name'] ?? 'Admin';
         }
 
         .bulk-actions-bar .count {
-            font-weight: 700;
-            color: white;
-            font-size: 15px;
-            padding: 8px 16px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 8px;
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+            padding: 6px 12px;
+            background: #e5e7eb;
+            border-radius: 4px;
         }
 
         .bulk-actions-bar select {
             padding: 10px 36px 10px 16px;
-            border: none;
-            border-radius: 8px;
+            border: 1.5px solid #d1d5db;
+            border-radius: 6px;
             font-size: 14px;
-            font-weight: 600;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            font-weight: 500;
             appearance: none;
             background: white;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: right 12px center;
             cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .bulk-actions-bar select:focus {
+            outline: none;
+            border-color: #000;
         }
 
         .bulk-actions-bar button {
             padding: 10px 20px;
-            background: white;
-            color: #f5576c;
+            background: #000;
+            color: white;
             border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 700;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: background 0.2s;
         }
 
         .bulk-actions-bar button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            background: #1f2937;
         }
 
         .bulk-actions-bar button:last-child {
-            background: rgba(255,255,255,0.2);
+            background: #6b7280;
             color: white;
         }
 
         .bulk-actions-bar button:last-child:hover {
-            background: rgba(255,255,255,0.3);
+            background: #4b5563;
         }
 
         input[type="checkbox"] {
