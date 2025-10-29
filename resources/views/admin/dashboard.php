@@ -1,4 +1,6 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 session_start();
 
 // Load config
@@ -33,7 +35,7 @@ try {
     $total_listings = $pdo->query("SELECT COUNT(*) FROM listings")->fetchColumn();
     $total_companies = $pdo->query("SELECT COUNT(*) FROM companies")->fetchColumn();
     $total_users = $pdo->query("SELECT COUNT(*) FROM users")->fetchColumn();
-    $active_subscriptions = $pdo->query("SELECT COUNT(*) FROM subscriptions WHERE subscription_expiry_id = 1")->fetchColumn();
+    $active_subscriptions = $pdo->query("SELECT COUNT(*) FROM subscriptions WHERE active = 1")->fetchColumn();
     
     // Get recent listings
     $recent_listings = $pdo->query("
@@ -48,6 +50,7 @@ try {
     // Get recent users
     $recent_users = $pdo->query("
         SELECT * FROM users 
+        WHERE email != 'admin@glassmarket.com'
         ORDER BY created_at DESC 
         LIMIT 5
     ")->fetchAll(PDO::FETCH_ASSOC);
@@ -56,8 +59,8 @@ try {
     $company_types = $pdo->query("
         SELECT ct.type, COUNT(c.id) as count 
         FROM company_types ct 
-        LEFT JOIN companies c ON ct.id = c.company_type_id 
-        GROUP BY ct.id, ct.type
+        LEFT JOIN companies c ON ct.type = c.company_type 
+        GROUP BY ct.type
     ")->fetchAll(PDO::FETCH_ASSOC);
     
 } catch (PDOException $e) {
@@ -73,515 +76,15 @@ $admin_email = $_SESSION['user_email'] ?? '';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Glass Market</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: ui-serif, Georgia, 'Times New Roman', Times, serif;
-            background: #f3eee6;
-            color: #1f1a17;
-        }
-
-        /* Header */
-        .header {
-            background: #201b15;
-            color: white;
-            padding: 0;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .header-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px 32px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo-section {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .logo {
-            width: 48px;
-            height: 48px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .logo svg {
-            width: 28px;
-            height: 28px;
-        }
-
-        .logo-text h1 {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 2px;
-        }
-
-        .logo-text p {
-            font-size: 13px;
-            opacity: 0.9;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-        }
-
-        .user-profile {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 8px 16px;
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 50px;
-            backdrop-filter: blur(10px);
-        }
-
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: white;
-            color: #2a2623;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 16px;
-        }
-
-        .user-info {
-            text-align: left;
-        }
-
-        .user-info .name {
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .user-info .email {
-            font-size: 12px;
-            opacity: 0.8;
-        }
-
-        .btn-logout {
-            padding: 10px 24px;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .btn-logout:hover {
-            background: rgba(255, 255, 255, 0.3);
-            border-color: rgba(255, 255, 255, 0.5);
-            transform: translateY(-2px);
-        }
-
-        /* Container */
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 32px;
-        }
-
-        /* Welcome Banner */
-        .welcome-banner {
-            background: #201b15;
-            color: white;
-            padding: 48px;
-            border-radius: 8px;
-            margin-bottom: 32px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .welcome-banner::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -10%;
-            width: 500px;
-            height: 500px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 50%;
-        }
-
-        .welcome-banner h2 {
-            font-size: 36px;
-            margin-bottom: 8px;
-            position: relative;
-            z-index: 1;
-            font-weight: 800;
-        }
-
-        .welcome-banner p {
-            font-size: 18px;
-            opacity: 0.95;
-            position: relative;
-            z-index: 1;
-        }
-
-        /* Stats Grid */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 24px;
-            margin-bottom: 32px;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 28px;
-            border-radius: 8px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-            transition: all 0.2s ease;
-            border: 1px solid rgba(0, 0, 0, 0.06);
-        }
-
-        .stat-card:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-        }
-
-        .stat-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 20px;
-        }
-
-        .stat-icon {
-            width: 56px;
-            height: 56px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-        }
-
-        .stat-icon.purple {
-            background: #2a2623;
-            box-shadow: 0 4px 8px rgba(42, 38, 35, 0.15);
-        }
-
-        .stat-icon.blue {
-            background: #3b342f;
-            box-shadow: 0 4px 8px rgba(59, 52, 47, 0.15);
-        }
-
-        .stat-icon.green {
-            background: #6b5f56;
-            box-shadow: 0 4px 8px rgba(107, 95, 86, 0.15);
-        }
-
-        .stat-icon.orange {
-            background: #8c8278;
-            box-shadow: 0 4px 8px rgba(140, 130, 120, 0.15);
-        }
-
-        .stat-title {
-            font-size: 14px;
-            color: #6b5f56;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-        }
-
-        .stat-value {
-            font-size: 42px;
-            font-weight: 800;
-            color: #1f1a17;
-            line-height: 1;
-        }
-
-        .stat-change {
-            display: inline-block;
-            margin-top: 12px;
-            font-size: 13px;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-weight: 600;
-        }
-
-        .stat-change.positive {
-            background: #efe7dc;
-            color: #2a2623;
-        }
-
-        .stat-change.neutral {
-            background: #f2ede5;
-            color: #6b5f56;
-        }
-
-        /* Content Grid */
-        .content-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 24px;
-            margin-bottom: 32px;
-        }
-
-        @media (max-width: 1024px) {
-            .content-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .card {
-            background: white;
-            padding: 28px;
-            border-radius: 8px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-            border: 1px solid rgba(0, 0, 0, 0.06);
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-        }
-
-        .card-header h3 {
-            font-size: 20px;
-            font-weight: 800;
-            color: #1f1a17;
-        }
-
-        .card-header a {
-            font-size: 14px;
-            color: #2a2623;
-            text-decoration: none;
-            font-weight: 600;
-            transition: color 0.2s;
-        }
-
-        .card-header a:hover {
-            text-decoration: underline;
-        }
-
-        /* Table */
-        .table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .table thead {
-            background: #faf6ef;
-        }
-
-        .table th {
-            padding: 12px 16px;
-            text-align: left;
-            font-size: 12px;
-            font-weight: 700;
-            color: #6b5f56;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .table td {
-            padding: 16px;
-            border-top: 1px solid rgba(0, 0, 0, 0.06);
-            font-size: 14px;
-        }
-
-        .table tr:hover {
-            background: #faf6ef;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .badge.success {
-            background: #efe7dc;
-            color: #2a2623;
-        }
-
-        .badge.warning {
-            background: #f2ede5;
-            color: #6b5f56;
-        }
-
-        .badge.info {
-            background: #faf6ef;
-            color: #3b342f;
-        }
-
-        /* List */
-        .list-item {
-            padding: 16px;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: background 0.2s;
-        }
-
-        .list-item:hover {
-            background: #faf6ef;
-        }
-
-        .list-item:last-child {
-            border-bottom: none;
-        }
-
-        .list-item-info h4 {
-            font-size: 15px;
-            font-weight: 700;
-            color: #1f1a17;
-            margin-bottom: 4px;
-        }
-
-        .list-item-info p {
-            font-size: 13px;
-            color: #6b5f56;
-        }
-
-        .list-item-value {
-            font-size: 18px;
-            font-weight: 700;
-            color: #2a2623;
-        }
-
-        /* Chart Section */
-        .chart-container {
-            margin-top: 20px;
-        }
-
-        .chart-bar-wrapper {
-            margin-bottom: 16px;
-        }
-
-        .chart-bar-label {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-
-        .chart-bar-label span:first-child {
-            font-weight: 600;
-            color: #1f1a17;
-        }
-
-        .chart-bar-label span:last-child {
-            color: #6b5f56;
-        }
-
-        .chart-bar {
-            height: 12px;
-            background: #f2ede5;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-
-        .chart-bar-fill {
-            height: 100%;
-            background: #2a2623;
-            border-radius: 10px;
-            transition: width 1s ease;
-        }
-
-        /* Quick Actions */
-        .quick-actions {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-        }
-
-        .action-btn {
-            padding: 20px;
-            background: #faf6ef;
-            border: 1px solid rgba(0, 0, 0, 0.06);
-            border-radius: 8px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-decoration: none;
-            color: #1f1a17;
-            display: block;
-        }
-
-        .action-btn:hover {
-            background: #f2ede5;
-            transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-        }
-
-        .action-btn-icon {
-            width: 48px;
-            height: 48px;
-            margin: 0 auto 12px;
-            background: #2a2623;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 24px;
-        }
-
-        .action-btn span {
-            display: block;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: #6b5f56;
-        }
-
-        .empty-state svg {
-            width: 64px;
-            height: 64px;
-            margin: 0 auto 16px;
-            opacity: 0.5;
-        }
-
-        .empty-state p {
-            font-size: 14px;
-        }
-    </style>
+    <link rel="stylesheet" href="/glass-market/public/css/admin-dashboard.css">
 </head>
 <body>
+    <?php if (isset($error)): ?>
+        <div style="background: #ff4444; color: white; padding: 15px; margin: 0; text-align: center; font-weight: bold;">
+            ⚠️ <?php echo htmlspecialchars($error); ?>
+        </div>
+    <?php endif; ?>
+    
     <!-- Header -->
     <div class="header">
         <div class="header-content">
@@ -758,7 +261,7 @@ $admin_email = $_SESSION['user_email'] ?? '';
         <div class="card">
             <div class="card-header">
                 <h3>Recent Users</h3>
-                <a href="#">Manage Users →</a>
+                <a href="verify-users.php">Manage Users →</a>
             </div>
             <?php if (!empty($recent_users)): ?>
                 <?php foreach ($recent_users as $user): ?>
@@ -768,7 +271,11 @@ $admin_email = $_SESSION['user_email'] ?? '';
                             <p><?php echo htmlspecialchars($user['email']); ?> • Joined <?php echo date('M d, Y', strtotime($user['created_at'])); ?></p>
                         </div>
                         <div class="list-item-value">
-                            <span class="badge info">Active</span>
+                            <?php if ($user['email_verified_at']): ?>
+                                <span class="badge success">Verified</span>
+                            <?php else: ?>
+                                <span class="badge warning">Pending</span>
+                            <?php endif; ?>
                         </div>
                     </div>
                 <?php endforeach; ?>
