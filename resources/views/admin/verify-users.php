@@ -42,7 +42,14 @@ try {
             if ($action === 'approve') {
                 $stmt = $pdo->prepare("UPDATE users SET email_verified_at = NOW() WHERE id = :id");
                 $stmt->execute(['id' => $user_id]);
-                $success_message = 'User has been approved successfully!';
+                
+                // Ensure user has a trial subscription
+                require_once __DIR__ . '/../../../database/classes/subscriptions.php';
+                if (!Subscription::hasActiveSubscription($pdo, $user_id)) {
+                    Subscription::createTrialSubscription($pdo, $user_id);
+                }
+                
+                $success_message = 'User has been approved successfully and granted 3-month trial!';
             } elseif ($action === 'reject') {
                 $stmt = $pdo->prepare("DELETE FROM users WHERE id = :id");
                 $stmt->execute(['id' => $user_id]);

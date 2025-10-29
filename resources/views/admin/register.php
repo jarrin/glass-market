@@ -61,8 +61,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'password' => $hashed_password
                 ]);
                 
+                // Get the newly created user ID
+                $user_id = $pdo->lastInsertId();
+
+                // Create 3-month free trial subscription
+                require_once __DIR__ . '/../../../database/classes/subscriptions.php';
+                Subscription::createTrialSubscription($pdo, $user_id);
+                
                 // Set success message
-                $success_message = 'Registration successful! Your account is pending admin approval. You will be able to access the platform once an administrator verifies your account.';
+                $success_message = 'Registration successful! You have been granted a 3-month free trial. Your account is pending admin approval. You will be able to access the platform once an administrator verifies your account.';
             }
         } catch (PDOException $e) {
             $error_message = 'Registration failed: ' . $e->getMessage();
