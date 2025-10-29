@@ -50,10 +50,10 @@ try {
                 }
                 
                 $success_message = 'User has been approved successfully and granted 3-month trial!';
-            } elseif ($action === 'reject') {
-                $stmt = $pdo->prepare("DELETE FROM users WHERE id = :id");
+            } elseif ($action === 'reject' || $action === 'delete') {
+                $stmt = $pdo->prepare("DELETE FROM users WHERE id = :id AND email != 'admin@glassmarket.com'");
                 $stmt->execute(['id' => $user_id]);
-                $success_message = 'User registration has been rejected and removed.';
+                $success_message = $action === 'reject' ? 'User registration has been rejected and removed.' : 'User has been deleted successfully.';
             }
         }
         
@@ -360,6 +360,24 @@ $admin_name = $_SESSION['admin_user_name'] ?? 'Admin';
             background: #fecaca;
         }
 
+        .btn-delete {
+            background: #fca5a5;
+            color: #7f1d1d;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .btn-delete:hover {
+            background: #f87171;
+            color: white;
+            transform: translateY(-1px);
+        }
+
         .btn-view {
             background: #faf6ef;
             color: #2a2623;
@@ -525,6 +543,7 @@ $admin_name = $_SESSION['admin_user_name'] ?? 'Admin';
                             <th>Email</th>
                             <th>Verified On</th>
                             <th>Status</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -544,6 +563,13 @@ $admin_name = $_SESSION['admin_user_name'] ?? 'Admin';
                                 <td><?php echo htmlspecialchars($user['email']); ?></td>
                                 <td><?php echo date('M d, Y \a\t H:i', strtotime($user['email_verified_at'])); ?></td>
                                 <td><span class="badge success">Verified</span></td>
+                                <td>
+                                    <form method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this user? This action cannot be undone.');">
+                                        <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
+                                        <input type="hidden" name="action" value="delete">
+                                        <button type="submit" class="btn-delete">Delete</button>
+                                    </form>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
