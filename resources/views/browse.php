@@ -96,7 +96,6 @@
     <?php include __DIR__ . '/../../includes/navbar.php'; ?>
 <main class="container" style="padding-top: 70px;">
     <h1 class="page-title">Browse Collection</h1>
-    <p class="subtitle">Discover unique glass art from artisans worldwide</p>
 
     <?php
         // Fetch products from database
@@ -232,7 +231,7 @@
                 <h4>Categories</h4>
                 <ul class="filter-list" id="categories-list">
                     <?php
-                        $allCategories = ['Vases & Vessels','Sculptures','Tableware','Lighting','Decorative','Jewelry'];
+                        $allCategories = [];
                         // compute counts from products (if products not defined yet we'll set to 0 temporarily)
                         $categoryCounts = array_fill_keys($allCategories, 0);
                         if(isset($products) && is_array($products)){
@@ -300,32 +299,6 @@
             <div class="divider"></div>
 
             <div class="panel">
-                <h4>Style</h4>
-                <ul class="filter-list" id="styles-list">
-                    <?php
-                        $allStyles = ['Contemporary', 'Vintage', 'Art Deco', 'Murano', 'Bohemian'];
-                        // compute counts from products
-                        $styleCounts = array_fill_keys($allStyles, 0);
-                        if(isset($products) && is_array($products)){
-                            foreach($products as $pp){
-                                if(isset($pp['style']) && isset($styleCounts[$pp['style']])){
-                                    $styleCounts[$pp['style']]++;
-                                }
-                            }
-                        }
-                        foreach($allStyles as $style){
-                            $count = isset($styleCounts[$style]) ? $styleCounts[$style] : 0;
-                            // sanitize id for input
-                            $id = 'style_' . preg_replace('/[^a-z0-9]+/i','_', strtolower($style));
-                            echo "<li><label><input type=\"checkbox\" class=\"style-filter\" id=\"$id\" value=\"".htmlspecialchars($style,ENT_QUOTES,'UTF-8')."\"> <span>".htmlspecialchars($style,ENT_QUOTES,'UTF-8')."</span></label> <span class=\"count\">$count</span></li>";
-                        }
-                    ?>
-                </ul>
-            </div>
-
-            <div class="divider"></div>
-
-            <div class="panel">
                 <h4>Condition</h4>
                 <ul class="filter-list" id="conditions-list">
                     <?php
@@ -381,9 +354,8 @@
                             <div class="cat"><?php echo htmlspecialchars(strtoupper($p['category']), ENT_QUOTES, 'UTF-8'); ?></div>
                             <div class="title"><?php echo htmlspecialchars($p['title'], ENT_QUOTES, 'UTF-8'); ?></div>
                             <?php if(isset($p['tons'])): ?>
-                            <div class="tons" style="margin-top:4px;color:#8b8683;font-size:14px"><?php echo number_format($p['tons'], 2); ?> tons</div>
+                            <div class="tons" style="margin-top:4px;color:#8b8683;font-size:15px"><?php echo number_format($p['tons'], 2); ?> tons</div>
                             <?php endif; ?>
-                            <div class="price" style="margin-top:6px;color:#6b6460">€<?php echo number_format($p['price'],0); ?></div>
                         </div>
                     </article>
                 <?php endforeach; ?>
