@@ -44,17 +44,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
             
             if ($user && password_verify($password, $user['password'])) {
-                // Check if account is verified
-                if (empty($user['email_verified_at'])) {
+                // Block admin from logging in here - must use admin login
+                if ($user['email'] === 'admin@glassmarket.com') {
+                    $error_message = 'Admin accounts must use the admin login portal.';
+                } elseif (empty($user['email_verified_at'])) {
+                    // Check if account is verified
                     $error_message = 'The admin still needs to verify your email';
                 } else {
-                    // Login successful
+                    // Login successful - regular user only
                     $_SESSION['user_logged_in'] = true;
                     $_SESSION['user_id'] = $user['id'];
                     $_SESSION['user_name'] = $user['name'];
                     $_SESSION['user_email'] = $user['email'];
                     $_SESSION['user_avatar'] = $user['avatar'] ?? '';
-                    $_SESSION['is_admin'] = $user['is_admin'] ?? 0;
                     
                     // Handle remember me
                     if ($remember) {

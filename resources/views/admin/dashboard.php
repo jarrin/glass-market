@@ -11,15 +11,15 @@ if (file_exists($config_path)) {
 
 // Require admin authentication
 if (!isset($_SESSION['user_logged_in']) || $_SESSION['user_logged_in'] !== true) {
-    header('Location: ' . VIEWS_URL . '/login.php');
+    header('Location: login.php');
     exit;
 }
 
 // Check if user is admin
-// if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] != 1) {
-//     header('Location: ' . PUBLIC_URL . '/index.php');
-//     exit;
-// }
+if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] != 1) {
+    header('Location: login.php');
+    exit;
+}
 
 // Database connection
 $db_host = '127.0.0.1';

@@ -7,6 +7,12 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
     exit;
 }
 
+// Check if user is admin
+if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] != 1) {
+    header('Location: login.php');
+    exit;
+}
+
 // Database connection
 $db_host = '127.0.0.1';
 $db_name = 'glass_market';
