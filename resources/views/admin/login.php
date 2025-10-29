@@ -2,7 +2,7 @@
 session_start();
 
 // Database connection
-require_once __DIR__ . '/../../config.php';
+require_once __DIR__ . '/../../../config.php';
 
 // Database credentials from .env or hardcoded
 $db_host = '127.0.0.1';
