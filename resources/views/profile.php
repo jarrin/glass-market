@@ -355,6 +355,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_listing'])) {
             $pdo = new PDO("mysql:host=$db_host;dbname=$db_name", $db_user, $db_pass);
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             
+            // Handle file upload
+            $image_path = null;
+            if (isset($_FILES['glass_image']) && $_FILES['glass_image']['error'] === UPLOAD_ERR_OK) {
+                $file = $_FILES['glass_image'];
+                $allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+                $max_size = 5 * 1024 * 1024; // 5MB
+                
+                // Validate file type
+                if (!in_array($file['type'], $allowed_types)) {
+                    $error_message = 'Invalid file type. Please upload a JPG, PNG, or WebP image.';
+                    throw new Exception($error_message);
+                }
+                
+                // Validate file size
+                if ($file['size'] > $max_size) {
+                    $error_message = 'File is too large. Maximum size is 5MB.';
+                    throw new Exception($error_message);
+                }
+                
+                // Create uploads directory if it doesn't exist
+                $upload_dir = __DIR__ . '/../../public/uploads/listings';
+                if (!is_dir($upload_dir)) {
+                    mkdir($upload_dir, 0755, true);
+                }
+                
+                // Generate unique filename
+                $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+                $filename = 'listing_' . time() . '_' . uniqid() . '.' . $extension;
+                $target_path = $upload_dir . '/' . $filename;
+                
+                // Move uploaded file
+                if (move_uploaded_file($file['tmp_name'], $target_path)) {
+                    $image_path = 'uploads/listings/' . $filename;
+                } else {
+                    $error_message = 'Failed to upload image.';
+                    throw new Exception($error_message);
+                }
+            }
+            
             // Get or create company_id for user
             $stmt = $pdo->prepare('SELECT company_id FROM users WHERE id = :user_id');
             $stmt->execute(['user_id' => $user['id']]);
@@ -395,11 +434,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_listing'])) {
                     glass_type, 
                     quantity_tons,
                     quantity_note,
-                    quality_notes, 
+                    quality_notes,
+                    image_path,
                     published,
                     created_at
                 )
-                VALUES (:company_id, :side, :glass_type, :quantity_tons, :quantity_note, :quality_notes, :published, NOW())
+                VALUES (:company_id, :side, :glass_type, :quantity_tons, :quantity_note, :quality_notes, :image_path, :published, NOW())
             ');
             
             $stmt->execute([
@@ -409,14 +449,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_listing'])) {
                 'quantity_tons' => $tons,
                 'quantity_note' => $title,
                 'quality_notes' => $description,
-                'published' => 0 // Unpublished until admin approval
+                'image_path' => $image_path,
+                'published' => 1 // Published immediately
             ]);
             
-            $_SESSION['listing_success'] = 'Glass listing created successfully! Your listing is pending admin approval.';
+            $_SESSION['listing_success'] = 'Glass listing created successfully! Your listing is now live on the marketplace.';
             
             // Redirect to prevent form resubmission
             header('Location: ' . $_SERVER['PHP_SELF']);
             exit;
+        } catch (Exception $e) {
+            $error_message = 'Failed to create listing: ' . $e->getMessage();
         } catch (PDOException $e) {
             $error_message = 'Failed to create listing: ' . $e->getMessage();
         }
@@ -1111,7 +1154,7 @@ if (isset($_SESSION['listing_success'])) {
                     </div>
                 <?php endif; ?>
                 
-                <form method="POST" action="">
+                <form method="POST" action="" enctype="multipart/form-data">
                     <div class="form-group">
                         <label for="glass_title">Listing Title</label>
                         <input
@@ -1166,8 +1209,20 @@ if (isset($_SESSION['listing_success'])) {
                         <small style="font-size: 11px; color: #999;">Optional - Add any quality notes or additional information</small>
                     </div>
 
+                    <div class="form-group">
+                        <label for="glass_image">Product Image</label>
+                        <input
+                            type="file"
+                            id="glass_image"
+                            name="glass_image"
+                            accept="image/jpeg,image/jpg,image/png,image/webp"
+                            style="width: 100%; padding: 12px 14px; font-size: 14px; border: 1.5px solid #ddd; border-radius: 6px; background: #fafafa;"
+                        >
+                        <small style="font-size: 11px; color: #999;">Upload a photo of your glass (JPG, PNG, or WebP - Max 5MB)</small>
+                    </div>
+
                     <div style="background: #fffbeb; padding: 12px; border-radius: 6px; margin-bottom: 20px; font-size: 12px; color: #92400e;">
-                        💡 <strong>Note:</strong> Price will be negotiated directly with buyers. Your listing will be reviewed by our team before going live.
+                        💡 <strong>Note:</strong> Price will be negotiated directly with buyers. Your listing will be published immediately.
                     </div>
 
                     <div style="margin-top: 24px;">

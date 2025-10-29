@@ -113,11 +113,13 @@
                     l.price_text,
                     l.currency,
                     l.quantity_tons,
+                    l.quantity_note,
                     l.side,
                     l.recycled,
                     l.tested,
                     l.storage_location,
                     l.quality_notes,
+                    l.image_path,
                     c.name as company_name
                 FROM listings l
                 LEFT JOIN companies c ON l.company_id = c.id
@@ -170,12 +172,19 @@
                     $condition = 'Like New';
                 }
                 
+                // Determine image URL - use uploaded image if available, otherwise placeholder
+                $imageUrl = "https://picsum.photos/seed/glass{$listing['id']}/800/800";
+                if (!empty($listing['image_path'])) {
+                    $imageUrl = PUBLIC_URL . '/' . $listing['image_path'];
+                }
+                
                 $products[] = [
                     'id' => $listing['id'],
                     'title' => $glassType,
+                    'listing_title' => $listing['quantity_note'] ?: $glassType,
                     'tons' => $listing['quantity_tons'],
                     'category' => $category,
-                    'image' => "https://picsum.photos/seed/glass{$listing['id']}/800/800",
+                    'image' => $imageUrl,
                     'price' => $price,
                     'style' => $style,
                     'condition' => $condition,
@@ -228,24 +237,24 @@
     <div class="layout">
         <aside class="sidebar" id="filterSidebar">
             <div class="panel">
-                <h4>Categories</h4>
-                <ul class="filter-list" id="categories-list">
+                <h4>Glass Type</h4>
+                <ul class="filter-list" id="glass-types-list">
                     <?php
-                        $allCategories = [];
-                        // compute counts from products (if products not defined yet we'll set to 0 temporarily)
-                        $categoryCounts = array_fill_keys($allCategories, 0);
+                        $allGlassTypes = ['Green Glass', 'White Glass', 'Brown Glass', 'Clear Glass', 'Mixed Glass'];
+                        // compute counts from products
+                        $glassTypeCounts = array_fill_keys($allGlassTypes, 0);
                         if(isset($products) && is_array($products)){
                             foreach($products as $pp){
-                                if(isset($pp['category']) && isset($categoryCounts[$pp['category']])){
-                                    $categoryCounts[$pp['category']]++;
+                                if(isset($pp['title']) && isset($glassTypeCounts[$pp['title']])){
+                                    $glassTypeCounts[$pp['title']]++;
                                 }
                             }
                         }
-                        foreach($allCategories as $cat){
-                            $count = isset($categoryCounts[$cat]) ? $categoryCounts[$cat] : 0;
+                        foreach($allGlassTypes as $glassType){
+                            $count = isset($glassTypeCounts[$glassType]) ? $glassTypeCounts[$glassType] : 0;
                             // sanitize id for input
-                            $id = 'cat_' . preg_replace('/[^a-z0-9]+/i','_', strtolower($cat));
-                            echo "<li><label><input type=\"checkbox\" class=\"cat-filter\" id=\"$id\" value=\"".htmlspecialchars($cat,ENT_QUOTES,'UTF-8')."\"> <span>".htmlspecialchars($cat,ENT_QUOTES,'UTF-8')."</span></label> <span class=\"count\">$count</span></li>";
+                            $id = 'glass_' . preg_replace('/[^a-z0-9]+/i','_', strtolower($glassType));
+                            echo "<li><label><input type=\"checkbox\" class=\"glass-filter\" id=\"$id\" value=\"".htmlspecialchars($glassType,ENT_QUOTES,'UTF-8')."\"> <span>".htmlspecialchars($glassType,ENT_QUOTES,'UTF-8')."</span></label> <span class=\"count\">$count</span></li>";
                         }
                     ?>
                 </ul>
@@ -254,31 +263,34 @@
             <div class="divider"></div>
 
             <div class="panel">
-                <h4>Price Range</h4>
+                <h4>Tonnage Range</h4>
                 <div class="price-range-container">
                     <?php
-                        // determine price bounds from products
-                        $minPrice = 0; $maxPrice = 1000;
+                        // determine tons bounds from products
+                        $minTons = 0; $maxTons = 1000;
                         if(isset($products) && count($products)){
-                            $prices = array_column($products,'price');
-                            $minPrice = (int)min($prices);
-                            $maxPrice = (int)max($prices);
+                            $tonsArray = array_column($products,'tons');
+                            if(!empty($tonsArray)){
+                                $minTons = (int)min($tonsArray);
+                                $maxTons = (int)max($tonsArray);
+                                if($maxTons == $minTons) $maxTons = $minTons + 100;
+                            }
                         }
                     ?>
                     <div class="price-range-display">
-                        <span id="minPriceLabel">$0</span>
-                        <span id="maxPriceLabel">$1000</span>
+                        <span id="minPriceLabel">0 tons</span>
+                        <span id="maxPriceLabel"><?php echo $maxTons; ?> tons</span>
                     </div>
 
                     <div class="price-inputs">
                         <div class="price-input-group">
                             <label for="minPrice" style="font-size:12px;color:#6b6460;margin-right:4px">Min</label>
-                            <input id="minPrice" type="number" class="price-input" min="0" max="1000" value="0">
+                            <input id="minPrice" type="number" class="price-input" min="0" max="<?php echo $maxTons; ?>" value="0" step="0.1">
                         </div>
                         <span style="color:#6b6460">-</span>
                         <div class="price-input-group">
                             <label for="maxPrice" style="font-size:12px;color:#6b6460;margin-right:4px">Max</label>
-                            <input id="maxPrice" type="number" class="price-input" min="0" max="1000" value="1000">
+                            <input id="maxPrice" type="number" class="price-input" min="0" max="<?php echo $maxTons; ?>" value="<?php echo $maxTons; ?>" step="0.1">
                         </div>
                     </div>
 
@@ -291,8 +303,8 @@
                     </div>
 
                     <!-- Hidden range inputs for compatibility -->
-                    <input id="minRange" type="range" min="0" max="1000" value="0" style="display:none">
-                    <input id="maxRange" type="range" min="0" max="1000" value="1000" style="display:none">
+                    <input id="minRange" type="range" min="0" max="<?php echo $maxTons; ?>" value="0" step="0.1" style="display:none">
+                    <input id="maxRange" type="range" min="0" max="<?php echo $maxTons; ?>" value="<?php echo $maxTons; ?>" step="0.1" style="display:none">
                 </div>
             </div>
 
@@ -333,11 +345,11 @@
             <div class="toolbar">
                 <div class="items-count">24 items</div>
                 <div>
-                    <select aria-label="Sort">
-                        <option>Featured</option>
-                        <option>Newest</option>
-                        <option>Price: Low to High</option>
-                        <option>Price: High to Low</option>
+                    <select aria-label="Sort" id="sortSelect">
+                        <option value="featured">Featured</option>
+                        <option value="newest">Newest</option>
+                        <option value="tons-low">Tons: Low to High</option>
+                        <option value="tons-high">Tons: High to Low</option>
                     </select>
                 </div>
             </div>
@@ -346,16 +358,22 @@
 
             <div class="grid">
                 <?php foreach($products as $p): ?>
-                    <article class="card" data-category="<?php echo htmlspecialchars($p['category'], ENT_QUOTES, 'UTF-8'); ?>" data-price="<?php echo (int)$p['price']; ?>" data-style="<?php echo htmlspecialchars($p['style'], ENT_QUOTES, 'UTF-8'); ?>" data-condition="<?php echo htmlspecialchars($p['condition'], ENT_QUOTES, 'UTF-8'); ?>">
+                    <article class="card" data-glass-type="<?php echo htmlspecialchars($p['title'], ENT_QUOTES, 'UTF-8'); ?>" data-tons="<?php echo isset($p['tons']) ? (float)$p['tons'] : 0; ?>" data-condition="<?php echo htmlspecialchars($p['condition'], ENT_QUOTES, 'UTF-8'); ?>">
                         <div class="media" role="img" aria-label="<?php echo htmlspecialchars($p['title'], ENT_QUOTES, 'UTF-8'); ?>">
                             <img src="<?php echo htmlspecialchars($p['image'], ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($p['title'], ENT_QUOTES, 'UTF-8'); ?>" style="width:100%;height:100%;object-fit:cover;display:block">
                         </div>
                         <div class="meta">
-                            <div class="cat"><?php echo htmlspecialchars(strtoupper($p['category']), ENT_QUOTES, 'UTF-8'); ?></div>
-                            <div class="title"><?php echo htmlspecialchars($p['title'], ENT_QUOTES, 'UTF-8'); ?></div>
+                            <div class="listing-title" style="font-weight:700;font-size:16px;color:#2a2623;margin-bottom:6px">
+                                <?php echo htmlspecialchars($p['listing_title'] ?? $p['title'], ENT_QUOTES, 'UTF-8'); ?>
+                            </div>
                             <?php if(isset($p['tons'])): ?>
-                            <div class="tons" style="margin-top:4px;color:#8b8683;font-size:15px"><?php echo number_format($p['tons'], 2); ?> tons</div>
+                            <div class="tons" style="color:#6b6460;font-size:14px;margin-bottom:4px">
+                                <strong>Tonnage:</strong> <?php echo number_format($p['tons'], 2); ?> tons
+                            </div>
                             <?php endif; ?>
+                            <div class="glass-type" style="color:#6b6460;font-size:14px">
+                                <strong>Type:</strong> <?php echo htmlspecialchars($p['title'], ENT_QUOTES, 'UTF-8'); ?>
+                            </div>
                         </div>
                     </article>
                 <?php endforeach; ?>
@@ -379,8 +397,7 @@
                 });
             }
             
-            const catCheckboxes = Array.from(document.querySelectorAll('.cat-filter'));
-            const styleCheckboxes = Array.from(document.querySelectorAll('.style-filter'));
+            const glassTypeCheckboxes = Array.from(document.querySelectorAll('.glass-filter'));
             const conditionCheckboxes = Array.from(document.querySelectorAll('.condition-filter'));
             const minRange = document.getElementById('minRange');
             const maxRange = document.getElementById('maxRange');
@@ -398,53 +415,52 @@
             const ITEMS_PER_PAGE = 9;
             let currentPage = 1;
             let visibleCards = [];
+            let maxTonsValue = <?php echo $maxTons; ?>;
 
             function applyFilters(){
-                const activeCats = catCheckboxes.filter(cb=>cb.checked).map(cb=>cb.value);
-                const activeStyles = styleCheckboxes.filter(cb=>cb.checked).map(cb=>cb.value);
+                const activeGlassTypes = glassTypeCheckboxes.filter(cb=>cb.checked).map(cb=>cb.value);
                 const activeConditions = conditionCheckboxes.filter(cb=>cb.checked).map(cb=>cb.value);
-                const min = parseInt(minRange.value,10);
-                const max = parseInt(maxRange.value,10);
+                const min = parseFloat(minRange.value) || 0;
+                const max = parseFloat(maxRange.value) || maxTonsValue;
+                
+                console.log('Filtering with tons range:', min, 'to', max);
 
-                // compute counts per category, style, condition for the current filters
-                const catCounts = {};
-                const styleCounts = {};
+                // compute counts per glass type and condition for the current filters
+                const glassTypeCounts = {};
                 const conditionCounts = {};
                 visibleCards = [];
                 
                 cards.forEach(c=>{
-                    const cat = c.getAttribute('data-category');
-                    const style = c.getAttribute('data-style');
+                    const glassType = c.getAttribute('data-glass-type');
                     const condition = c.getAttribute('data-condition');
-                    const price = parseInt(c.getAttribute('data-price'),10);
-                    const priceMatch = price >= min && price <= max;
-                    const catMatch = activeCats.length ? activeCats.indexOf(cat) !== -1 : true;
-                    const styleMatch = activeStyles.length ? activeStyles.indexOf(style) !== -1 : true;
+                    const tons = parseFloat(c.getAttribute('data-tons')) || 0;
+                    const tonsMatch = tons >= min && tons <= max;
+                    const glassTypeMatch = activeGlassTypes.length ? activeGlassTypes.indexOf(glassType) !== -1 : true;
                     const conditionMatch = activeConditions.length ? activeConditions.indexOf(condition) !== -1 : true;
-                    if(priceMatch && styleMatch && conditionMatch){
-                        if(!(cat in catCounts)) catCounts[cat]=0;
-                        catCounts[cat]++;
+                    
+                    if(tonsMatch && conditionMatch){
+                        if(!(glassType in glassTypeCounts)) glassTypeCounts[glassType]=0;
+                        glassTypeCounts[glassType]++;
                     }
-                    if(priceMatch && catMatch && conditionMatch){
-                        if(!(style in styleCounts)) styleCounts[style]=0;
-                        styleCounts[style]++;
-                    }
-                    if(priceMatch && catMatch && styleMatch){
+                    if(tonsMatch && glassTypeMatch){
                         if(!(condition in conditionCounts)) conditionCounts[condition]=0;
                         conditionCounts[condition]++;
                     }
                 });
 
-                cards.forEach(c=>{
-                    const cat = c.getAttribute('data-category');
-                    const style = c.getAttribute('data-style');
+                cards.forEach((c, index) => {
+                    const glassType = c.getAttribute('data-glass-type');
                     const condition = c.getAttribute('data-condition');
-                    const price = parseInt(c.getAttribute('data-price'),10);
-                    const catMatch = activeCats.length ? activeCats.indexOf(cat) !== -1 : true;
-                    const styleMatch = activeStyles.length ? activeStyles.indexOf(style) !== -1 : true;
+                    const tons = parseFloat(c.getAttribute('data-tons')) || 0;
+                    const glassTypeMatch = activeGlassTypes.length ? activeGlassTypes.indexOf(glassType) !== -1 : true;
                     const conditionMatch = activeConditions.length ? activeConditions.indexOf(condition) !== -1 : true;
-                    const priceMatch = price >= min && price <= max;
-                    if(catMatch && styleMatch && conditionMatch && priceMatch){
+                    const tonsMatch = tons >= min && tons <= max;
+                    
+                    if(index === 0) {
+                        console.log('First card tons:', tons, 'Match:', tonsMatch);
+                    }
+                    
+                    if(glassTypeMatch && conditionMatch && tonsMatch){
                         visibleCards.push(c);
                     }
                 });
@@ -452,17 +468,11 @@
                 itemsCount.textContent = visibleCards.length + ' items';
 
                 // update count labels in sidebar
-                document.querySelectorAll('#categories-list .count').forEach(el=>{
+                document.querySelectorAll('#glass-types-list .count').forEach(el=>{
                     const li = el.closest('li');
-                    const input = li.querySelector('.cat-filter');
-                    const cat = input.value;
-                    el.textContent = catCounts[cat] !== undefined ? catCounts[cat] : 0;
-                });
-                document.querySelectorAll('#styles-list .count').forEach(el=>{
-                    const li = el.closest('li');
-                    const input = li.querySelector('.style-filter');
-                    const style = input.value;
-                    el.textContent = styleCounts[style] !== undefined ? styleCounts[style] : 0;
+                    const input = li.querySelector('.glass-filter');
+                    const glassType = input.value;
+                    el.textContent = glassTypeCounts[glassType] !== undefined ? glassTypeCounts[glassType] : 0;
                 });
                 document.querySelectorAll('#conditions-list .count').forEach(el=>{
                     const li = el.closest('li');
@@ -527,27 +537,31 @@
 
             // sync number inputs with range inputs and update visual slider
             function syncRanges(e){
-                let min = parseInt(minPrice.value,10) || 0;
-                let max = parseInt(maxPrice.value,10) || 1000;
+                let min = parseFloat(minPrice.value);
+                let max = parseFloat(maxPrice.value);
+                
+                // Handle NaN or empty values
+                if(isNaN(min)) min = 0;
+                if(isNaN(max)) max = maxTonsValue;
 
-                // enforce boundaries for min price (0-1000)
+                // enforce boundaries for min tons
                 if(min < 0){
                     min = 0;
                     minPrice.value = 0;
                 }
-                if(min > 1000){
-                    min = 1000;
-                    minPrice.value = 1000;
+                if(min > maxTonsValue){
+                    min = maxTonsValue;
+                    minPrice.value = maxTonsValue;
                 }
 
-                // enforce boundaries for max price (0-1000)
+                // enforce boundaries for max tons
                 if(max < 0){
                     max = 0;
                     maxPrice.value = 0;
                 }
-                if(max > 1000){
-                    max = 1000;
-                    maxPrice.value = 1000;
+                if(max > maxTonsValue){
+                    max = maxTonsValue;
+                    maxPrice.value = maxTonsValue;
                 }
 
                 // ensure min <= max
@@ -566,8 +580,8 @@
                 maxRange.value = max;
 
                 // update display labels
-                minPriceLabel.textContent = '$' + min;
-                maxPriceLabel.textContent = '$' + max;
+                minPriceLabel.textContent = min.toFixed(1) + ' tons';
+                maxPriceLabel.textContent = max.toFixed(1) + ' tons';
 
                 // update visual slider
                 updateVisualSlider(min, max);
@@ -577,8 +591,8 @@
 
             // update visual slider appearance
             function updateVisualSlider(min, max) {
-                const minPercent = (min / 1000) * 100;
-                const maxPercent = (max / 1000) * 100;
+                const minPercent = (min / maxTonsValue) * 100;
+                const maxPercent = (max / maxTonsValue) * 100;
 
                 minThumb.style.left = minPercent + '%';
                 maxThumb.style.left = maxPercent + '%';
@@ -589,28 +603,89 @@
             }
 
             function clearAllFilters(){
-                catCheckboxes.forEach(cb=>cb.checked = false);
-                styleCheckboxes.forEach(cb=>cb.checked = false);
+                glassTypeCheckboxes.forEach(cb=>cb.checked = false);
                 conditionCheckboxes.forEach(cb=>cb.checked = false);
                 minPrice.value = 0;
-                maxPrice.value = 1000;
+                maxPrice.value = maxTonsValue;
                 minRange.value = 0;
-                maxRange.value = 1000;
-                minPriceLabel.textContent = '$0';
-                maxPriceLabel.textContent = '$1000';
-                updateVisualSlider(0, 1000);
+                maxRange.value = maxTonsValue;
+                minPriceLabel.textContent = '0 tons';
+                maxPriceLabel.textContent = maxTonsValue + ' tons';
+                updateVisualSlider(0, maxTonsValue);
                 currentPage = 1;
                 applyFilters();
             }
 
-            catCheckboxes.forEach(cb=>cb.addEventListener('change', applyFilters));
-            styleCheckboxes.forEach(cb=>cb.addEventListener('change', applyFilters));
+            glassTypeCheckboxes.forEach(cb=>cb.addEventListener('change', applyFilters));
             conditionCheckboxes.forEach(cb=>cb.addEventListener('change', applyFilters));
             minPrice.addEventListener('input', syncRanges);
             maxPrice.addEventListener('input', syncRanges);
             minRange.addEventListener('input', syncRanges);
             maxRange.addEventListener('input', syncRanges);
             document.getElementById('clear-filters').addEventListener('click', clearAllFilters);
+
+            // Sorting functionality
+            const sortSelect = document.getElementById('sortSelect');
+            sortSelect.addEventListener('change', function() {
+                const sortValue = this.value;
+                if(sortValue === 'tons-low') {
+                    visibleCards.sort((a, b) => {
+                        const tonsA = parseFloat(a.getAttribute('data-tons')) || 0;
+                        const tonsB = parseFloat(b.getAttribute('data-tons')) || 0;
+                        return tonsA - tonsB;
+                    });
+                } else if(sortValue === 'tons-high') {
+                    visibleCards.sort((a, b) => {
+                        const tonsA = parseFloat(a.getAttribute('data-tons')) || 0;
+                        const tonsB = parseFloat(b.getAttribute('data-tons')) || 0;
+                        return tonsB - tonsA;
+                    });
+                }
+                updatePagination();
+            });
+
+            // Drag functionality for slider thumbs
+            let isDragging = false;
+            let activeThumb = null;
+
+            function startDrag(e, thumb) {
+                isDragging = true;
+                activeThumb = thumb;
+                e.preventDefault();
+            }
+
+            function handleDrag(e) {
+                if (!isDragging || !activeThumb) return;
+                
+                const slider = document.querySelector('.price-slider');
+                const rect = slider.getBoundingClientRect();
+                const x = (e.type.includes('mouse') ? e.clientX : e.touches[0].clientX) - rect.left;
+                const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
+                const value = (percent / 100) * maxTonsValue;
+
+                if (activeThumb === minThumb) {
+                    minPrice.value = value.toFixed(1);
+                } else if (activeThumb === maxThumb) {
+                    maxPrice.value = value.toFixed(1);
+                }
+                
+                syncRanges();
+            }
+
+            function stopDrag() {
+                isDragging = false;
+                activeThumb = null;
+            }
+
+            minThumb.addEventListener('mousedown', (e) => startDrag(e, minThumb));
+            maxThumb.addEventListener('mousedown', (e) => startDrag(e, maxThumb));
+            minThumb.addEventListener('touchstart', (e) => startDrag(e, minThumb));
+            maxThumb.addEventListener('touchstart', (e) => startDrag(e, maxThumb));
+            
+            document.addEventListener('mousemove', handleDrag);
+            document.addEventListener('touchmove', handleDrag);
+            document.addEventListener('mouseup', stopDrag);
+            document.addEventListener('touchend', stopDrag);
 
             // initialize values
             syncRanges();

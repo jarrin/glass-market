@@ -37,11 +37,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } elseif (empty($user['email_verified_at'])) {
                     $error_message = 'Your account is pending approval.';
                 } else {
-                    // Login successful
+                    // Login successful - set both admin and user session variables
                     $_SESSION['admin_logged_in'] = true;
+                    $_SESSION['user_logged_in'] = true;
                     $_SESSION['admin_user_id'] = $user['id'];
+                    $_SESSION['user_id'] = $user['id'];
                     $_SESSION['admin_user_name'] = $user['name'];
+                    $_SESSION['user_name'] = $user['name'];
                     $_SESSION['admin_user_email'] = $user['email'];
+                    $_SESSION['user_email'] = $user['email'];
+                    $_SESSION['is_admin'] = 1;
                     
                     // Redirect to dashboard
                     header('Location: dashboard.php');
