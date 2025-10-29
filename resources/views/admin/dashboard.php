@@ -179,7 +179,7 @@ $admin_email = $_SESSION['admin_user_email'] ?? '';
             <div class="card">
                 <div class="card-header">
                     <h3>Recent Listings</h3>
-                    <a href="#">View All →</a>
+                    <a href="recent-listings.php">View All →</a>
                 </div>
                 <?php if (!empty($recent_listings)): ?>
                     <table class="table">
