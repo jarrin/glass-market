@@ -94,42 +94,50 @@ try {
         'hero' => [
             'title' => 'Hero Experience',
             'description' => 'Headline, subcopy, and CTA that define the first impression.',
-            'icon' => '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="#9cc2ff" width="24" height="24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2"/><circle cx="12" cy="12" r="9"/></svg>'
+            'nav_caption' => 'Hero headline & CTA',
+            'icon' => '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="#a7c4ff" width="24" height="24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2"/><circle cx="12" cy="12" r="9"/></svg>'
         ],
         'stats' => [
             'title' => 'Impact Stats',
             'description' => 'Four key metrics that sit directly below the hero.',
-            'icon' => '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="#a4f4d0" width="24" height="24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h3v12H4zM10.5 10h3v8h-3zM17 4h3v14h-3z"/></svg>'
+            'nav_caption' => 'Metrics row under hero',
+            'icon' => '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="#80efd6" width="24" height="24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h3v12H4zM10.5 10h3v8h-3zM17 4h3v14h-3z"/></svg>'
         ],
         'mission' => [
             'title' => 'Mission Block',
             'description' => 'Explain why Glass Market exists and the change you drive.',
-            'icon' => '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="#ffd59c" width="24" height="24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l3 3"/><circle cx="12" cy="12" r="9"/></svg>'
+            'nav_caption' => 'Mission column copy',
+            'icon' => '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="#ffdba8" width="24" height="24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l3 3"/><circle cx="12" cy="12" r="9"/></svg>'
         ],
         'vision' => [
             'title' => 'Vision Block',
             'description' => 'Share the horizon you are building toward.',
-            'icon' => '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="#f6b2ff" width="24" height="24"><path stroke-linecap="round" stroke-linejoin="round" d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>'
+            'nav_caption' => 'Vision column copy',
+            'icon' => '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="#e0baff" width="24" height="24"><path stroke-linecap="round" stroke-linejoin="round" d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>'
         ],
         'values' => [
             'title' => 'Values Grid',
             'description' => 'Appears as three cards highlighting how you operate.',
-            'icon' => '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="#ff9ca6" width="24" height="24"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/></svg>'
+            'nav_caption' => 'Three value cards',
+            'icon' => '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="#ffadc0" width="24" height="24"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/></svg>'
         ],
         'team' => [
             'title' => 'Team Highlight',
             'description' => 'Introduce the people behind Glass Market.',
-            'icon' => '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="#b8f0ff" width="24" height="24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 14c2.21 0 4 1.79 4 4v1H4v-1c0-2.21 1.79-4 4-4"/><circle cx="12" cy="8" r="4"/></svg>'
+            'nav_caption' => 'Team intro copy',
+            'icon' => '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="#b4e4ff" width="24" height="24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 14c2.21 0 4 1.79 4 4v1H4v-1c0-2.21 1.79-4 4-4"/><circle cx="12" cy="8" r="4"/></svg>'
         ],
         'cta' => [
             'title' => 'Primary CTA',
             'description' => 'Final call-to-action that closes the About page.',
-            'icon' => '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="#ffcf9c" width="24" height="24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg>'
+            'nav_caption' => 'Bottom CTA banner',
+            'icon' => '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="#ffcfae" width="24" height="24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg>'
         ],
         'general' => [
             'title' => 'Additional Fields',
             'description' => 'Any remaining copy blocks that do not fit above.',
-            'icon' => '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="#c9d1ff" width="24" height="24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"/></svg>'
+            'nav_caption' => 'Other configurable copy',
+            'icon' => '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="#cbd5ff" width="24" height="24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"/></svg>'
         ],
     ];
 
@@ -180,52 +188,62 @@ $admin_name = $_SESSION['user_name'] ?? 'Admin';
         body.editor-body {
             margin: 0;
             min-height: 100vh;
-            background: radial-gradient(140% 140% at 0% 0%, #28231d 0%, #171310 45%, #090807 100%);
-            color: #f5f3ef;
+            background: radial-gradient(130% 145% at 12% -10%, #1e2537 0%, #0d1423 50%, #05070d 100%);
+            color: #eef3fb;
             font-family: "SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            padding: 64px 0 96px;
+            padding: 72px 0 110px;
         }
 
         .page-editor {
-            max-width: 1080px;
+            max-width: 1140px;
             margin: 0 auto;
-            padding: 0 32px;
+            padding: 0 36px;
             display: flex;
             flex-direction: column;
-            gap: 32px;
+            gap: 40px;
         }
 
         .editor-hero {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 32px;
-            padding: 36px 40px;
-            backdrop-filter: blur(24px);
-            box-shadow: 0 45px 120px -80px rgba(0, 0, 0, 0.8);
+            position: relative;
+            background: linear-gradient(135deg, rgba(42, 74, 132, 0.55) 0%, rgba(16, 26, 48, 0.92) 100%);
+            border: 1px solid rgba(122, 163, 255, 0.22);
+            border-radius: 36px;
+            padding: 40px 48px;
+            backdrop-filter: blur(28px);
+            box-shadow: 0 45px 120px -60px rgba(13, 24, 45, 0.9);
             display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
-            gap: 24px;
+            gap: 28px;
+            overflow: hidden;
+        }
+
+        .editor-hero::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(120% 120% at 110% -10%, rgba(147, 185, 255, 0.55) 0%, rgba(25, 37, 61, 0.4) 48%, transparent 68%);
+            pointer-events: none;
         }
 
         .page-title {
-            font-size: clamp(32px, 6vw, 42px);
+            font-size: clamp(34px, 5.8vw, 46px);
             margin: 0;
             font-weight: 700;
-            letter-spacing: -0.01em;
+            letter-spacing: -0.015em;
         }
 
         .page-meta {
             font-size: 14px;
-            opacity: 0.7;
-            margin-top: 8px;
+            color: rgba(214, 226, 255, 0.78);
+            margin-top: 10px;
         }
 
         .back-btn {
-            padding: 12px 24px;
-            background: rgba(255, 255, 255, 0.08);
-            color: #f5f3ef;
+            padding: 14px 28px;
+            background: rgba(12, 18, 32, 0.6);
+            color: #eef3fb;
             border-radius: 999px;
             font-size: 14px;
             font-weight: 600;
@@ -233,92 +251,95 @@ $admin_name = $_SESSION['user_name'] ?? 'Admin';
             display: inline-flex;
             align-items: center;
             gap: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.16);
+            border: 1px solid rgba(155, 189, 255, 0.32);
             transition: transform 0.3s ease, background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
             backdrop-filter: blur(20px);
+            position: relative;
+            z-index: 1;
         }
 
         .back-btn:hover {
             transform: translateY(-2px);
-            background: rgba(255, 255, 255, 0.14);
-            border-color: rgba(255, 255, 255, 0.28);
-            box-shadow: 0 20px 40px -24px rgba(0, 0, 0, 0.8);
+            background: rgba(31, 47, 82, 0.75);
+            border-color: rgba(182, 209, 255, 0.55);
+            box-shadow: 0 24px 56px -30px rgba(31, 53, 101, 0.9);
         }
 
         .alert {
-            padding: 18px 24px;
-            border-radius: 18px;
+            padding: 20px 26px;
+            border-radius: 16px;
             font-weight: 600;
             font-size: 14px;
             border: 1px solid transparent;
-            box-shadow: 0 20px 50px -30px rgba(0, 0, 0, 0.65);
+            box-shadow: 0 30px 80px -60px rgba(4, 9, 20, 0.85);
+            backdrop-filter: blur(18px);
         }
 
         .alert-success {
-            background: rgba(12, 99, 54, 0.22);
-            border-color: rgba(44, 186, 109, 0.35);
-            color: #c7f8d1;
+            background: linear-gradient(135deg, rgba(23, 120, 79, 0.35) 0%, rgba(13, 61, 39, 0.55) 100%);
+            border-color: rgba(115, 227, 170, 0.45);
+            color: #c8fde2;
         }
 
         .alert-error {
-            background: rgba(176, 23, 43, 0.2);
-            border-color: rgba(255, 103, 129, 0.28);
-            color: #ffd7dd;
+            background: linear-gradient(135deg, rgba(173, 38, 59, 0.32) 0%, rgba(93, 17, 30, 0.6) 100%);
+            border-color: rgba(255, 134, 154, 0.42);
+            color: #ffe5e9;
         }
 
         .editor-card {
-            background: rgba(12, 11, 10, 0.75);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 36px;
-            padding: 48px;
-            backdrop-filter: blur(26px);
-            box-shadow: 0 60px 140px -90px rgba(0, 0, 0, 0.85);
+            background: rgba(10, 15, 27, 0.78);
+            border: 1px solid rgba(128, 154, 214, 0.12);
+            border-radius: 40px;
+            padding: 40px;
+            backdrop-filter: blur(30px);
+            box-shadow: 0 55px 140px -80px rgba(5, 9, 18, 0.9);
         }
 
         .editor-layout {
             display: flex;
-            gap: 36px;
+            gap: 40px;
             align-items: flex-start;
         }
 
         .editor-sidebar {
-            width: 240px;
+            width: 260px;
             position: sticky;
             top: 120px;
         }
 
         .sidebar-card {
-            background: rgba(12, 11, 10, 0.68);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(8, 13, 25, 0.82);
+            border: 1px solid rgba(108, 140, 212, 0.2);
             border-radius: 28px;
-            padding: 28px 24px;
-            backdrop-filter: blur(18px);
-            box-shadow: 0 30px 80px -60px rgba(0, 0, 0, 0.85);
+            padding: 30px 24px;
+            backdrop-filter: blur(26px);
+            box-shadow: 0 38px 90px -72px rgba(8, 14, 30, 0.9);
             display: flex;
             flex-direction: column;
             gap: 20px;
         }
 
         .sidebar-title {
-            font-size: 13px;
-            letter-spacing: 0.22em;
+            font-size: 12px;
+            letter-spacing: 0.26em;
             text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.58);
+            color: rgba(190, 205, 243, 0.6);
         }
 
         .sidebar-links {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 14px;
         }
 
         .sidebar-link {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid transparent;
-            border-radius: 18px;
-            padding: 14px 16px;
+            background: rgba(24, 36, 62, 0.32);
+            border: 1px solid rgba(133, 165, 240, 0.18);
+            border-radius: 20px;
+            padding: 16px 18px;
             display: flex;
-            gap: 12px;
+            gap: 14px;
             align-items: flex-start;
             width: 100%;
             color: inherit;
@@ -326,67 +347,71 @@ $admin_name = $_SESSION['user_name'] ?? 'Admin';
             font-weight: 600;
             cursor: pointer;
             text-align: left;
-            transition: background 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+            transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
         }
 
         .sidebar-link:hover {
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(42, 62, 102, 0.45);
+            border-color: rgba(176, 204, 255, 0.4);
+            box-shadow: 0 25px 60px -48px rgba(32, 54, 98, 0.8);
             transform: translateX(4px);
         }
 
         .sidebar-link.active {
-            border-color: rgba(156, 194, 255, 0.5);
-            background: rgba(156, 194, 255, 0.16);
-            box-shadow: 0 18px 40px -28px rgba(156, 194, 255, 0.6);
+            border-color: rgba(164, 192, 255, 0.8);
+            background: linear-gradient(135deg, rgba(73, 110, 192, 0.55) 0%, rgba(39, 68, 134, 0.65) 100%);
+            box-shadow: 0 30px 70px -46px rgba(70, 111, 198, 0.85);
         }
 
         .sidebar-dot {
-            width: 10px;
-            height: 10px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.4);
+            background: rgba(168, 190, 232, 0.5);
             margin-top: 4px;
             flex-shrink: 0;
-            transition: background 0.25s ease;
+            transition: background 0.25s ease, transform 0.25s ease;
         }
 
         .sidebar-link.active .sidebar-dot {
-            background: #9cc2ff;
+            background: #a5c3ff;
+            transform: scale(1.2);
         }
 
         .sidebar-label {
             display: block;
-            letter-spacing: 0.1em;
+            letter-spacing: 0.14em;
             text-transform: uppercase;
             font-size: 12px;
-            color: rgba(255, 255, 255, 0.72);
+            color: rgba(224, 232, 255, 0.85);
         }
 
         .sidebar-caption {
             display: block;
             font-size: 12px;
-            color: rgba(255, 255, 255, 0.45);
-            margin-top: 4px;
+            color: rgba(177, 193, 227, 0.64);
+            margin-top: 5px;
         }
 
         .editor-content {
             flex: 1;
             display: flex;
             flex-direction: column;
-            gap: 48px;
+            gap: 56px;
         }
 
         .group-block {
-            padding: 36px 32px;
-            border-radius: 32px;
-            border: 1px solid rgba(255, 255, 255, 0.07);
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.06) 0%, rgba(16, 18, 24, 0.62) 100%);
-            box-shadow: 0 45px 100px -80px rgba(0, 0, 0, 0.8);
+            padding: 40px 36px;
+            border-radius: 36px;
+            border: 1px solid rgba(123, 156, 230, 0.16);
+            background: linear-gradient(150deg, rgba(28, 40, 70, 0.58) 0%, rgba(11, 17, 31, 0.92) 100%);
+            box-shadow: 0 50px 110px -78px rgba(7, 11, 21, 0.9);
             display: flex;
             flex-direction: column;
-            gap: 28px;
+            gap: 32px;
             position: relative;
-            scroll-margin-top: 120px;
+            scroll-margin-top: 130px;
+            overflow: hidden;
         }
 
         .group-block::before {
@@ -394,8 +419,8 @@ $admin_name = $_SESSION['user_name'] ?? 'Admin';
             position: absolute;
             inset: 0;
             border-radius: inherit;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 55%, rgba(255, 255, 255, 0) 100%);
-            opacity: 0.4;
+            background: radial-gradient(110% 100% at 115% -10%, rgba(123, 156, 230, 0.35) 0%, rgba(41, 58, 99, 0.25) 34%, transparent 64%);
+            opacity: 0.55;
             pointer-events: none;
         }
 
@@ -403,7 +428,7 @@ $admin_name = $_SESSION['user_name'] ?? 'Admin';
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 20px;
+            gap: 24px;
             position: relative;
             z-index: 1;
         }
@@ -411,14 +436,15 @@ $admin_name = $_SESSION['user_name'] ?? 'Admin';
         .group-header-main {
             display: flex;
             align-items: center;
-            gap: 18px;
+            gap: 20px;
         }
 
         .group-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 16px;
-            background: rgba(255, 255, 255, 0.08);
+            width: 54px;
+            height: 54px;
+            border-radius: 18px;
+            background: rgba(194, 215, 255, 0.16);
+            border: 1px solid rgba(175, 204, 255, 0.35);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -426,24 +452,24 @@ $admin_name = $_SESSION['user_name'] ?? 'Admin';
 
         .group-header h2 {
             margin: 0;
-            font-size: 20px;
+            font-size: 22px;
             letter-spacing: -0.01em;
         }
 
         .group-header p {
-            margin: 6px 0 0;
+            margin: 8px 0 0;
             font-size: 14px;
-            color: rgba(255, 255, 255, 0.65);
+            color: rgba(207, 220, 250, 0.72);
         }
 
         .group-count {
-            font-size: 12px;
-            letter-spacing: 0.16em;
+            font-size: 11px;
+            letter-spacing: 0.22em;
             text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.45);
-            background: rgba(255, 255, 255, 0.08);
+            color: rgba(185, 200, 234, 0.75);
+            background: rgba(103, 136, 210, 0.22);
             border-radius: 999px;
-            padding: 6px 14px;
+            padding: 7px 18px;
         }
 
         .group-fields {
@@ -454,19 +480,20 @@ $admin_name = $_SESSION['user_name'] ?? 'Admin';
         .form-stack {
             display: flex;
             flex-direction: column;
-            gap: 28px;
+            gap: 30px;
         }
 
         .form-group {
-            padding: 26px 28px 28px;
-            border-radius: 24px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            background: linear-gradient(155deg, rgba(255, 255, 255, 0.05) 0%, rgba(20, 18, 16, 0.35) 100%);
+            padding: 28px 30px;
+            border-radius: 26px;
+            border: 1px solid rgba(125, 154, 226, 0.2);
+            background: linear-gradient(150deg, rgba(26, 38, 66, 0.75) 0%, rgba(15, 22, 39, 0.92) 100%);
             position: relative;
             transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
             display: flex;
             flex-direction: column;
             gap: 18px;
+            overflow: hidden;
         }
 
         .form-group::after {
@@ -475,16 +502,16 @@ $admin_name = $_SESSION['user_name'] ?? 'Admin';
             inset: 0;
             border-radius: inherit;
             pointer-events: none;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 48%, rgba(255, 255, 255, 0) 100%);
+            background: linear-gradient(135deg, rgba(126, 162, 233, 0.26) 0%, rgba(51, 70, 111, 0.18) 42%, transparent 100%);
             opacity: 0;
             transition: opacity 0.3s ease;
         }
 
         .form-group:hover,
         .form-group:focus-within {
-            border-color: rgba(88, 141, 255, 0.42);
+            border-color: rgba(164, 192, 255, 0.7);
             transform: translateY(-2px);
-            box-shadow: 0 30px 80px -60px rgba(17, 24, 39, 0.8);
+            box-shadow: 0 32px 80px -58px rgba(45, 70, 128, 0.85);
         }
 
         .form-group:hover::after,
@@ -501,88 +528,90 @@ $admin_name = $_SESSION['user_name'] ?? 'Admin';
         }
 
         .form-label {
-            font-size: 13px;
-            letter-spacing: 0.24em;
+            font-size: 12px;
+            letter-spacing: 0.28em;
             text-transform: uppercase;
             font-weight: 700;
-            color: rgba(255, 255, 255, 0.82);
+            color: rgba(223, 232, 255, 0.82);
         }
 
         .form-key {
-            font-size: 12px;
-            letter-spacing: 0.16em;
+            font-size: 11px;
+            letter-spacing: 0.2em;
             text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.4);
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: rgba(180, 197, 236, 0.7);
+            background: rgba(26, 38, 66, 0.6);
+            border: 1px solid rgba(135, 165, 233, 0.33);
             border-radius: 999px;
-            padding: 6px 14px;
+            padding: 6px 16px;
         }
 
         .form-input,
         .form-textarea {
             width: 100%;
-            padding: 16px 18px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 16px;
+            padding: 18px 20px;
+            border: 1px solid rgba(138, 167, 236, 0.25);
+            border-radius: 18px;
             font-size: 16px;
             font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            color: #f9f6f2;
-            background: rgba(255, 255, 255, 0.06);
+            color: #f3f6ff;
+            background: rgba(17, 25, 44, 0.72);
             transition: border-color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
         }
 
         .form-input::placeholder,
         .form-textarea::placeholder {
-            color: rgba(255, 255, 255, 0.35);
+            color: rgba(195, 209, 237, 0.46);
         }
 
         .form-input:focus,
         .form-textarea:focus {
             outline: none;
-            border-color: rgba(116, 170, 255, 0.7);
-            background: rgba(20, 28, 45, 0.65);
-            box-shadow: 0 18px 48px -28px rgba(17, 80, 197, 0.75);
+            border-color: rgba(176, 204, 255, 0.85);
+            background: rgba(27, 36, 64, 0.88);
+            box-shadow: 0 30px 70px -48px rgba(87, 132, 224, 0.9);
         }
 
         .form-textarea {
-            min-height: 160px;
+            min-height: 170px;
             resize: vertical;
             line-height: 1.7;
         }
 
         .form-hint {
-            font-size: 13px;
-            color: rgba(255, 255, 255, 0.45);
+            font-size: 12px;
+            color: rgba(188, 204, 236, 0.64);
             margin: 0;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
         }
 
         .form-actions {
             display: flex;
             flex-wrap: wrap;
-            gap: 16px;
+            gap: 18px;
             justify-content: flex-end;
-            padding-top: 32px;
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
-            margin-top: 40px;
+            padding-top: 36px;
+            border-top: 1px solid rgba(126, 154, 226, 0.22);
+            margin-top: 48px;
         }
 
         .btn-primary {
-            padding: 15px 36px;
+            padding: 16px 40px;
             border-radius: 999px;
             border: none;
             font-size: 15px;
             font-weight: 600;
-            color: #0a0a0d;
-            background: linear-gradient(135deg, #9dd3ff 0%, #4f8bff 55%, #2b68ff 100%);
+            color: #061229;
+            background: linear-gradient(135deg, #a9d6ff 0%, #5c93ff 52%, #3b6df2 100%);
             cursor: pointer;
             transition: transform 0.25s ease, box-shadow 0.25s ease;
-            box-shadow: 0 35px 70px -40px rgba(79, 139, 255, 0.9);
+            box-shadow: 0 38px 92px -42px rgba(92, 147, 255, 0.95);
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 45px 90px -45px rgba(79, 139, 255, 0.95);
+            box-shadow: 0 46px 110px -46px rgba(92, 147, 255, 1);
         }
 
         .btn-primary:active {
@@ -590,41 +619,42 @@ $admin_name = $_SESSION['user_name'] ?? 'Admin';
         }
 
         .btn-secondary {
-            padding: 15px 30px;
+            padding: 16px 32px;
             border-radius: 999px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            background: transparent;
-            color: #f5f3ef;
+            border: 1px solid rgba(155, 188, 255, 0.35);
+            background: rgba(19, 28, 48, 0.65);
+            color: #eef3fb;
             font-size: 15px;
             font-weight: 600;
             text-decoration: none;
-            transition: background 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
-            backdrop-filter: blur(14px);
+            transition: background 0.25s ease, border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+            backdrop-filter: blur(16px);
         }
 
         .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.35);
+            background: rgba(43, 60, 96, 0.78);
+            border-color: rgba(190, 214, 255, 0.55);
             transform: translateY(-1px);
+            box-shadow: 0 26px 64px -44px rgba(44, 66, 108, 0.85);
         }
 
         @media (max-width: 768px) {
             body.editor-body {
-                padding: 40px 0 72px;
+                padding: 48px 0 80px;
             }
 
             .page-editor {
-                padding: 0 20px;
+                padding: 0 24px;
             }
 
             .editor-card {
-                padding: 32px 24px;
-                border-radius: 28px;
+                padding: 32px 26px;
+                border-radius: 32px;
             }
 
             .editor-layout {
                 flex-direction: column;
-                gap: 24px;
+                gap: 28px;
             }
 
             .editor-sidebar {
@@ -634,21 +664,21 @@ $admin_name = $_SESSION['user_name'] ?? 'Admin';
 
             .sidebar-card {
                 flex-direction: column;
-                padding: 24px 20px;
+                padding: 26px 22px;
             }
 
             .sidebar-links {
                 flex-direction: row;
                 overflow-x: auto;
-                padding-bottom: 4px;
+                padding-bottom: 6px;
             }
 
             .sidebar-link {
-                min-width: 180px;
+                min-width: 200px;
             }
 
             .form-group {
-                padding: 22px 22px 24px;
+                padding: 24px 24px 26px;
             }
 
             .form-input,
@@ -682,11 +712,11 @@ $admin_name = $_SESSION['user_name'] ?? 'Admin';
             </div>
             <a href="../dashboard.php" class="back-btn">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                        min-width: 170px;
                 </svg>
                 Back to Dashboard
             </a>
-        </div>
+                        padding: 30px 24px;
 
         <?php if ($success_message): ?>
             <div class="alert alert-success">✓ <?php echo htmlspecialchars($success_message); ?></div>
@@ -705,12 +735,17 @@ $admin_name = $_SESSION['user_name'] ?? 'Admin';
                             <div class="sidebar-links">
                                 <?php foreach ($group_order as $group_key): ?>
                                     <?php if (!isset($grouped_sections[$group_key])) { continue; } ?>
-                                    <?php $meta = $group_meta[$group_key] ?? ['title' => ucfirst($group_key), 'description' => '', 'icon' => '']; ?>
+                                    <?php 
+                                        $meta = $group_meta[$group_key] ?? ['title' => ucfirst($group_key), 'description' => '', 'icon' => '', 'nav_caption' => ''];
+                                        $field_count = count($grouped_sections[$group_key]);
+                                        $nav_caption = trim($meta['nav_caption'] ?? '');
+                                        $sidebar_caption = $nav_caption ? $nav_caption . ' • ' . $field_count . ' fields' : $field_count . ' fields';
+                                    ?>
                                     <button type="button" class="sidebar-link" data-target="group-<?php echo htmlspecialchars($group_key); ?>">
                                         <span class="sidebar-dot"></span>
                                         <div>
                                             <span class="sidebar-label"><?php echo htmlspecialchars($meta['title']); ?></span>
-                                            <span class="sidebar-caption"><?php echo count($grouped_sections[$group_key]); ?> fields</span>
+                                            <span class="sidebar-caption"><?php echo htmlspecialchars($sidebar_caption); ?></span>
                                         </div>
                                     </button>
                                 <?php endforeach; ?>
@@ -807,19 +842,41 @@ $admin_name = $_SESSION['user_name'] ?? 'Admin';
                 return;
             }
 
+            var manualScroll = false;
+            var manualTimer = null;
+
+            function setActiveLink(targetId) {
+                if (!targetId) {
+                    return;
+                }
+                links.forEach(function(link) {
+                    var matches = link.getAttribute('data-target') === targetId;
+                    link.classList.toggle('active', matches);
+                });
+            }
+
             links.forEach(function(link) {
-                link.addEventListener('click', function() {
+                link.addEventListener('click', function(event) {
+                    event.preventDefault();
                     var targetId = link.getAttribute('data-target');
                     var section = document.getElementById(targetId);
+
+                    manualScroll = true;
+                    clearTimeout(manualTimer);
+                    manualTimer = setTimeout(function() {
+                        manualScroll = false;
+                    }, 700);
+
+                    setActiveLink(targetId);
+
                     if (section) {
                         section.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }
                 });
             });
 
-            if (links[0]) {
-                links[0].classList.add('active');
-            }
+            var initialTarget = links[0] ? links[0].getAttribute('data-target') : '';
+            setActiveLink(initialTarget);
 
             if (!('IntersectionObserver' in window)) {
                 return;
@@ -827,21 +884,13 @@ $admin_name = $_SESSION['user_name'] ?? 'Admin';
 
             var observer = new IntersectionObserver(function(entries) {
                 entries.forEach(function(entry) {
-                    if (entry.isIntersecting) {
-                        var id = entry.target.id;
-                        links.forEach(function(link) {
-                            var matches = link.getAttribute('data-target') === id;
-                            if (matches) {
-                                link.classList.add('active');
-                            } else {
-                                link.classList.remove('active');
-                            }
-                        });
+                    if (entry.isIntersecting && !manualScroll) {
+                        setActiveLink(entry.target.id);
                     }
                 });
             }, {
-                rootMargin: '-45% 0px -45% 0px',
-                threshold: 0.2
+                rootMargin: '-42% 0px -48% 0px',
+                threshold: 0.1
             });
 
             sections.forEach(function(section) {
