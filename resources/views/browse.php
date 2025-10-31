@@ -394,12 +394,19 @@
             let maxTonsValue = <?php echo $maxTons; ?>;
 
             function applyFilters(){
+                console.log('=== APPLY FILTERS CALLED ===');
+
                 const activeGlassTypes = glassTypeCheckboxes.filter(cb=>cb.checked).map(cb=>cb.value);
                 const activeConditions = conditionCheckboxes.filter(cb=>cb.checked).map(cb=>cb.value);
-                const min = parseFloat(minRange.value) || 0;
-                const max = parseFloat(maxRange.value) || maxTonsValue;
-                
-                console.log('Filtering with tons range:', min, 'to', max);
+
+                // FIX: Use minPrice/maxPrice instead of minRange/maxRange
+                const min = parseFloat(minPrice.value) || 0;
+                const max = parseFloat(maxPrice.value) || maxTonsValue;
+
+                console.log('Active Glass Types:', activeGlassTypes);
+                console.log('Active Conditions:', activeConditions);
+                console.log('Tons range:', min, 'to', max);
+                console.log('Total cards:', cards.length);
 
                 // compute counts per glass type and condition for the current filters
                 const glassTypeCounts = {};
@@ -431,16 +438,29 @@
                     const glassTypeMatch = activeGlassTypes.length ? activeGlassTypes.indexOf(glassType) !== -1 : true;
                     const conditionMatch = activeConditions.length ? activeConditions.indexOf(condition) !== -1 : true;
                     const tonsMatch = tons >= min && tons <= max;
-                    
-                    if(index === 0) {
-                        console.log('First card tons:', tons, 'Match:', tonsMatch);
+
+                    // Log first 3 cards for debugging
+                    if(index < 3) {
+                        console.log(`Card ${index}:`, {
+                            glassType,
+                            glassTypeMatch,
+                            condition,
+                            conditionMatch,
+                            tons,
+                            tonsMatch,
+                            willShow: glassTypeMatch && conditionMatch && tonsMatch
+                        });
                     }
-                    
+
                     if(glassTypeMatch && conditionMatch && tonsMatch){
                         visibleCards.push(c);
                     }
                 });
                 
+                console.log('Visible cards after filter:', visibleCards.length);
+                console.log('Glass type counts:', glassTypeCounts);
+                console.log('Condition counts:', conditionCounts);
+
                 itemsCount.textContent = visibleCards.length + ' items';
 
                 // update count labels in sidebar
@@ -456,10 +476,11 @@
                     const condition = input.value;
                     el.textContent = conditionCounts[condition] !== undefined ? conditionCounts[condition] : 0;
                 });
-                
+
                 // Reset to page 1 when filters change
                 currentPage = 1;
                 updatePagination();
+                console.log('=== FILTER COMPLETE ===\n');
             }
             
             function updatePagination(){
@@ -604,19 +625,35 @@
             const sortSelect = document.getElementById('sortSelect');
             sortSelect.addEventListener('change', function() {
                 const sortValue = this.value;
-                if(sortValue === 'tons-low') {
+
+                if(sortValue === 'featured') {
+                    // Featured: restore original order (reset to cards array order)
+                    visibleCards.sort((a, b) => {
+                        return cards.indexOf(a) - cards.indexOf(b);
+                    });
+                } else if(sortValue === 'newest') {
+                    // Newest: reverse the original order
+                    visibleCards.sort((a, b) => {
+                        return cards.indexOf(b) - cards.indexOf(a);
+                    });
+                } else if(sortValue === 'tons-low') {
+                    // Tons: Low to High
                     visibleCards.sort((a, b) => {
                         const tonsA = parseFloat(a.getAttribute('data-tons')) || 0;
                         const tonsB = parseFloat(b.getAttribute('data-tons')) || 0;
                         return tonsA - tonsB;
                     });
                 } else if(sortValue === 'tons-high') {
+                    // Tons: High to Low
                     visibleCards.sort((a, b) => {
                         const tonsA = parseFloat(a.getAttribute('data-tons')) || 0;
                         const tonsB = parseFloat(b.getAttribute('data-tons')) || 0;
                         return tonsB - tonsA;
                     });
                 }
+
+                // Reset to first page after sorting
+                currentPage = 1;
                 updatePagination();
             });
 
