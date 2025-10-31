@@ -70,56 +70,83 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment Errors - Glass Market Admin</title>
-    <link rel="stylesheet" href="<?php echo CSS_URL; ?>/app.css">
+    <link rel="stylesheet" href="css/manage-users-header.css">
     <style>
-        .admin-container {
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f7;
+        }
+
+        .container {
             max-width: 1400px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 40px 20px;
         }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #e5e7eb;
+        .page-header {
+            margin-bottom: 32px;
         }
 
+        .page-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 0 0 8px 0;
+            color: #1d1d1f;
+        }
+
+        .page-header p {
+            font-size: 16px;
+            color: #6e6e73;
+            margin: 0;
+        }
+
+        /* Stats - Apple-like cards */
         .stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
             gap: 20px;
-            margin-bottom: 30px;
+            margin-bottom: 32px;
         }
 
         .stat-card {
-            background: #f9fafb;
-            border-radius: 8px;
-            padding: 20px;
-            border: 1px solid #e5e7eb;
+            background: white;
+            border-radius: 18px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0,0,0,0.06);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.08);
         }
 
         .stat-card h3 {
-            font-size: 14px;
-            color: #6b7280;
-            margin: 0 0 8px 0;
-            text-transform: uppercase;
+            font-size: 13px;
+            color: #86868b;
+            margin: 0 0 12px 0;
             font-weight: 600;
+            letter-spacing: -0.01em;
         }
 
         .stat-card .value {
-            font-size: 32px;
+            font-size: 40px;
             font-weight: 700;
             color: #dc2626;
+            letter-spacing: -0.02em;
+            line-height: 1;
         }
 
+        /* Apple-like table */
         .errors-table {
             background: white;
-            border-radius: 8px;
+            border-radius: 18px;
             overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            border: 1px solid rgba(0,0,0,0.06);
         }
 
         .errors-table table {
@@ -128,136 +155,160 @@ try {
         }
 
         .errors-table th {
-            background: #f9fafb;
-            padding: 12px 16px;
+            background: #f5f5f7;
+            padding: 16px 20px;
             text-align: left;
             font-weight: 600;
-            color: #374151;
-            border-bottom: 1px solid #e5e7eb;
-            font-size: 14px;
+            color: #1d1d1f;
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+            font-size: 13px;
+            letter-spacing: -0.01em;
         }
 
         .errors-table td {
-            padding: 12px 16px;
-            border-bottom: 1px solid #f3f4f6;
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(0,0,0,0.04);
             font-size: 14px;
+            color: #1d1d1f;
         }
 
         .errors-table tr:hover {
-            background: #f9fafb;
+            background: rgba(0,0,0,0.02);
         }
 
         .error-row {
             cursor: pointer;
+            transition: background 0.2s ease;
         }
 
         .error-detail {
             display: none;
             background: #fef2f2;
-            padding: 16px;
+            padding: 20px;
             border-left: 4px solid #dc2626;
         }
 
         .error-detail.show {
             display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .error-detail h4 {
-            margin: 0 0 8px 0;
+            margin: 0 0 12px 0;
             color: #991b1b;
             font-size: 14px;
+            font-weight: 600;
         }
 
         .error-detail pre {
             background: white;
-            padding: 12px;
-            border-radius: 4px;
+            padding: 16px;
+            border-radius: 12px;
             overflow-x: auto;
             font-size: 12px;
             margin: 8px 0;
+            border: 1px solid rgba(0,0,0,0.08);
         }
 
+        /* Apple-like badges */
         .badge {
             display: inline-block;
-            padding: 4px 12px;
-            border-radius: 12px;
+            padding: 6px 12px;
+            border-radius: 20px;
             font-size: 12px;
             font-weight: 600;
+            letter-spacing: -0.01em;
         }
 
-        .badge-trial { background: #dbeafe; color: #1e40af; }
-        .badge-monthly { background: #dcfce7; color: #166534; }
-        .badge-annual { background: #fef3c7; color: #92400e; }
+        .badge-trial { background: #e8f4fd; color: #0071e3; }
+        .badge-monthly { background: #d6f5e0; color: #0d6832; }
+        .badge-annual { background: #fff4d6; color: #8e6a00; }
 
+        /* Apple-like pagination */
         .pagination {
             display: flex;
             justify-content: center;
             gap: 8px;
-            margin-top: 20px;
-            padding: 20px;
+            margin-top: 32px;
+            padding: 20px 0;
         }
 
         .pagination a,
         .pagination span {
-            padding: 8px 12px;
-            border: 1px solid #e5e7eb;
-            border-radius: 4px;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 20px;
             text-decoration: none;
-            color: #374151;
+            color: #1d1d1f;
+            font-weight: 500;
+            font-size: 14px;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+            transition: all 0.2s ease;
         }
 
         .pagination a:hover {
-            background: #f9fafb;
+            background: #f5f5f7;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         }
 
         .pagination .current {
-            background: #3b82f6;
-            color: white;
-            border-color: #3b82f6;
-        }
-
-        .btn {
-            padding: 8px 16px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 14px;
-            display: inline-block;
-        }
-
-        .btn-primary {
-            background: #3b82f6;
+            background: #0071e3;
             color: white;
         }
 
-        .btn-primary:hover {
-            background: #2563eb;
-        }
-
+        /* Apple-like empty state */
         .empty-state {
             text-align: center;
-            padding: 60px 20px;
-            color: #6b7280;
+            padding: 80px 20px;
         }
 
         .empty-state svg {
-            width: 64px;
-            height: 64px;
-            margin-bottom: 16px;
-            opacity: 0.5;
+            width: 72px;
+            height: 72px;
+            margin-bottom: 20px;
+            color: #06c;
+        }
+
+        .empty-state h3 {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0 0 8px 0;
+            color: #1d1d1f;
+        }
+
+        .empty-state p {
+            font-size: 16px;
+            color: #86868b;
+            margin: 0;
         }
     </style>
 </head>
 <body>
-    <?php include __DIR__ . '/../../../includes/navbar.php'; ?>
+    <!-- Header matching manage-users.php -->
+    <div class="header">
+        <div class="header-content">
+            <h1>Payment Errors - Glass Market</h1>
+            <a href="dashboard.php">← Back to Dashboard</a>
+        </div>
+    </div>
 
-    <div class="admin-container" style="padding-top: 80px;">
-        <div class="header">
-            <div>
-                <h1 style="margin: 0 0 8px 0;">Payment Errors</h1>
-                <p style="margin: 0; color: #6b7280;">Monitor and troubleshoot failed payment attempts</p>
-            </div>
-            <a href="dashboard.php" class="btn btn-primary">Back to Dashboard</a>
+    <div class="container">
+        <div class="page-header">
+            <h1>Payment Errors</h1>
+            <p>Monitor and troubleshoot failed payment attempts</p>
         </div>
 
         <?php
