@@ -313,32 +313,6 @@
             <div class="divider"></div>
 
             <div class="panel">
-                <h4>Condition</h4>
-                <ul class="filter-list" id="conditions-list">
-                    <?php
-                        $allConditions = ['New', 'Like New', 'Vintage'];
-                        // compute counts from products
-                        $conditionCounts = array_fill_keys($allConditions, 0);
-                        if(isset($products) && is_array($products)){
-                            foreach($products as $pp){
-                                if(isset($pp['condition']) && isset($conditionCounts[$pp['condition']])){
-                                    $conditionCounts[$pp['condition']]++;
-                                }
-                            }
-                        }
-                        foreach($allConditions as $condition){
-                            $count = isset($conditionCounts[$condition]) ? $conditionCounts[$condition] : 0;
-                            // sanitize id for input
-                            $id = 'condition_' . preg_replace('/[^a-z0-9]+/i','_', strtolower($condition));
-                            echo "<li><label><input type=\"checkbox\" class=\"condition-filter\" id=\"$id\" value=\"".htmlspecialchars($condition,ENT_QUOTES,'UTF-8')."\"> <span>".htmlspecialchars($condition,ENT_QUOTES,'UTF-8')."</span></label> <span class=\"count\">$count</span></li>";
-                        }
-                    ?>
-                </ul>
-            </div>
-
-            <div class="divider"></div>
-
-            <div class="panel">
                 <button id="clear-filters" style="width:100%;padding:10px;border:1px solid #6b6460;background:#fff;color:#6b6460;border-radius:4px;cursor:pointer;">Clear All Filters</button>
             </div>
         </aside>
@@ -348,7 +322,8 @@
                 <div class="items-count">24 items</div>
                 <div>
                     <select aria-label="Sort" id="sortSelect">
-                        <option value="featured">No filters</option>
+                        <option value="featured">Featured</option>
+                        <option value="newest">Newest</option>
                         <option value="tons-low">Tons: Low to High</option>
                         <option value="tons-high">Tons: High to Low</option>
                     </select>
@@ -359,7 +334,7 @@
 
             <div class="grid">
                 <?php foreach($products as $p): ?>
-                    <article class="card" data-glass-type="<?php echo htmlspecialchars($p['title'], ENT_QUOTES, 'UTF-8'); ?>" data-tons="<?php echo isset($p['tons']) ? (float)$p['tons'] : 0; ?>" data-condition="<?php echo htmlspecialchars($p['condition'], ENT_QUOTES, 'UTF-8'); ?>">
+                    <article class="card" data-id="<?php echo htmlspecialchars($p['id'], ENT_QUOTES, 'UTF-8'); ?>" data-glass-type="<?php echo htmlspecialchars($p['title'], ENT_QUOTES, 'UTF-8'); ?>" data-tons="<?php echo isset($p['tons']) ? (float)$p['tons'] : 0; ?>" data-condition="<?php echo htmlspecialchars($p['condition'], ENT_QUOTES, 'UTF-8'); ?>">
                         <div class="media" role="img" aria-label="<?php echo htmlspecialchars($p['title'], ENT_QUOTES, 'UTF-8'); ?>">
                             <img src="<?php echo htmlspecialchars($p['image'], ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($p['title'], ENT_QUOTES, 'UTF-8'); ?>" style="width:100%;height:100%;object-fit:cover;display:block">
                         </div>
@@ -419,19 +394,12 @@
             let maxTonsValue = <?php echo $maxTons; ?>;
 
             function applyFilters(){
-                console.log('=== APPLY FILTERS CALLED ===');
-
                 const activeGlassTypes = glassTypeCheckboxes.filter(cb=>cb.checked).map(cb=>cb.value);
                 const activeConditions = conditionCheckboxes.filter(cb=>cb.checked).map(cb=>cb.value);
-
-                // FIX: Use minPrice/maxPrice instead of minRange/maxRange
-                const min = parseFloat(minPrice.value) || 0;
-                const max = parseFloat(maxPrice.value) || maxTonsValue;
-
-                console.log('Active Glass Types:', activeGlassTypes);
-                console.log('Active Conditions:', activeConditions);
-                console.log('Tons range:', min, 'to', max);
-                console.log('Total cards:', cards.length);
+                const min = parseFloat(minRange.value) || 0;
+                const max = parseFloat(maxRange.value) || maxTonsValue;
+                
+                console.log('Filtering with tons range:', min, 'to', max);
 
                 // compute counts per glass type and condition for the current filters
                 const glassTypeCounts = {};
@@ -439,8 +407,8 @@
                 visibleCards = [];
                 
                 cards.forEach(c=>{
-                    const glassType = (c.getAttribute('data-glass-type') || '').trim();
-                    const condition = (c.getAttribute('data-condition') || '').trim();
+                    const glassType = c.getAttribute('data-glass-type');
+                    const condition = c.getAttribute('data-condition');
                     const tons = parseFloat(c.getAttribute('data-tons')) || 0;
                     const tonsMatch = tons >= min && tons <= max;
                     const glassTypeMatch = activeGlassTypes.length ? activeGlassTypes.indexOf(glassType) !== -1 : true;
@@ -457,37 +425,22 @@
                 });
 
                 cards.forEach((c, index) => {
-                    const glassType = (c.getAttribute('data-glass-type') || '').trim();
-                    const condition = (c.getAttribute('data-condition') || '').trim();
+                    const glassType = c.getAttribute('data-glass-type');
+                    const condition = c.getAttribute('data-condition');
                     const tons = parseFloat(c.getAttribute('data-tons')) || 0;
                     const glassTypeMatch = activeGlassTypes.length ? activeGlassTypes.indexOf(glassType) !== -1 : true;
                     const conditionMatch = activeConditions.length ? activeConditions.indexOf(condition) !== -1 : true;
                     const tonsMatch = tons >= min && tons <= max;
-
-                    // Log first 3 cards for debugging
-                    if(index < 3) {
-                        console.log(`Card ${index}:`, {
-                            glassType: `"${glassType}"`,
-                            activeGlassTypes,
-                            indexOfResult: activeGlassTypes.indexOf(glassType),
-                            glassTypeMatch,
-                            condition: `"${condition}"`,
-                            conditionMatch,
-                            tons,
-                            tonsMatch,
-                            willShow: glassTypeMatch && conditionMatch && tonsMatch
-                        });
+                    
+                    if(index === 0) {
+                        console.log('First card tons:', tons, 'Match:', tonsMatch);
                     }
-
+                    
                     if(glassTypeMatch && conditionMatch && tonsMatch){
                         visibleCards.push(c);
                     }
                 });
                 
-                console.log('Visible cards after filter:', visibleCards.length);
-                console.log('Glass type counts:', glassTypeCounts);
-                console.log('Condition counts:', conditionCounts);
-
                 itemsCount.textContent = visibleCards.length + ' items';
 
                 // update count labels in sidebar
@@ -503,21 +456,13 @@
                     const condition = input.value;
                     el.textContent = conditionCounts[condition] !== undefined ? conditionCounts[condition] : 0;
                 });
-
+                
                 // Reset to page 1 when filters change
                 currentPage = 1;
                 updatePagination();
-                console.log('=== FILTER COMPLETE ===\n');
             }
             
             function updatePagination(){
-                console.log('=== UPDATE PAGINATION CALLED ===');
-                console.log('Total cards:', cards.length);
-                console.log('Visible cards:', visibleCards.length);
-                console.log('Current page:', currentPage);
-                
-                const grid = document.querySelector('.grid');
-                
                 // Hide all cards first
                 cards.forEach(c => c.style.display = 'none');
                 
@@ -525,21 +470,11 @@
                 const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
                 const endIndex = startIndex + ITEMS_PER_PAGE;
                 
-                console.log('Start index:', startIndex, 'End index:', endIndex);
-                console.log('Cards to show:', visibleCards.slice(startIndex, endIndex).length);
-                
-                // Show cards for current page in the correct order
-                const cardsToShow = visibleCards.slice(startIndex, endIndex);
-                cardsToShow.forEach((c, idx) => {
-                    console.log(`Showing card ${idx}:`, c.getAttribute('data-glass-type'));
-                    c.style.display = '';
-                    // Reorder in DOM to match sorted order
-                    grid.appendChild(c);
-                });
+                // Show only cards for current page
+                visibleCards.slice(startIndex, endIndex).forEach(c => c.style.display = '');
                 
                 // Render pagination controls
                 renderPaginationControls(totalPages);
-                console.log('=== PAGINATION UPDATE COMPLETE ===\n');
             }
             
             function renderPaginationControls(totalPages){
@@ -669,30 +604,19 @@
             const sortSelect = document.getElementById('sortSelect');
             sortSelect.addEventListener('change', function() {
                 const sortValue = this.value;
-
-                if(sortValue === 'featured') {
-                    // No filters: restore original order (reset to cards array order)
-                    visibleCards.sort((a, b) => {
-                        return cards.indexOf(a) - cards.indexOf(b);
-                    });
-                } else if(sortValue === 'tons-low') {
-                    // Tons: Low to High
+                if(sortValue === 'tons-low') {
                     visibleCards.sort((a, b) => {
                         const tonsA = parseFloat(a.getAttribute('data-tons')) || 0;
                         const tonsB = parseFloat(b.getAttribute('data-tons')) || 0;
                         return tonsA - tonsB;
                     });
                 } else if(sortValue === 'tons-high') {
-                    // Tons: High to Low
                     visibleCards.sort((a, b) => {
                         const tonsA = parseFloat(a.getAttribute('data-tons')) || 0;
                         const tonsB = parseFloat(b.getAttribute('data-tons')) || 0;
                         return tonsB - tonsA;
                     });
                 }
-
-                // Reset to first page after sorting
-                currentPage = 1;
                 updatePagination();
             });
 
@@ -743,6 +667,21 @@
             syncRanges();
             applyFilters();
         })();
+    </script>
+
+    <!-- Klikbare cards script -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.card[data-id]').forEach(function(card) {
+            card.style.cursor = "pointer";
+            card.addEventListener('click', function() {
+                var id = card.getAttribute('data-id');
+                if (id) {
+                    window.location.href = 'listings.php?id=' + encodeURIComponent(id);
+                }
+            });
+        });
+    });
     </script>
 
 </main>

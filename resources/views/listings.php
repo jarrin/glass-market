@@ -83,7 +83,7 @@ if (!empty($listing['image_path'])) {
     </p>
 
     <div style="margin-top:30px;">
-      <a href="listings.php" class="btn btn-secondary">← Terug naar overzicht</a>
+      <a href="browse.php" class="btn btn-secondary">← Terug naar overzicht</a>
     </div>
   </div>
 </section>
