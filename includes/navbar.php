@@ -394,6 +394,7 @@ window.addEventListener('scroll', function() {
   <nav class="nav-links" role="navigation" aria-label="Primary">
     <a href="<?php echo VIEWS_URL; ?>/browse.php">Browse</a>
     <a href="<?php echo VIEWS_URL; ?>/categories.php">Categories</a>
+    <a href="<?php echo VIEWS_URL; ?>/sellers.php">Sellers</a>
     <a href="<?php echo VIEWS_URL; ?>/about.php">About</a>
   </nav>
 

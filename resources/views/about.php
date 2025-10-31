@@ -1,11 +1,62 @@
-<?php session_start(); ?>
-<?php require_once __DIR__ . '/../../config.php'; ?>
+<?php 
+session_start(); 
+
+// Database connection to fetch page content
+$db_host = '127.0.0.1';
+$db_name = 'glass_market';
+$db_user = 'root';
+$db_pass = '';
+
+$page_content = [];
+
+try {
+    $pdo = new PDO("mysql:host=$db_host;dbname=$db_name", $db_user, $db_pass);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    
+    // Fetch all content for the about-us page
+    $stmt = $pdo->prepare("
+        SELECT 
+            ps.section_key,
+            pc.content_value
+        FROM pages p
+        JOIN page_sections ps ON p.id = ps.page_id
+        LEFT JOIN page_content pc ON ps.id = pc.section_id
+        WHERE p.slug = 'about-us'
+        ORDER BY ps.display_order
+    ");
+    $stmt->execute();
+    $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Convert to associative array for easy access
+    foreach ($results as $row) {
+        $page_content[$row['section_key']] = $row['content_value'] ?? '';
+    }
+    
+} catch (PDOException $e) {
+    error_log("Error fetching page content: " . $e->getMessage());
+    // Use default values if database fails
+    $page_content = [
+        'hero_title' => 'About Glass Market',
+        'hero_subtitle' => 'Connecting the global glass recycling industry',
+        'mission_title' => 'Our Mission',
+        'mission_text' => 'Learn more about our mission.',
+        'vision_title' => 'Our Vision',
+        'vision_text' => 'Our vision for the future.',
+        'values_title' => 'Our Values',
+        'values_text' => 'Our core values.',
+        'team_title' => 'Our Team',
+        'team_text' => 'Meet our team.'
+    ];
+}
+
+require_once __DIR__ . '/../../config.php';
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>About Glass Market</title>
+  <title><?php echo htmlspecialchars($page_content['hero_title'] ?? 'About Glass Market'); ?></title>
   <link rel="stylesheet" href="../css/app.css">
 </head>
 <body>
@@ -16,15 +67,14 @@
   <!-- Hero -->
   <section class="hero hero-muted text-center">
     <div class="container">
-      <h1 class="page-title">About Glass Market</h1>
+      <h1 class="page-title"><?php echo htmlspecialchars($page_content['hero_title'] ?? 'About Glass Market'); ?></h1>
       <p class="page-subtitle">
-        The world's premier marketplace for glass art, crystals, and handcrafted glassware. 
-        Connecting artisans with collectors since 2020.
+        <?php echo nl2br(htmlspecialchars($page_content['hero_subtitle'] ?? 'Connecting the global glass recycling industry')); ?>
       </p>
     </div>
   </section>
 
-  <!-- Stats -->
+  <!-- Stats - These can be made dynamic later if needed -->
   <section class="stats">
     <div class="container">
       <div class="stats-row">
@@ -48,23 +98,22 @@
     </div>
   </section>
 
-  <!-- Story -->
+  <!-- Mission -->
+  <section class="mission text-center">
+    <div class="container">
+      <h2><?php echo htmlspecialchars($page_content['mission_title'] ?? 'Our Mission'); ?></h2>
+      <p>
+        <?php echo nl2br(htmlspecialchars($page_content['mission_text'] ?? 'Our mission statement.')); ?>
+      </p>
+    </div>
+  </section>
+
+  <!-- Vision -->
   <section class="story text-center">
     <div class="container">
-      <h2>Our Story</h2>
+      <h2><?php echo htmlspecialchars($page_content['vision_title'] ?? 'Our Vision'); ?></h2>
       <p>
-        Glass Market was born from a simple idea: to create a dedicated space where the beauty and artistry of
-        glass could be celebrated and shared. We recognized that glass art, from delicate crystal pieces to bold
-        contemporary sculptures, deserved a marketplace that understood its unique value.
-      </p>
-      <p>
-        What started as a small platform has grown into a thriving global community of artisans, collectors, and
-        enthusiasts. Today, we connect thousands of sellers with buyers who appreciate the craftsmanship,
-        history, and beauty of glass art.
-      </p>
-      <p>
-        Every piece on Glass Market tells a story—whether it's a traditional Venetian vase crafted using
-        centuries-old techniques or a modern art glass sculpture pushing creative boundaries.
+        <?php echo nl2br(htmlspecialchars($page_content['vision_text'] ?? 'Our vision statement.')); ?>
       </p>
     </div>
   </section>
@@ -72,56 +121,19 @@
  <!-- Values -->
 <section class="values">
   <div class="container text-center">
-    <h2>Our Values</h2>
-    <div class="values-grid">
-      <div class="card value">
-        <div class="card-content">
-          <div class="value-icon">🛡️</div>
-          <h4>Trust & Safety</h4>
-          <p>We prioritize secure transactions and buyer protection, ensuring every purchase is safe and reliable.</p>
-        </div>
-      </div>
-
-      <div class="card value">
-        <div class="card-content">
-          <div class="value-icon">👥</div>
-          <h4>Community First</h4>
-          <p>Supporting artisans and collectors worldwide, building connections through shared passion for glass art.</p>
-        </div>
-      </div>
-
-      <div class="card value">
-        <div class="card-content">
-          <div class="value-icon">🌍</div>
-          <h4>Global Marketplace</h4>
-          <p>Connecting buyers and sellers across continents, making unique glass pieces accessible to everyone.</p>
-        </div>
-      </div>
-
-      <div class="card value">
-        <div class="card-content">
-          <div class="value-icon">❤️</div>
-          <h4>Quality Craftsmanship</h4>
-          <p>Celebrating the artistry and skill of glassmakers, from traditional techniques to contemporary designs.</p>
-        </div>
-      </div>
-    </div>
+    <h2><?php echo htmlspecialchars($page_content['values_title'] ?? 'Our Values'); ?></h2>
+    <p style="max-width: 800px; margin: 0 auto 40px; color: #6b6460; line-height: 1.8;">
+      <?php echo nl2br(htmlspecialchars($page_content['values_text'] ?? 'Our core values.')); ?>
+    </p>
   </div>
 </section>
 
-
-  <!-- Mission -->
+  <!-- Team -->
   <section class="mission text-center">
     <div class="container">
-      <h2>Our Mission</h2>
+      <h2><?php echo htmlspecialchars($page_content['team_title'] ?? 'Our Team'); ?></h2>
       <p>
-        To preserve and promote the art of glassmaking by providing a trusted platform where artisans can
-        showcase their work and collectors can discover unique pieces from around the world.
-      </p>
-      <p>
-        We believe in fair practices, transparent transactions, and fostering meaningful connections between
-        makers and buyers. Every transaction on Glass Market supports independent artisans and helps keep
-        traditional crafts alive for future generations.
+        <?php echo nl2br(htmlspecialchars($page_content['team_text'] ?? 'Our team information.')); ?>
       </p>
     </div>
   </section>
