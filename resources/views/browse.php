@@ -630,19 +630,35 @@
             const sortSelect = document.getElementById('sortSelect');
             sortSelect.addEventListener('change', function() {
                 const sortValue = this.value;
-                if(sortValue === 'tons-low') {
+
+                if(sortValue === 'featured') {
+                    // Featured: restore original order (reset to cards array order)
+                    visibleCards.sort((a, b) => {
+                        return cards.indexOf(a) - cards.indexOf(b);
+                    });
+                } else if(sortValue === 'newest') {
+                    // Newest: reverse the original order
+                    visibleCards.sort((a, b) => {
+                        return cards.indexOf(b) - cards.indexOf(a);
+                    });
+                } else if(sortValue === 'tons-low') {
+                    // Tons: Low to High
                     visibleCards.sort((a, b) => {
                         const tonsA = parseFloat(a.getAttribute('data-tons')) || 0;
                         const tonsB = parseFloat(b.getAttribute('data-tons')) || 0;
                         return tonsA - tonsB;
                     });
                 } else if(sortValue === 'tons-high') {
+                    // Tons: High to Low
                     visibleCards.sort((a, b) => {
                         const tonsA = parseFloat(a.getAttribute('data-tons')) || 0;
                         const tonsB = parseFloat(b.getAttribute('data-tons')) || 0;
                         return tonsB - tonsA;
                     });
                 }
+
+                // Reset to first page after sorting
+                currentPage = 1;
                 updatePagination();
             });
 
