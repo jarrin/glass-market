@@ -28,6 +28,8 @@ $user = [
     'created_at' => null,
 ];
 
+$user_listings_count = 0;
+
 if ($user['id']) {
     try {
         $pdo = new PDO("mysql:host=$db_host;dbname=$db_name", $db_user, $db_pass);
@@ -38,6 +40,18 @@ if ($user['id']) {
         if ($dbUser) {
             $user = array_merge($user, $dbUser);
         }
+        
+        // Get user's listings count
+        $stmt = $pdo->prepare('
+            SELECT COUNT(*) as count
+            FROM listings l
+            LEFT JOIN companies c ON l.company_id = c.id
+            LEFT JOIN users u ON c.id = u.company_id
+            WHERE u.id = :user_id
+        ');
+        $stmt->execute(['user_id' => $user['id']]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $user_listings_count = $result['count'] ?? 0;
     } catch (PDOException $e) {
         // Silently continue with session data if DB fails
     }
@@ -657,11 +671,24 @@ if (isset($_SESSION['listing_success'])) {
         }
 
         .stat-card {
-            text-align: center;
-            padding: 20px;
-            background: #fafafa;
+            background: white;
+            padding: 24px;
             border-radius: 8px;
-            border: 1.5px solid #e0e0e0;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .stat-card.clickable {
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            color: inherit;
+        }
+
+        .stat-card.clickable:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            background: #fafafa;
         }
 
         .stat-number {
@@ -737,10 +764,10 @@ if (isset($_SESSION['listing_success'])) {
             <div class="profile-section">
                 <div class="section-title">Account Overview</div>
                 <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-number">0</div>
+                    <a href="<?php echo VIEWS_URL; ?>/my-listings.php" class="stat-card clickable">
+                        <div class="stat-number"><?php echo $user_listings_count; ?></div>
                         <div class="stat-label">Listings</div>
-                    </div>
+                    </a>
                     <div class="stat-card">
                         <div class="stat-number">0</div>
                         <div class="stat-label">Orders</div>
@@ -750,6 +777,100 @@ if (isset($_SESSION['listing_success'])) {
                         <div class="stat-label">Reviews</div>
                     </div>
                 </div>
+            </div>
+
+                        <!-- Add New Glass Listing -->
+            <div class="profile-section">
+                <div class="section-title">Add New Glass Listing</div>
+                <p style="font-size: 13px; color: #666; margin-bottom: 20px;">List your green, white, or brown glass. Price will be negotiated after listing.</p>
+                
+                <?php if ($error_message): ?>
+                    <div class="alert alert-danger">
+                        <?php echo htmlspecialchars($error_message); ?>
+                    </div>
+                <?php endif; ?>
+
+                <?php if ($success_message): ?>
+                    <div class="alert alert-success">
+                        <?php echo htmlspecialchars($success_message); ?>
+                    </div>
+                <?php endif; ?>
+                
+                <form method="POST" action="" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="glass_title">Listing Title</label>
+                        <input
+                            type="text"
+                            id="glass_title"
+                            name="glass_title"
+                            placeholder="e.g., Premium Green Glass - High Quality"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="glass_type">Glass Type</label>
+                        <select
+                            id="glass_type"
+                            name="glass_type"
+                            style="width: 100%; padding: 12px 14px; font-size: 14px; border: 1.5px solid #ddd; border-radius: 6px; background: #fafafa;"
+                            required
+                        >
+                            <option value="">Select glass type...</option>
+                            <option value="green">Green Glass</option>
+                            <option value="white">White Glass</option>
+                            <option value="brown">Brown Glass</option>
+                            <option value="clear">Clear Glass</option>
+                            <option value="mixed">Mixed Glass</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="glass_tons">Tonnage (Tons)</label>
+                        <input
+                            type="number"
+                            id="glass_tons"
+                            name="glass_tons"
+                            placeholder="0.00"
+                            step="0.01"
+                            min="0"
+                            required
+                        >
+                        <small style="font-size: 11px; color: #999;">Specify the total weight in tons</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="glass_description">Quality Notes / Description</label>
+                        <textarea
+                            id="glass_description"
+                            name="glass_description"
+                            rows="4"
+                            placeholder="Describe the glass quality, condition, source, etc..."
+                            style="width: 100%; padding: 12px 14px; font-size: 14px; border: 1.5px solid #ddd; border-radius: 6px; background: #fafafa; font-family: inherit; resize: vertical;"
+                        ></textarea>
+                        <small style="font-size: 11px; color: #999;">Optional - Add any quality notes or additional information</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="glass_image">Product Image</label>
+                        <input
+                            type="file"
+                            id="glass_image"
+                            name="glass_image"
+                            accept="image/jpeg,image/jpg,image/png,image/webp"
+                            style="width: 100%; padding: 12px 14px; font-size: 14px; border: 1.5px solid #ddd; border-radius: 6px; background: #fafafa;"
+                        >
+                        <small style="font-size: 11px; color: #999;">Upload a photo of your glass (JPG, PNG, or WebP - Max 5MB)</small>
+                    </div>
+
+                    <div style="background: #fffbeb; padding: 12px; border-radius: 6px; margin-bottom: 20px; font-size: 12px; color: #92400e;">
+                        💡 <strong>Note:</strong> Price will be negotiated directly with buyers. Your listing will be published immediately.
+                    </div>
+
+                    <div style="margin-top: 24px;">
+                        <button type="submit" name="add_listing" class="btn btn-primary">Create Listing</button>
+                    </div>
+                </form>
             </div>
 
             <!-- Edit Profile -->
@@ -1138,100 +1259,7 @@ if (isset($_SESSION['listing_success'])) {
                 </div>
             </div>
 
-            <!-- Add New Glass Listing -->
-            <div class="profile-section">
-                <div class="section-title">Add New Glass Listing</div>
-                <p style="font-size: 13px; color: #666; margin-bottom: 20px;">List your green, white, or brown glass. Price will be negotiated after listing.</p>
-                
-                <?php if ($error_message): ?>
-                    <div class="alert alert-danger">
-                        <?php echo htmlspecialchars($error_message); ?>
-                    </div>
-                <?php endif; ?>
 
-                <?php if ($success_message): ?>
-                    <div class="alert alert-success">
-                        <?php echo htmlspecialchars($success_message); ?>
-                    </div>
-                <?php endif; ?>
-                
-                <form method="POST" action="" enctype="multipart/form-data">
-                    <div class="form-group">
-                        <label for="glass_title">Listing Title</label>
-                        <input
-                            type="text"
-                            id="glass_title"
-                            name="glass_title"
-                            placeholder="e.g., Premium Green Glass - High Quality"
-                            required
-                        >
-                    </div>
-
-                    <div class="form-group">
-                        <label for="glass_type">Glass Type</label>
-                        <select
-                            id="glass_type"
-                            name="glass_type"
-                            style="width: 100%; padding: 12px 14px; font-size: 14px; border: 1.5px solid #ddd; border-radius: 6px; background: #fafafa;"
-                            required
-                        >
-                            <option value="">Select glass type...</option>
-                            <option value="green">Green Glass</option>
-                            <option value="white">White Glass</option>
-                            <option value="brown">Brown Glass</option>
-                            <option value="clear">Clear Glass</option>
-                            <option value="mixed">Mixed Glass</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="glass_tons">Tonnage (Tons)</label>
-                        <input
-                            type="number"
-                            id="glass_tons"
-                            name="glass_tons"
-                            placeholder="0.00"
-                            step="0.01"
-                            min="0"
-                            required
-                        >
-                        <small style="font-size: 11px; color: #999;">Specify the total weight in tons</small>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="glass_description">Quality Notes / Description</label>
-                        <textarea
-                            id="glass_description"
-                            name="glass_description"
-                            rows="4"
-                            placeholder="Describe the glass quality, condition, source, etc..."
-                            style="width: 100%; padding: 12px 14px; font-size: 14px; border: 1.5px solid #ddd; border-radius: 6px; background: #fafafa; font-family: inherit; resize: vertical;"
-                        ></textarea>
-                        <small style="font-size: 11px; color: #999;">Optional - Add any quality notes or additional information</small>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="glass_image">Product Image</label>
-                        <input
-                            type="file"
-                            id="glass_image"
-                            name="glass_image"
-                            accept="image/jpeg,image/jpg,image/png,image/webp"
-                            style="width: 100%; padding: 12px 14px; font-size: 14px; border: 1.5px solid #ddd; border-radius: 6px; background: #fafafa;"
-                        >
-                        <small style="font-size: 11px; color: #999;">Upload a photo of your glass (JPG, PNG, or WebP - Max 5MB)</small>
-                    </div>
-
-                    <div style="background: #fffbeb; padding: 12px; border-radius: 6px; margin-bottom: 20px; font-size: 12px; color: #92400e;">
-                        💡 <strong>Note:</strong> Price will be negotiated directly with buyers. Your listing will be published immediately.
-                    </div>
-
-                    <div style="margin-top: 24px;">
-                        <button type="submit" name="add_listing" class="btn btn-primary">Create Listing</button>
-                    </div>
-                </form>
-            </div>
-        </div>
     </main>
     
     <script>
