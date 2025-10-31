@@ -93,6 +93,24 @@ $admin_email = $_SESSION['user_email'] ?? '';
                     <p>Admin Dashboard</p>
                 </div>
             </div>
+            <div class="header-nav">
+                <div class="nav-dropdown">
+                    <button class="nav-dropdown-btn">
+                        Manage Pages
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                        </svg>
+                    </button>
+                    <div class="nav-dropdown-menu">
+                        <a href="pages/edit.php?page=about-us" class="nav-dropdown-item">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="18" height="18">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                            </svg>
+                            About Us
+                        </a>
+                    </div>
+                </div>
+            </div>
             <div class="header-actions">
                 <div class="user-profile">
                     <div class="user-avatar">
