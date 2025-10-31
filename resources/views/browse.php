@@ -313,6 +313,32 @@
             <div class="divider"></div>
 
             <div class="panel">
+                <h4>Condition</h4>
+                <ul class="filter-list" id="conditions-list">
+                    <?php
+                        $allConditions = ['New', 'Like New', 'Vintage'];
+                        // compute counts from products
+                        $conditionCounts = array_fill_keys($allConditions, 0);
+                        if(isset($products) && is_array($products)){
+                            foreach($products as $pp){
+                                if(isset($pp['condition']) && isset($conditionCounts[$pp['condition']])){
+                                    $conditionCounts[$pp['condition']]++;
+                                }
+                            }
+                        }
+                        foreach($allConditions as $condition){
+                            $count = isset($conditionCounts[$condition]) ? $conditionCounts[$condition] : 0;
+                            // sanitize id for input
+                            $id = 'condition_' . preg_replace('/[^a-z0-9]+/i','_', strtolower($condition));
+                            echo "<li><label><input type=\"checkbox\" class=\"condition-filter\" id=\"$id\" value=\"".htmlspecialchars($condition,ENT_QUOTES,'UTF-8')."\"> <span>".htmlspecialchars($condition,ENT_QUOTES,'UTF-8')."</span></label> <span class=\"count\">$count</span></li>";
+                        }
+                    ?>
+                </ul>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="panel">
                 <button id="clear-filters" style="width:100%;padding:10px;border:1px solid #6b6460;background:#fff;color:#6b6460;border-radius:4px;cursor:pointer;">Clear All Filters</button>
             </div>
         </aside>
@@ -414,8 +440,8 @@
                 visibleCards = [];
                 
                 cards.forEach(c=>{
-                    const glassType = c.getAttribute('data-glass-type');
-                    const condition = c.getAttribute('data-condition');
+                    const glassType = (c.getAttribute('data-glass-type') || '').trim();
+                    const condition = (c.getAttribute('data-condition') || '').trim();
                     const tons = parseFloat(c.getAttribute('data-tons')) || 0;
                     const tonsMatch = tons >= min && tons <= max;
                     const glassTypeMatch = activeGlassTypes.length ? activeGlassTypes.indexOf(glassType) !== -1 : true;
@@ -432,8 +458,8 @@
                 });
 
                 cards.forEach((c, index) => {
-                    const glassType = c.getAttribute('data-glass-type');
-                    const condition = c.getAttribute('data-condition');
+                    const glassType = (c.getAttribute('data-glass-type') || '').trim();
+                    const condition = (c.getAttribute('data-condition') || '').trim();
                     const tons = parseFloat(c.getAttribute('data-tons')) || 0;
                     const glassTypeMatch = activeGlassTypes.length ? activeGlassTypes.indexOf(glassType) !== -1 : true;
                     const conditionMatch = activeConditions.length ? activeConditions.indexOf(condition) !== -1 : true;
@@ -442,9 +468,11 @@
                     // Log first 3 cards for debugging
                     if(index < 3) {
                         console.log(`Card ${index}:`, {
-                            glassType,
+                            glassType: `"${glassType}"`,
+                            activeGlassTypes,
+                            indexOfResult: activeGlassTypes.indexOf(glassType),
                             glassTypeMatch,
-                            condition,
+                            condition: `"${condition}"`,
                             conditionMatch,
                             tons,
                             tonsMatch,
@@ -484,6 +512,13 @@
             }
             
             function updatePagination(){
+                console.log('=== UPDATE PAGINATION CALLED ===');
+                console.log('Total cards:', cards.length);
+                console.log('Visible cards:', visibleCards.length);
+                console.log('Current page:', currentPage);
+                
+                const grid = document.querySelector('.grid');
+                
                 // Hide all cards first
                 cards.forEach(c => c.style.display = 'none');
                 
@@ -491,11 +526,21 @@
                 const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
                 const endIndex = startIndex + ITEMS_PER_PAGE;
                 
-                // Show only cards for current page
-                visibleCards.slice(startIndex, endIndex).forEach(c => c.style.display = '');
+                console.log('Start index:', startIndex, 'End index:', endIndex);
+                console.log('Cards to show:', visibleCards.slice(startIndex, endIndex).length);
+                
+                // Show cards for current page in the correct order
+                const cardsToShow = visibleCards.slice(startIndex, endIndex);
+                cardsToShow.forEach((c, idx) => {
+                    console.log(`Showing card ${idx}:`, c.getAttribute('data-glass-type'));
+                    c.style.display = '';
+                    // Reorder in DOM to match sorted order
+                    grid.appendChild(c);
+                });
                 
                 // Render pagination controls
                 renderPaginationControls(totalPages);
+                console.log('=== PAGINATION UPDATE COMPLETE ===\n');
             }
             
             function renderPaginationControls(totalPages){
