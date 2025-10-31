@@ -313,32 +313,6 @@
             <div class="divider"></div>
 
             <div class="panel">
-                <h4>Condition</h4>
-                <ul class="filter-list" id="conditions-list">
-                    <?php
-                        $allConditions = ['New', 'Like New', 'Vintage'];
-                        // compute counts from products
-                        $conditionCounts = array_fill_keys($allConditions, 0);
-                        if(isset($products) && is_array($products)){
-                            foreach($products as $pp){
-                                if(isset($pp['condition']) && isset($conditionCounts[$pp['condition']])){
-                                    $conditionCounts[$pp['condition']]++;
-                                }
-                            }
-                        }
-                        foreach($allConditions as $condition){
-                            $count = isset($conditionCounts[$condition]) ? $conditionCounts[$condition] : 0;
-                            // sanitize id for input
-                            $id = 'condition_' . preg_replace('/[^a-z0-9]+/i','_', strtolower($condition));
-                            echo "<li><label><input type=\"checkbox\" class=\"condition-filter\" id=\"$id\" value=\"".htmlspecialchars($condition,ENT_QUOTES,'UTF-8')."\"> <span>".htmlspecialchars($condition,ENT_QUOTES,'UTF-8')."</span></label> <span class=\"count\">$count</span></li>";
-                        }
-                    ?>
-                </ul>
-            </div>
-
-            <div class="divider"></div>
-
-            <div class="panel">
                 <button id="clear-filters" style="width:100%;padding:10px;border:1px solid #6b6460;background:#fff;color:#6b6460;border-radius:4px;cursor:pointer;">Clear All Filters</button>
             </div>
         </aside>
