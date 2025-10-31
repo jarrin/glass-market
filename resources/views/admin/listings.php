@@ -51,8 +51,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['approve_listing'])) {
     exit;
 }
 
-// Handle listing rejection
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reject_listing'])) {
+// Handle listing rejection/deletion
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && (isset($_POST['reject_listing']) || isset($_POST['delete_listing']))) {
     $listing_id = $_POST['listing_id'] ?? 0;
     
     try {
@@ -62,9 +62,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reject_listing'])) {
         $stmt = $pdo->prepare('DELETE FROM listings WHERE id = :id');
         $stmt->execute(['id' => $listing_id]);
         
-        $_SESSION['admin_success'] = 'Listing rejected and deleted successfully!';
+        $_SESSION['admin_success'] = 'Listing deleted successfully!';
     } catch (PDOException $e) {
-        $_SESSION['admin_error'] = 'Failed to reject listing: ' . $e->getMessage();
+        $_SESSION['admin_error'] = 'Failed to delete listing: ' . $e->getMessage();
     }
     
     // Redirect to prevent form resubmission
@@ -82,37 +82,36 @@ if (isset($_SESSION['admin_error'])) {
     unset($_SESSION['admin_error']);
 }
 
-// Load pending listings
-$pending_listings = [];
-$approved_listings = [];
+// Load all listings
+$all_listings = [];
+$total_listings = 0;
+$published_count = 0;
+$pending_count = 0;
 
 try {
     $pdo = new PDO("mysql:host=$db_host;dbname=$db_name", $db_user, $db_pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
-    // Get pending listings with company info
+    // Get all listings with company info
     $stmt = $pdo->prepare('
         SELECT l.*, c.name as company_name, u.name as user_name, u.email as user_email
         FROM listings l
         LEFT JOIN companies c ON l.company_id = c.id
         LEFT JOIN users u ON c.id = u.company_id
-        WHERE l.published = 0
         ORDER BY l.created_at DESC
     ');
     $stmt->execute();
-    $pending_listings = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $all_listings = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    // Get approved listings
-    $stmt = $pdo->prepare('
-        SELECT l.*, c.name as company_name
-        FROM listings l
-        LEFT JOIN companies c ON l.company_id = c.id
-        WHERE l.published = 1
-        ORDER BY l.created_at DESC
-        LIMIT 20
-    ');
-    $stmt->execute();
-    $approved_listings = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    // Calculate stats
+    $total_listings = count($all_listings);
+    foreach ($all_listings as $listing) {
+        if ($listing['published'] == 1) {
+            $published_count++;
+        } else {
+            $pending_count++;
+        }
+    }
     
 } catch (PDOException $e) {
     $error_message = 'Failed to load listings: ' . $e->getMessage();
@@ -199,9 +198,23 @@ try {
 
         .listing-header {
             display: flex;
-            justify-content: space-between;
+            gap: 16px;
             align-items: start;
             margin-bottom: 12px;
+        }
+
+        .listing-thumbnail {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+            flex-shrink: 0;
+        }
+
+        .listing-content {
+            flex: 1;
+            min-width: 0;
         }
 
         .listing-title {
@@ -335,22 +348,22 @@ try {
         <div class="admin-container">
             <div class="admin-header">
                 <h1>🛡️ Admin - Manage Listings</h1>
-                <a href="<?php echo PUBLIC_URL; ?>/index.php" class="btn btn-back">Back to Site</a>
+                <a href="<?php echo VIEWS_URL; ?>/admin/dashboard.php" class="btn btn-back">Back to dashboard</a>
             </div>
 
             <!-- Stats -->
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-number"><?php echo count($pending_listings); ?></div>
+                    <div class="stat-number"><?php echo $total_listings; ?></div>
+                    <div class="stat-label">Total Listings</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number"><?php echo $published_count; ?></div>
+                    <div class="stat-label">Published</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number"><?php echo $pending_count; ?></div>
                     <div class="stat-label">Pending Approval</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number"><?php echo count($approved_listings); ?></div>
-                    <div class="stat-label">Recently Approved</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number"><?php echo count($pending_listings) + count($approved_listings); ?></div>
-                    <div class="stat-label">Total Managed</div>
                 </div>
             </div>
 
@@ -366,18 +379,32 @@ try {
                 </div>
             <?php endif; ?>
 
-            <!-- Pending Listings -->
+            <!-- All Listings -->
             <div class="admin-section">
-                <div class="section-title">⏳ Pending Listings (<?php echo count($pending_listings); ?>)</div>
+                <div class="section-title">📋 All Listings (<?php echo $total_listings; ?>)</div>
                 
-                <?php if (count($pending_listings) > 0): ?>
-                    <?php foreach ($pending_listings as $listing): ?>
+                <?php if (count($all_listings) > 0): ?>
+                    <?php foreach ($all_listings as $listing): ?>
+                        <?php
+                            // Determine image URL
+                            $imageUrl = "https://picsum.photos/seed/glass{$listing['id']}/400/400";
+                            if (!empty($listing['image_path'])) {
+                                $imageUrl = PUBLIC_URL . '/' . $listing['image_path'];
+                            }
+                        ?>
                         <div class="listing-card">
                             <div class="listing-header">
-                                <div style="flex: 1;">
+                                <img src="<?php echo htmlspecialchars($imageUrl, ENT_QUOTES, 'UTF-8'); ?>" 
+                                     alt="<?php echo htmlspecialchars($listing['quantity_note'] ?? 'Product', ENT_QUOTES, 'UTF-8'); ?>" 
+                                     class="listing-thumbnail">
+                                <div class="listing-content">
                                     <div class="listing-title">
                                         <?php echo htmlspecialchars($listing['quantity_note'] ?? 'Untitled Listing'); ?>
-                                        <span class="badge badge-pending">Pending</span>
+                                        <?php if ($listing['published'] == 1): ?>
+                                            <span class="badge badge-published">Published</span>
+                                        <?php else: ?>
+                                            <span class="badge badge-pending">Pending</span>
+                                        <?php endif; ?>
                                     </div>
                                     <div class="listing-meta">
                                         <strong>Type:</strong> <?php echo htmlspecialchars($listing['glass_type']); ?> | 
@@ -404,13 +431,15 @@ try {
                             <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e0e0e0;">
                                 <form method="POST" style="display: inline;">
                                     <input type="hidden" name="listing_id" value="<?php echo $listing['id']; ?>">
-                                    <button type="submit" name="approve_listing" class="btn btn-approve" 
-                                            onclick="return confirm('Approve this listing and make it live?')">
-                                        ✓ Approve & Publish
-                                    </button>
-                                    <button type="submit" name="reject_listing" class="btn btn-reject"
-                                            onclick="return confirm('Are you sure you want to reject and delete this listing?')">
-                                        ✗ Reject & Delete
+                                    <?php if ($listing['published'] == 0): ?>
+                                        <button type="submit" name="approve_listing" class="btn btn-approve" 
+                                                onclick="return confirm('Approve this listing and make it live?')">
+                                            ✓ Approve & Publish
+                                        </button>
+                                    <?php endif; ?>
+                                    <button type="submit" name="delete_listing" class="btn btn-reject"
+                                            onclick="return confirm('Are you sure you want to delete this listing? This cannot be undone.')">
+                                        🗑️ Delete
                                     </button>
                                 </form>
                             </div>
@@ -418,32 +447,7 @@ try {
                     <?php endforeach; ?>
                 <?php else: ?>
                     <div class="empty-state">
-                        <p>✅ No pending listings. All caught up!</p>
-                    </div>
-                <?php endif; ?>
-            </div>
-
-            <!-- Recently Approved Listings -->
-            <div class="admin-section">
-                <div class="section-title">✅ Recently Approved (Last 20)</div>
-                
-                <?php if (count($approved_listings) > 0): ?>
-                    <?php foreach ($approved_listings as $listing): ?>
-                        <div class="listing-card">
-                            <div class="listing-title">
-                                <?php echo htmlspecialchars($listing['quantity_note'] ?? 'Untitled Listing'); ?>
-                                <span class="badge badge-published">Published</span>
-                            </div>
-                            <div class="listing-meta">
-                                <strong>Type:</strong> <?php echo htmlspecialchars($listing['glass_type']); ?> | 
-                                <strong>Quantity:</strong> <?php echo htmlspecialchars($listing['quantity_tons']); ?> tons | 
-                                <strong>Company:</strong> <?php echo htmlspecialchars($listing['company_name'] ?? 'N/A'); ?>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <div class="empty-state">
-                        <p>No approved listings yet.</p>
+                        <p>No listings found.</p>
                     </div>
                 <?php endif; ?>
             </div>
