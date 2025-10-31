@@ -61,25 +61,15 @@ if (!empty($listing['image_path'])) {
       <p><em><?= htmlspecialchars($listing['glass_type_other']) ?></em></p>
     <?php endif; ?>
 
-    <p><strong>Locatie opslag:</strong> <?= htmlspecialchars($listing['storage_location'] ?? 'Onbekend') ?></p>
-    <p><strong>Recycled:</strong> <?= htmlspecialchars($listing['recycled']) ?></p>
-    <p><strong>Getest:</strong> <?= htmlspecialchars($listing['tested']) ?></p>
 
-    <p><strong>Kwaliteit:</strong><br>
+
+    <p><strong>Beschrijving</strong><br>
       <?= nl2br(htmlspecialchars($listing['quality_notes'] ?? 'Geen opmerkingen')) ?>
     </p>
 
     <p><strong>Hoeveelheid:</strong>
       <?= htmlspecialchars($listing['quantity_tons'] ?? '-') ?> ton
       <?= $listing['quantity_note'] ? '(' . htmlspecialchars($listing['quantity_note']) . ')' : '' ?>
-    </p>
-
-    <p><strong>Prijs:</strong>
-      <?= $listing['price_text'] ? htmlspecialchars($listing['price_text']) . ' ' . htmlspecialchars($listing['currency']) : 'Prijs op aanvraag' ?>
-    </p>
-
-    <p><strong>Beschikbaar tot:</strong>
-      <?= $listing['valid_until'] ? htmlspecialchars($listing['valid_until']) : 'Onbekend' ?>
     </p>
 
     <div style="margin-top:30px;">
