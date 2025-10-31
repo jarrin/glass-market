@@ -329,8 +329,8 @@ $selected_plan = $_SESSION['selected_plan'] ?? null;
                     <li>Email support</li>
                 </ul>
                 <?php if ($is_logged_in): ?>
-                    <a href="/glass-market/resources/views/admin/sandbox.php" class="plan-button plan-button-secondary">
-                        Manage in Admin
+                    <a href="/glass-market/resources/views/create-payment.php?plan=trial" class="plan-button plan-button-secondary">
+                        Start Free Trial
                     </a>
                 <?php else: ?>
                     <a href="/glass-market/resources/views/register.php?plan=trial" class="plan-button plan-button-secondary">
@@ -358,8 +358,8 @@ $selected_plan = $_SESSION['selected_plan'] ?? null;
                     <li>No commitment</li>
                 </ul>
                 <?php if ($is_logged_in): ?>
-                    <a href="/glass-market/resources/views/admin/sandbox.php?plan=monthly" class="plan-button plan-button-primary">
-                        Test Payment
+                    <a href="/glass-market/resources/views/create-payment.php?plan=monthly" class="plan-button plan-button-primary">
+                        Subscribe Now
                     </a>
                 <?php else: ?>
                     <a href="/glass-market/resources/views/register.php?plan=monthly" class="plan-button plan-button-primary">
@@ -387,8 +387,8 @@ $selected_plan = $_SESSION['selected_plan'] ?? null;
                     <li>Early feature access</li>
                 </ul>
                 <?php if ($is_logged_in): ?>
-                    <a href="/glass-market/resources/views/admin/sandbox.php?plan=annual" class="plan-button plan-button-secondary">
-                        Test Payment
+                    <a href="/glass-market/resources/views/create-payment.php?plan=annual" class="plan-button plan-button-secondary">
+                        Subscribe Now
                     </a>
                 <?php else: ?>
                     <a href="/glass-market/resources/views/register.php?plan=annual" class="plan-button plan-button-secondary">

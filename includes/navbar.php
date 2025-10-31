@@ -1,6 +1,6 @@
 <?php
 // Blurry glass navbar include
-// Usage: <?php include __DIR__ . '/includes/navbar.php'; ?>
+// Usage: <?php include __DIR__ . '/includes/navbar.php'; 
 
 // Start session if not already started
 if (session_status() === PHP_SESSION_NONE) {
@@ -14,6 +14,7 @@ $user_email = $is_logged_in ? ($_SESSION['user_email'] ?? '') : '';
 $user_avatar = $is_logged_in ? ($_SESSION['user_avatar'] ?? '') : '';
 $is_admin = $is_logged_in ? ($_SESSION['is_admin'] ?? 0) : 0;
 ?>
+
 <style>
 /* Navbar root */
 .glass-navbar {
@@ -148,7 +149,34 @@ $is_admin = $is_logged_in ? ($_SESSION['is_admin'] ?? 0) : 0;
 .auth-buttons {
   display: flex;
   gap: 10px;
+  align-items: center;
   margin-left: 12px;
+}
+
+/* User info display */
+.user-info-display {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.3);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.3);
+  transition: all 0.2s ease;
+}
+
+.user-info-display:hover {
+  background: rgba(255,255,255,0.4);
+  border-color: rgba(255,255,255,0.4);
+}
+
+.user-name-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(10,10,10,0.9);
+  white-space: nowrap;
 }
 
 .btn-login, .btn-register {
@@ -318,12 +346,17 @@ $is_admin = $is_logged_in ? ($_SESSION['is_admin'] ?? 0) : 0;
   .glass-navbar .nav-links { display: none; }
 }
 
+@media (max-width: 680px) {
+  .user-name-text { display: none; } /* Hide name on smaller screens */
+  .user-info-display { padding: 0; background: none; border: none; }
+}
+
 @media (max-width: 480px) {
   .glass-navbar { padding: 8px 12px; }
   .glass-navbar .search { display: none; }
-  .btn-login, .btn-register { 
-    padding: 6px 12px; 
-    font-size: 13px; 
+  .btn-login, .btn-register {
+    padding: 6px 12px;
+    font-size: 13px;
   }
   .auth-buttons { margin-left: auto; }
   .user-profile { margin-left: auto; }
@@ -369,20 +402,24 @@ window.addEventListener('scroll', function() {
     <input type="search" placeholder="Search glass art, crystals..." aria-label="Search">
   </div>
 
-  <!-- Profile Icon (always visible) -->
   <div class="auth-buttons">
-    <a href="<?php echo VIEWS_URL; ?>/profile.php" class="icon-circle" title="Profile">
-      <?php if (isset($is_logged_in) && $is_logged_in && !empty($user_avatar)): ?>
-        <img src="<?php echo htmlspecialchars($user_avatar); ?>" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
-      <?php else: ?>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-          <circle cx="12" cy="7" r="4"></circle>
-        </svg>
-      <?php endif; ?>
-    </a>
     <?php if (isset($is_logged_in) && $is_logged_in): ?>
-      <?php if ($is_admin == 1): ?>
+      <!-- Logged in: Show user info -->
+      <div class="user-info-display">
+        <a href="<?php echo VIEWS_URL; ?>/profile.php" class="icon-circle" title="Profile" style="margin: 0;">
+          <?php if (!empty($user_avatar)): ?>
+            <img src="<?php echo htmlspecialchars($user_avatar); ?>" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+          <?php else: ?>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          <?php endif; ?>
+        </a>
+        <span class="user-name-text"><?php echo htmlspecialchars($user_name); ?></span>
+      </div>
+
+      <?php if (isset($is_admin) && $is_admin == 1): ?>
         <a href="<?php echo VIEWS_URL; ?>/admin/dashboard.php" class="btn-register" style="display: flex; align-items: center; gap: 6px;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
@@ -392,8 +429,16 @@ window.addEventListener('scroll', function() {
           Admin
         </a>
       <?php endif; ?>
+
       <a href="<?php echo VIEWS_URL; ?>/logout.php" class="btn-login">Logout</a>
     <?php else: ?>
+      <!-- Not logged in: Show profile icon + login/register -->
+      <a href="<?php echo VIEWS_URL; ?>/profile.php" class="icon-circle" title="Profile">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+      </a>
       <a href="<?php echo VIEWS_URL; ?>/login.php" class="btn-login">Login</a>
       <a href="<?php echo VIEWS_URL; ?>/register.php" class="btn-register">Register</a>
     <?php endif; ?>

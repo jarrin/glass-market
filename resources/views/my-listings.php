@@ -1,25 +1,13 @@
 <?php
 session_start();
 
-// Load config
-$config_path = dirname(dirname(dirname(__DIR__))) . '/config.php';
-if (file_exists($config_path)) {
-    require_once $config_path;
-} else {
-    die('Config file not found at: ' . $config_path);
-}
+require_once __DIR__ . '/../../config.php';
 
-// Require admin authentication
+// Require authentication
 if (!isset($_SESSION['user_logged_in']) || $_SESSION['user_logged_in'] !== true) {
     header('Location: ' . VIEWS_URL . '/login.php');
     exit;
 }
-
-// Check if user is admin
-// if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] != 1) {
-//     header('Location: ' . PUBLIC_URL . '/index.php');
-//     exit;
-// }
 
 // Database credentials
 $db_host = '127.0.0.1';
@@ -30,60 +18,88 @@ $db_pass = '';
 $error_message = '';
 $success_message = '';
 
-// Handle listing approval
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['approve_listing'])) {
+// Get user info
+$user_id = $_SESSION['user_id'] ?? null;
+
+// Handle listing deletion
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_listing'])) {
     $listing_id = $_POST['listing_id'] ?? 0;
     
     try {
         $pdo = new PDO("mysql:host=$db_host;dbname=$db_name", $db_user, $db_pass);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         
-        $stmt = $pdo->prepare('UPDATE listings SET published = 1 WHERE id = :id');
-        $stmt->execute(['id' => $listing_id]);
+        // Verify the listing belongs to the user's company
+        $stmt = $pdo->prepare('
+            SELECT l.id FROM listings l
+            LEFT JOIN companies c ON l.company_id = c.id
+            LEFT JOIN users u ON c.id = u.company_id
+            WHERE l.id = :listing_id AND u.id = :user_id
+        ');
+        $stmt->execute(['listing_id' => $listing_id, 'user_id' => $user_id]);
         
-        $_SESSION['admin_success'] = 'Listing approved and published successfully!';
+        if ($stmt->fetch()) {
+            $stmt = $pdo->prepare('DELETE FROM listings WHERE id = :id');
+            $stmt->execute(['id' => $listing_id]);
+            $_SESSION['listing_success'] = 'Listing deleted successfully!';
+        } else {
+            $_SESSION['listing_error'] = 'You do not have permission to delete this listing.';
+        }
     } catch (PDOException $e) {
-        $_SESSION['admin_error'] = 'Failed to approve listing: ' . $e->getMessage();
+        $_SESSION['listing_error'] = 'Failed to delete listing: ' . $e->getMessage();
     }
     
-    // Redirect to prevent form resubmission
     header('Location: ' . $_SERVER['PHP_SELF']);
     exit;
 }
 
-// Handle listing rejection/deletion
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && (isset($_POST['reject_listing']) || isset($_POST['delete_listing']))) {
+// Handle listing publish/unpublish toggle
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_publish'])) {
     $listing_id = $_POST['listing_id'] ?? 0;
+    $new_status = $_POST['new_status'] ?? 0;
     
     try {
         $pdo = new PDO("mysql:host=$db_host;dbname=$db_name", $db_user, $db_pass);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         
-        $stmt = $pdo->prepare('DELETE FROM listings WHERE id = :id');
-        $stmt->execute(['id' => $listing_id]);
+        // Verify the listing belongs to the user's company
+        $stmt = $pdo->prepare('
+            SELECT l.id FROM listings l
+            LEFT JOIN companies c ON l.company_id = c.id
+            LEFT JOIN users u ON c.id = u.company_id
+            WHERE l.id = :listing_id AND u.id = :user_id
+        ');
+        $stmt->execute(['listing_id' => $listing_id, 'user_id' => $user_id]);
         
-        $_SESSION['admin_success'] = 'Listing deleted successfully!';
+        if ($stmt->fetch()) {
+            $stmt = $pdo->prepare('UPDATE listings SET published = :status WHERE id = :id');
+            $stmt->execute(['status' => $new_status, 'id' => $listing_id]);
+            
+            $status_text = $new_status == 1 ? 'published' : 'unpublished';
+            $_SESSION['listing_success'] = "Listing {$status_text} successfully!";
+        } else {
+            $_SESSION['listing_error'] = 'You do not have permission to modify this listing.';
+        }
     } catch (PDOException $e) {
-        $_SESSION['admin_error'] = 'Failed to delete listing: ' . $e->getMessage();
+        $_SESSION['listing_error'] = 'Failed to update listing: ' . $e->getMessage();
     }
     
-    // Redirect to prevent form resubmission
     header('Location: ' . $_SERVER['PHP_SELF']);
     exit;
 }
 
 // Get messages from session and clear them
-if (isset($_SESSION['admin_success'])) {
-    $success_message = $_SESSION['admin_success'];
-    unset($_SESSION['admin_success']);
+if (isset($_SESSION['listing_success'])) {
+    $success_message = $_SESSION['listing_success'];
+    unset($_SESSION['listing_success']);
 }
-if (isset($_SESSION['admin_error'])) {
-    $error_message = $_SESSION['admin_error'];
-    unset($_SESSION['admin_error']);
+if (isset($_SESSION['listing_error'])) {
+    $error_message = $_SESSION['listing_error'];
+    unset($_SESSION['listing_error']);
 }
 
-// Load all listings
-$all_listings = [];
+// Load user's listings
+$my_listings = [];
 $total_listings = 0;
 $published_count = 0;
 $pending_count = 0;
@@ -92,20 +108,21 @@ try {
     $pdo = new PDO("mysql:host=$db_host;dbname=$db_name", $db_user, $db_pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
-    // Get all listings with company info
+    // Get all listings for the user's company
     $stmt = $pdo->prepare('
-        SELECT l.*, c.name as company_name, u.name as user_name, u.email as user_email
+        SELECT l.*, c.name as company_name
         FROM listings l
         LEFT JOIN companies c ON l.company_id = c.id
         LEFT JOIN users u ON c.id = u.company_id
+        WHERE u.id = :user_id
         ORDER BY l.created_at DESC
     ');
-    $stmt->execute();
-    $all_listings = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $stmt->execute(['user_id' => $user_id]);
+    $my_listings = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     // Calculate stats
-    $total_listings = count($all_listings);
-    foreach ($all_listings as $listing) {
+    $total_listings = count($my_listings);
+    foreach ($my_listings as $listing) {
         if ($listing['published'] == 1) {
             $published_count++;
         } else {
@@ -122,20 +139,20 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Manage Listings - Glass Market</title>
+    <title>My Listings - Glass Market</title>
     <link rel="stylesheet" href="<?php echo CSS_URL; ?>/app.css">
     <style>
         body {
             background: #f5f5f5;
         }
 
-        .admin-container {
+        .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 40px 20px;
         }
 
-        .admin-header {
+        .page-header {
             background: #000;
             color: white;
             padding: 30px 40px;
@@ -146,13 +163,13 @@ try {
             align-items: center;
         }
 
-        .admin-header h1 {
+        .page-header h1 {
             font-size: 28px;
             font-weight: 800;
             margin: 0;
         }
 
-        .admin-section {
+        .section {
             background: white;
             border-radius: 12px;
             padding: 32px;
@@ -270,41 +287,75 @@ try {
             letter-spacing: 0.5px;
             transition: all 0.2s ease;
             margin-right: 8px;
+            text-decoration: none;
+            display: inline-block;
         }
 
-        .btn-approve {
-            background: #10b981;
+        .btn-edit {
+            background: #3b82f6;
             color: white;
         }
 
-        .btn-approve:hover {
-            background: #059669;
+        .btn-edit:hover {
+            background: #2563eb;
         }
 
-        .btn-reject {
+        .btn-delete {
             background: #ef4444;
             color: white;
         }
 
-        .btn-reject:hover {
+        .btn-delete:hover {
             background: #dc2626;
+        }
+
+        .btn-publish {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-publish:hover {
+            background: #059669;
+        }
+
+        .btn-unpublish {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .btn-unpublish:hover {
+            background: #d97706;
         }
 
         .btn-back {
             background: #6b7280;
             color: white;
-            text-decoration: none;
-            display: inline-block;
         }
 
         .btn-back:hover {
             background: #4b5563;
         }
 
+        .btn-create {
+            background: #000;
+            color: white;
+        }
+
+        .btn-create:hover {
+            background: #333;
+        }
+
         .empty-state {
             text-align: center;
-            padding: 40px;
+            padding: 60px 40px;
             color: #999;
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            color: #ddd;
         }
 
         .stats-grid {
@@ -344,11 +395,16 @@ try {
     </style>
 </head>
 <body>
-    <main style="padding-top: 40px;">
-        <div class="admin-container">
-            <div class="admin-header">
-                <h1>🛡️ Admin - Manage Listings</h1>
-                <a href="<?php echo VIEWS_URL; ?>/admin/dashboard.php" class="btn btn-back">Back to dashboard</a>
+    <?php include __DIR__ . '/../../includes/navbar.php'; ?>
+    <?php include __DIR__ . '/../../includes/subscription-notification.php'; ?>
+
+    <main style="padding-top: 80px;">
+        <div class="container">
+            <div class="page-header">
+                <h1>📦 My Listings</h1>
+                <div>
+                    <a href="<?php echo VIEWS_URL; ?>/profile.php" class="btn btn-back">Back to Profile</a>
+                </div>
             </div>
 
             <!-- Stats -->
@@ -363,7 +419,7 @@ try {
                 </div>
                 <div class="stat-card">
                     <div class="stat-number"><?php echo $pending_count; ?></div>
-                    <div class="stat-label">Pending Approval</div>
+                    <div class="stat-label">Pending</div>
                 </div>
             </div>
 
@@ -380,11 +436,11 @@ try {
             <?php endif; ?>
 
             <!-- All Listings -->
-            <div class="admin-section">
-                <div class="section-title">📋 All Listings (<?php echo $total_listings; ?>)</div>
+            <div class="section">
+                <div class="section-title">All Your Listings (<?php echo $total_listings; ?>)</div>
                 
-                <?php if (count($all_listings) > 0): ?>
-                    <?php foreach ($all_listings as $listing): ?>
+                <?php if (count($my_listings) > 0): ?>
+                    <?php foreach ($my_listings as $listing): ?>
                         <?php
                             // Determine image URL
                             $imageUrl = "https://picsum.photos/seed/glass{$listing['id']}/400/400";
@@ -412,8 +468,7 @@ try {
                                         <strong>Side:</strong> <?php echo htmlspecialchars($listing['side']); ?>
                                     </div>
                                     <div class="listing-meta">
-                                        <strong>Company:</strong> <?php echo htmlspecialchars($listing['company_name'] ?? 'N/A'); ?> | 
-                                        <strong>User:</strong> <?php echo htmlspecialchars($listing['user_name'] ?? 'N/A'); ?> (<?php echo htmlspecialchars($listing['user_email'] ?? 'N/A'); ?>)
+                                        <strong>Company:</strong> <?php echo htmlspecialchars($listing['company_name'] ?? 'N/A'); ?>
                                     </div>
                                     <div class="listing-meta">
                                         <strong>Created:</strong> <?php echo date('F j, Y \a\t g:i A', strtotime($listing['created_at'])); ?>
@@ -429,15 +484,26 @@ try {
                             </div>
                             
                             <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e0e0e0;">
+                                <a href="<?php echo VIEWS_URL; ?>/edit-listing.php?id=<?php echo $listing['id']; ?>" class="btn btn-edit">
+                                    ✏️ Edit
+                                </a>
+                                
                                 <form method="POST" style="display: inline;">
                                     <input type="hidden" name="listing_id" value="<?php echo $listing['id']; ?>">
+                                    <input type="hidden" name="new_status" value="<?php echo $listing['published'] == 1 ? 0 : 1; ?>">
                                     <?php if ($listing['published'] == 0): ?>
-                                        <button type="submit" name="approve_listing" class="btn btn-approve" 
-                                                onclick="return confirm('Approve this listing and make it live?')">
-                                            ✓ Approve & Publish
+                                        <button type="submit" name="toggle_publish" class="btn btn-publish" 
+                                                onclick="return confirm('Publish this listing?')">
+                                            ✓ Publish
+                                        </button>
+                                    <?php else: ?>
+                                        <button type="submit" name="toggle_publish" class="btn btn-unpublish"
+                                                onclick="return confirm('Unpublish this listing?')">
+                                            ⏸ Unpublish
                                         </button>
                                     <?php endif; ?>
-                                    <button type="submit" name="delete_listing" class="btn btn-reject"
+                                    
+                                    <button type="submit" name="delete_listing" class="btn btn-delete"
                                             onclick="return confirm('Are you sure you want to delete this listing? This cannot be undone.')">
                                         🗑️ Delete
                                     </button>
@@ -447,11 +513,20 @@ try {
                     <?php endforeach; ?>
                 <?php else: ?>
                     <div class="empty-state">
-                        <p>No listings found.</p>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="9" y1="9" x2="15" y2="15"></line>
+                            <line x1="15" y1="9" x2="9" y2="15"></line>
+                        </svg>
+                        <h3 style="margin-bottom: 12px; color: #666;">No listings yet</h3>
+                        <p style="margin-bottom: 24px;">Create your first listing to get started!</p>
+                        <a href="<?php echo VIEWS_URL; ?>/create-listing.php" class="btn btn-create">Create Your First Listing</a>
                     </div>
                 <?php endif; ?>
             </div>
         </div>
     </main>
+
+    <?php include __DIR__ . '/../../includes/footer.php'; ?>
 </body>
 </html>
