@@ -1,98 +1,83 @@
-<?php session_start(); ?>
-<?php require_once __DIR__ . '/../../config.php'; ?>
-
 <?php
+session_start();
+require __DIR__ . '/../../config.php';
 require __DIR__ . '/../../includes/db_connect.php';
 
-// Haal alle listings op
-$stmt = $pdo->query("SELECT id, glass_type, glass_type_other, price_text, currency, storage_location, recycled FROM listings WHERE published = 1 ORDER BY id DESC");
-$listings = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// Check of er een ID is meegegeven in de URL
+if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
+    die('Ongeldige listing ID.');
+}
+
+$id = (int) $_GET['id'];
+
+// Haal de specifieke listing op
+$stmt = $pdo->prepare("SELECT * FROM listings WHERE id = ? AND published = 1 LIMIT 1");
+$stmt->execute([$id]);
+$listing = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if (!$listing) {
+    die('Listing niet gevonden.');
+}
 ?>
 <!DOCTYPE html>
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <title>Listings - Glass Market</title>
+    <title><?= htmlspecialchars($listing['glass_type']) ?> - Glass Market</title>
     <link rel="stylesheet" href="../css/app.css">
 </head>
 <body>
 
 <?php include __DIR__ . '/../../includes/navbar.php'; ?>
-<!-- Hero -->
+
+<!-- Hero sectie -->
 <section class="hero hero-muted text-center">
   <div class="container">
-    <h1 class="page-title">Ontdek onze beschikbare glass listings</h1>
-    <p class="page-subtitle">Bekijk het actuele aanbod van gerecycled glas, gesorteerd per type en locatie.</p>
-  </div>
-</section>
-
-<!-- Listings grid -->
-<section class="section">
-  <div class="container">
-    <div class="section-head">
-      <h2>Alle listings</h2>
-    </div>
-
-    <?php if (count($listings) > 0): ?>
-      <div class="grid grid-4">
-        <?php foreach ($listings as $listing): ?>
-          <a href="listing.php?id=<?= $listing['id'] ?>" class="card">
-            <img src="/glass-market/assets/images/default-glass.jpg" alt="Glass" />
-            <div class="card-body">
-              <h3 class="card-title"><?= htmlspecialchars($listing['glass_type']) ?></h3>
-              <?php if ($listing['glass_type_other']): ?>
-                <p class="card-meta"><?= htmlspecialchars($listing['glass_type_other']) ?></p>
-              <?php endif; ?>
-              <p class="card-price">
-                <?= $listing['price_text'] ? htmlspecialchars($listing['price_text']) . ' ' . htmlspecialchars($listing['currency']) : 'Prijs op aanvraag' ?>
-              </p>
-              <p class="card-meta"><?= htmlspecialchars($listing['storage_location'] ?? 'Onbekende locatie') ?></p>
-              <p class="card-meta">Recycled: <?= htmlspecialchars($listing['recycled']) ?></p>
-            </div>
-          </a>
-        <?php endforeach; ?>
-      </div>
-    <?php else: ?>
-      <p>Er zijn momenteel geen listings beschikbaar.</p>
+    <h1 class="page-title"><?= htmlspecialchars($listing['glass_type']) ?></h1>
+    <?php if (!empty($listing['glass_type_other'])): ?>
+        <p class="page-subtitle"><?= htmlspecialchars($listing['glass_type_other']) ?></p>
     <?php endif; ?>
   </div>
 </section>
 
-<!-- Footer -->
-<footer class="footer">
-  <div class="container footer-top">
-    <div class="footer-brand">
-      <a href="#" class="brand">
-        <span class="brand-mark"></span> Glass Market
-      </a>
-      <p class="muted">Een platform voor duurzaam hergebruik van glasmaterialen.</p>
+<!-- Detailsectie -->
+<section class="section">
+  <div class="container">
+    <div class="card" style="max-width:800px; margin:0 auto;">
+      <img src="/glass-market/assets/images/default-glass.jpg" alt="Glass" />
+      <div class="card-body">
+        <h3 class="card-title"><?= htmlspecialchars($listing['glass_type']) ?></h3>
+
+        <p class="card-meta"><strong>Locatie opslag:</strong> <?= htmlspecialchars($listing['storage_location'] ?? 'Onbekend') ?></p>
+        <p class="card-meta"><strong>Recycled:</strong> <?= htmlspecialchars($listing['recycled']) ?></p>
+        <p class="card-meta"><strong>Getest:</strong> <?= htmlspecialchars($listing['tested']) ?></p>
+
+        <p class="card-meta"><strong>Kwaliteit:</strong><br>
+          <?= nl2br(htmlspecialchars($listing['quality_notes'] ?? 'Geen opmerkingen')) ?>
+        </p>
+
+        <p class="card-meta"><strong>Hoeveelheid:</strong>
+          <?= htmlspecialchars($listing['quantity_tons'] ?? '-') ?> ton
+          <?= $listing['quantity_note'] ? '(' . htmlspecialchars($listing['quantity_note']) . ')' : '' ?>
+        </p>
+
+        <p class="card-price"><strong>Prijs:</strong>
+          <?= $listing['price_text'] ? htmlspecialchars($listing['price_text']) . ' ' . htmlspecialchars($listing['currency']) : 'Prijs op aanvraag' ?>
+        </p>
+
+        <p class="card-meta"><strong>Beschikbaar tot:</strong>
+          <?= $listing['valid_until'] ? htmlspecialchars($listing['valid_until']) : 'Onbekend' ?>
+        </p>
+      </div>
     </div>
-    <div class="footer-cols">
-      <div class="footer-col">
-        <h5>Over ons</h5>
-        <a href="#">Missie</a>
-        <a href="#">Team</a>
-      </div>
-      <div class="footer-col">
-        <h5>Contact</h5>
-        <a href="#">Support</a>
-        <a href="#">Partners</a>
-      </div>
-      <div class="footer-col">
-        <h5>Volg ons</h5>
-        <a href="#">LinkedIn</a>
-        <a href="#">Twitter</a>
-      </div>
+
+    <div class="center" style="margin-top: 30px;">
+      <a href="browse.php" class="btn btn-secondary">← Terug naar overzicht</a>
     </div>
   </div>
-  <div class="footer-bottom">
-    <span>&copy; <?= date('Y') ?> Glass Market</span>
-    <div class="footer-links">
-      <a href="#">Privacy</a>
-      <a href="#">Terms</a>
-    </div>
-  </div>
-</footer>
+</section>
+
+<?php include __DIR__ . '/../../includes/footer.php'; ?>
 
 </body>
 </html>
