@@ -94,111 +94,82 @@ $admin_name = $_SESSION['user_name'] ?? 'Admin';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit <?php echo htmlspecialchars($page['title'] ?? 'Page'); ?> - Glass Market Admin</title>
+    <link rel="stylesheet" href="/glass-market/public/css/admin-dashboard.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        .page-editor {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
         }
         
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: #f5f5f7;
-            color: #1d1d1f;
-        }
-        
-        .header {
-            background: #1d1d1f;
-            color: white;
-            padding: 16px 32px;
+        .page-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 32px;
         }
         
-        .header h1 {
-            font-size: 20px;
-            font-weight: 600;
+        .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1f1a17;
         }
         
         .back-btn {
-            padding: 8px 20px;
-            background: rgba(255,255,255,0.15);
+            padding: 10px 24px;
+            background: #201b15;
             color: white;
             text-decoration: none;
             border-radius: 8px;
             font-size: 14px;
+            font-weight: 600;
             transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
         
         .back-btn:hover {
-            background: rgba(255,255,255,0.25);
+            background: #2a2623;
+            transform: translateY(-2px);
         }
         
         .alert {
-            padding: 16px 32px;
-            margin: 0;
-            text-align: center;
+            padding: 16px 24px;
+            margin-bottom: 24px;
+            border-radius: 8px;
             font-weight: 600;
+            font-size: 14px;
         }
         
         .alert-success {
             background: #d4edda;
             color: #155724;
+            border: 1px solid #c3e6cb;
         }
         
         .alert-error {
             background: #f8d7da;
             color: #721c24;
+            border: 1px solid #f5c6cb;
         }
         
-        .editor-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0;
-            height: calc(100vh - 60px);
-        }
-        
-        .editor-panel {
+        .editor-card {
             background: white;
-            overflow-y: auto;
-            border-right: 1px solid #d2d2d7;
-        }
-        
-        .preview-panel {
-            background: #f5f5f7;
-            overflow-y: auto;
-        }
-        
-        .panel-header {
-            background: #fbfbfd;
-            padding: 20px 32px;
-            border-bottom: 1px solid #d2d2d7;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-        
-        .panel-header h2 {
-            font-size: 18px;
-            font-weight: 600;
-            color: #1d1d1f;
-        }
-        
-        .editor-content {
-            padding: 32px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            padding: 40px;
         }
         
         .form-group {
-            margin-bottom: 28px;
+            margin-bottom: 32px;
         }
         
         .form-label {
             display: block;
             font-size: 14px;
             font-weight: 600;
-            color: #1d1d1f;
+            color: #2a2623;
             margin-bottom: 8px;
         }
         
@@ -206,39 +177,39 @@ $admin_name = $_SESSION['user_name'] ?? 'Admin';
         .form-textarea {
             width: 100%;
             padding: 12px 16px;
-            border: 1px solid #d2d2d7;
+            border: 2px solid #d4cfc7;
             border-radius: 8px;
             font-size: 15px;
-            font-family: inherit;
+            font-family: ui-serif, Georgia, 'Times New Roman', Times, serif;
             transition: all 0.3s;
+            background: #fafaf8;
         }
         
         .form-input:focus,
         .form-textarea:focus {
             outline: none;
-            border-color: #0071e3;
-            box-shadow: 0 0 0 4px rgba(0,113,227,0.1);
+            border-color: #6b6460;
+            background: white;
         }
         
         .form-textarea {
-            min-height: 100px;
+            min-height: 120px;
             resize: vertical;
+            line-height: 1.6;
         }
         
-        .btn-save {
-            position: sticky;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 20px 32px;
-            background: white;
-            border-top: 1px solid #d2d2d7;
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            padding-top: 24px;
+            border-top: 2px solid #f3eee6;
+            margin-top: 40px;
         }
         
         .btn-primary {
-            width: 100%;
+            flex: 1;
             padding: 14px 28px;
-            background: #0071e3;
+            background: #201b15;
             color: white;
             border: none;
             border-radius: 8px;
@@ -249,207 +220,89 @@ $admin_name = $_SESSION['user_name'] ?? 'Admin';
         }
         
         .btn-primary:hover {
-            background: #0077ed;
+            background: #2a2623;
             transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(0,113,227,0.3);
+            box-shadow: 0 4px 12px rgba(32,27,21,0.3);
         }
         
-        /* Preview Styles */
-        .preview-container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
-        
-        .preview-hero {
-            text-align: center;
-            padding: 60px 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 16px;
-            margin-bottom: 40px;
-        }
-        
-        .preview-hero h1 {
-            font-size: 48px;
-            font-weight: 700;
-            margin-bottom: 16px;
-        }
-        
-        .preview-hero p {
-            font-size: 20px;
-            opacity: 0.95;
-            max-width: 700px;
-            margin: 0 auto;
-            line-height: 1.6;
-        }
-        
-        .preview-section {
-            background: white;
-            padding: 40px;
-            border-radius: 16px;
-            margin-bottom: 24px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-        
-        .preview-section h2 {
-            font-size: 32px;
-            font-weight: 700;
-            color: #1d1d1f;
-            margin-bottom: 16px;
-        }
-        
-        .preview-section p {
-            font-size: 17px;
-            line-height: 1.7;
-            color: #515154;
-            white-space: pre-wrap;
-        }
-        
-        .preview-badge {
-            display: inline-block;
-            padding: 6px 12px;
-            background: #f5f5f7;
-            color: #0071e3;
-            font-size: 12px;
+        .btn-secondary {
+            padding: 14px 28px;
+            background: transparent;
+            color: #6b6460;
+            border: 2px solid #d4cfc7;
+            border-radius: 8px;
+            font-size: 15px;
             font-weight: 600;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .btn-secondary:hover {
+            border-color: #6b6460;
+            color: #2a2623;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>Edit: <?php echo htmlspecialchars($page['title'] ?? 'Page'); ?></h1>
-        <a href="../dashboard.php" class="back-btn">← Back to Dashboard</a>
-    </div>
-    
-    <?php if ($success_message): ?>
-        <div class="alert alert-success">✓ <?php echo htmlspecialchars($success_message); ?></div>
-    <?php endif; ?>
-    
-    <?php if ($error_message): ?>
-        <div class="alert alert-error">⚠ <?php echo htmlspecialchars($error_message); ?></div>
-    <?php endif; ?>
-    
-    <div class="editor-container">
-        <!-- Editor Panel -->
-        <div class="editor-panel">
-            <div class="panel-header">
-                <h2>Content Editor</h2>
-            </div>
-            
+    <div class="page-editor">
+        <div class="page-header">
+            <h1 class="page-title">Edit: <?php echo htmlspecialchars($page['title'] ?? 'Page'); ?></h1>
+            <a href="../dashboard.php" class="back-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                </svg>
+                Back to Dashboard
+            </a>
+        </div>
+        
+        <?php if ($success_message): ?>
+            <div class="alert alert-success">✓ <?php echo htmlspecialchars($success_message); ?></div>
+        <?php endif; ?>
+        
+        <?php if ($error_message): ?>
+            <div class="alert alert-error">⚠ <?php echo htmlspecialchars($error_message); ?></div>
+        <?php endif; ?>
+        
+        <div class="editor-card">
             <form method="POST" id="contentForm">
-                <div class="editor-content">
-                    <?php foreach ($sections as $section): ?>
-                        <div class="form-group">
-                            <label class="form-label" for="section_<?php echo $section['section_id']; ?>">
-                                <?php echo htmlspecialchars($section['section_label']); ?>
-                            </label>
-                            
-                            <?php if ($section['section_type'] === 'text'): ?>
-                                <input 
-                                    type="text" 
-                                    class="form-input" 
-                                    id="section_<?php echo $section['section_id']; ?>"
-                                    name="content[<?php echo $section['section_id']; ?>]"
-                                    value="<?php echo htmlspecialchars($section['content_value'] ?? ''); ?>"
-                                    data-section-key="<?php echo $section['section_key']; ?>"
-                                >
-                            <?php elseif ($section['section_type'] === 'textarea'): ?>
-                                <textarea 
-                                    class="form-textarea" 
-                                    id="section_<?php echo $section['section_id']; ?>"
-                                    name="content[<?php echo $section['section_id']; ?>]"
-                                    rows="4"
-                                    data-section-key="<?php echo $section['section_key']; ?>"
-                                ><?php echo htmlspecialchars($section['content_value'] ?? ''); ?></textarea>
-                            <?php endif; ?>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
+                <?php foreach ($sections as $section): ?>
+                    <div class="form-group">
+                        <label class="form-label" for="section_<?php echo $section['section_id']; ?>">
+                            <?php echo htmlspecialchars($section['section_label']); ?>
+                        </label>
+                        
+                        <?php if ($section['section_type'] === 'text'): ?>
+                            <input 
+                                type="text" 
+                                class="form-input" 
+                                id="section_<?php echo $section['section_id']; ?>"
+                                name="content[<?php echo $section['section_id']; ?>]"
+                                value="<?php echo htmlspecialchars($section['content_value'] ?? ''); ?>"
+                                placeholder="Enter <?php echo strtolower($section['section_label']); ?>"
+                            >
+                        <?php elseif ($section['section_type'] === 'textarea'): ?>
+                            <textarea 
+                                class="form-textarea" 
+                                id="section_<?php echo $section['section_id']; ?>"
+                                name="content[<?php echo $section['section_id']; ?>]"
+                                rows="5"
+                                placeholder="Enter <?php echo strtolower($section['section_label']); ?>"
+                            ><?php echo htmlspecialchars($section['content_value'] ?? ''); ?></textarea>
+                        <?php endif; ?>
+                    </div>
+                <?php endforeach; ?>
                 
-                <div class="btn-save">
+                <div class="form-actions">
                     <button type="submit" name="save_content" class="btn-primary">
                         Save Changes
                     </button>
+                    <a href="../dashboard.php" class="btn-secondary">Cancel</a>
                 </div>
             </form>
         </div>
-        
-        <!-- Preview Panel -->
-        <div class="preview-panel">
-            <div class="panel-header">
-                <h2>Live Preview</h2>
-            </div>
-            
-            <div class="preview-container" id="previewContent">
-                <!-- Hero Section -->
-                <div class="preview-hero">
-                    <h1 id="preview_hero_title">About Glass Market</h1>
-                    <p id="preview_hero_subtitle">Connecting the global glass recycling industry</p>
-                </div>
-                
-                <!-- Mission Section -->
-                <div class="preview-section">
-                    <span class="preview-badge">Our Mission</span>
-                    <h2 id="preview_mission_title">Our Mission</h2>
-                    <p id="preview_mission_text">Content loading...</p>
-                </div>
-                
-                <!-- Vision Section -->
-                <div class="preview-section">
-                    <span class="preview-badge">Our Vision</span>
-                    <h2 id="preview_vision_title">Our Vision</h2>
-                    <p id="preview_vision_text">Content loading...</p>
-                </div>
-                
-                <!-- Values Section -->
-                <div class="preview-section">
-                    <span class="preview-badge">Our Values</span>
-                    <h2 id="preview_values_title">Our Values</h2>
-                    <p id="preview_values_text">Content loading...</p>
-                </div>
-                
-                <!-- Team Section -->
-                <div class="preview-section">
-                    <span class="preview-badge">Our Team</span>
-                    <h2 id="preview_team_title">Our Team</h2>
-                    <p id="preview_team_text">Content loading...</p>
-                </div>
-            </div>
-        </div>
     </div>
-    
-    <script>
-        // Live preview update
-        document.addEventListener('DOMContentLoaded', function() {
-            const inputs = document.querySelectorAll('.form-input, .form-textarea');
-            
-            // Initial preview load
-            inputs.forEach(input => {
-                updatePreview(input);
-            });
-            
-            // Listen for changes
-            inputs.forEach(input => {
-                input.addEventListener('input', function() {
-                    updatePreview(this);
-                });
-            });
-            
-            function updatePreview(input) {
-                const sectionKey = input.getAttribute('data-section-key');
-                const value = input.value;
-                const previewElement = document.getElementById('preview_' + sectionKey);
-                
-                if (previewElement) {
-                    previewElement.textContent = value || 'No content yet...';
-                }
-            }
-        });
-    </script>
 </body>
 </html>
