@@ -14,9 +14,20 @@ if (!$subscription_status['show_notification']) {
     return;
 }
 
-// Don't show notification on pricing page (users need access to subscribe!)
+// Don't show notification on certain pages (users need access to these!)
 $current_page = basename($_SERVER['PHP_SELF']);
-if ($current_page === 'pricing.php') {
+$excluded_pages = [
+    'pricing.php',        // Let users see pricing
+    'login.php',          // Already on login
+    'register.php',       // Already registering
+    'logout.php',         // Logging out
+    'mollie-return.php',  // Payment return page
+    'mollie-webhook.php', // Payment webhook
+];
+
+// Also exclude all admin pages
+$current_uri = $_SERVER['REQUEST_URI'] ?? '';
+if (in_array($current_page, $excluded_pages) || strpos($current_uri, '/admin/') !== false) {
     return;
 }
 
@@ -74,6 +85,23 @@ switch ($subscription_status['notification_type']) {
                 'text' => 'Learn More',
                 'link' => '/glass-market/resources/views/about.php',
                 'dismiss' => true
+            ]
+        ];
+        break;
+        
+    case 'not_logged_in':
+        $notification_data = [
+            'title' => 'Welcome to Glass Market',
+            'message' => 'Join our community of glass artisans and collectors. Sign up today to get a free 3-month trial and access thousands of unique glass art pieces from around the world.',
+            'icon' => null,
+            'color' => 'welcome',
+            'primary_button' => [
+                'text' => 'Sign Up Free',
+                'link' => '/glass-market/resources/views/register.php'
+            ],
+            'secondary_button' => [
+                'text' => 'Login',
+                'link' => '/glass-market/resources/views/login.php'
             ]
         ];
         break;
@@ -218,6 +246,10 @@ switch ($subscription_status['notification_type']) {
         border-top-color: #2563eb;
     }
     
+    .subscription-modal.welcome {
+        border-top-color: #059669;
+    }
+    
     .subscription-modal.error .subscription-modal-icon {
         background: #fee2e2;
         color: #dc2626;
@@ -231,6 +263,11 @@ switch ($subscription_status['notification_type']) {
     .subscription-modal.info .subscription-modal-icon {
         background: #dbeafe;
         color: #2563eb;
+    }
+    
+    .subscription-modal.welcome .subscription-modal-icon {
+        background: #d1fae5;
+        color: #059669;
     }
     
     /* Prevent body scroll when modal is open */
@@ -270,6 +307,8 @@ switch ($subscription_status['notification_type']) {
             <div class="subscription-modal-icon">!</div>
         <?php elseif ($notification_data['color'] === 'warning'): ?>
             <div class="subscription-modal-icon">⚠</div>
+        <?php elseif ($notification_data['color'] === 'welcome'): ?>
+            <div class="subscription-modal-icon">👋</div>
         <?php else: ?>
             <div class="subscription-modal-icon">i</div>
         <?php endif; ?>

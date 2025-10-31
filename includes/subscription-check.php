@@ -25,8 +25,16 @@ if (isset($_SESSION['is_admin']) && ($_SESSION['is_admin'] === true || $_SESSION
     return;
 }
 
-// Only check if user is logged in
-if (isset($_SESSION['user_logged_in']) && $_SESSION['user_logged_in'] === true && isset($_SESSION['user_id'])) {
+// Check if user is logged in
+if (!isset($_SESSION['user_logged_in']) || $_SESSION['user_logged_in'] !== true) {
+    // User not logged in - show friendly signup prompt
+    $subscription_status['show_notification'] = true;
+    $subscription_status['notification_type'] = 'not_logged_in';
+    return;
+}
+
+// User is logged in - check subscription
+if (isset($_SESSION['user_id'])) {
     
     // Database connection
     $db_host = '127.0.0.1';
