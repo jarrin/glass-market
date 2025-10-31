@@ -1,6 +1,11 @@
 <?php
 session_start();
 
+// Enable error reporting for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+ini_set('log_errors', 1);
+
 // Database connection
 $db_host = '127.0.0.1';
 $db_name = 'glass_market';
@@ -9,21 +14,54 @@ $db_pass = '';
 
 $status = 'processing';
 $message = 'Processing your payment...';
-$payment_id = $_GET['payment_id'] ?? '';
 $user_id = $_GET['user_id'] ?? 0;
+
+// Log all GET parameters for debugging
+error_log('Mollie Return - GET params: ' . print_r($_GET, true));
 
 try {
     $pdo = new PDO("mysql:host=$db_host;dbname=$db_name", $db_user, $db_pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
+
     // Load composer autoload
     require_once __DIR__ . '/../../../vendor/autoload.php';
     require_once __DIR__ . '/../../../database/classes/mollie.php';
-    require_once __DIR__ . '/../../../database/classes/subscriptions.php';
-    
+
     $mollie = new MolliePayment();
-    
-    if ($payment_id) {
+
+    if (!$user_id) {
+        throw new Exception('No user ID provided in return URL');
+    }
+
+    // Get the most recent pending payment for this user
+    $stmt = $pdo->prepare("
+        SELECT payment_id, months, amount, status
+        FROM mollie_payments
+        WHERE user_id = :user_id
+        AND status = 'open'
+        ORDER BY created_at DESC
+        LIMIT 1
+    ");
+    $stmt->execute(['user_id' => $user_id]);
+    $pendingPayment = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$pendingPayment) {
+        // Try to find any recent payment (in case status was already updated)
+        $stmt = $pdo->prepare("
+            SELECT payment_id, months, amount, status
+            FROM mollie_payments
+            WHERE user_id = :user_id
+            ORDER BY created_at DESC
+            LIMIT 1
+        ");
+        $stmt->execute(['user_id' => $user_id]);
+        $pendingPayment = $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    if ($pendingPayment) {
+        $payment_id = $pendingPayment['payment_id'];
+        error_log("Found payment ID: $payment_id for user: $user_id");
+
         $payment = $mollie->getPayment($payment_id);
         
         if ($payment) {
@@ -71,26 +109,48 @@ try {
                             'start_date' => $startDate,
                             'end_date' => $endDate
                         ]);
+
+                        error_log("Created new subscription for user $userId: $startDate to $endDate");
                     }
+
+                    // Log success
+                    error_log("Payment $payment_id successfully processed for user $userId");
                 }
-                
+
             } elseif ($payment->isFailed()) {
                 $status = 'failed';
                 $message = '❌ Payment failed. Please try again.';
+                error_log("Payment $payment_id failed for user $user_id");
             } elseif ($payment->isCanceled()) {
                 $status = 'canceled';
                 $message = '⚠️ Payment was canceled.';
+                error_log("Payment $payment_id canceled by user $user_id");
             } elseif ($payment->isExpired()) {
                 $status = 'expired';
                 $message = '⏰ Payment expired. Please create a new payment.';
+                error_log("Payment $payment_id expired for user $user_id");
+            } else {
+                // Payment is still open/pending
+                $status = 'processing';
+                $message = 'Payment is still being processed. Please wait...';
+                error_log("Payment $payment_id still pending for user $user_id");
             }
+        } else {
+            $status = 'error';
+            $message = 'Could not retrieve payment information from Mollie.';
+            error_log("Could not get payment $payment_id from Mollie");
         }
+    } else {
+        $status = 'error';
+        $message = 'No payment found for this user. Please try again.';
+        error_log("No payment found for user $user_id");
     }
-    
+
 } catch (Exception $e) {
     $status = 'error';
     $message = 'An error occurred: ' . $e->getMessage();
     error_log('Mollie Return Error: ' . $e->getMessage());
+    error_log('Stack trace: ' . $e->getTraceAsString());
 }
 ?>
 <!DOCTYPE html>
@@ -209,11 +269,15 @@ try {
             ?>
         </h1>
         <p><?php echo htmlspecialchars($message); ?></p>
-        
+
         <?php if ($status === 'success'): ?>
-            <a href="dashboard.php" class="btn">Go to Dashboard</a>
+            <a href="/glass-market/public/index.php" class="btn">Go to Homepage</a>
+        <?php elseif ($status === 'processing'): ?>
+            <p style="margin-top: 20px; font-size: 14px;">
+                <a href="?user_id=<?php echo $user_id; ?>" style="color: #3b82f6;">Refresh to check status</a>
+            </p>
         <?php else: ?>
-            <a href="sandbox.php" class="btn">Back to Sandbox</a>
+            <a href="/glass-market/resources/views/pricing.php" class="btn">Back to Pricing</a>
         <?php endif; ?>
     </div>
 </body>

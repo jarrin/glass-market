@@ -147,6 +147,16 @@ Subscription activated in user_subscriptions table
 - `months` - Subscription duration
 - `created_at`, `paid_at` - Timestamps
 
+**Table: `payment_errors`**
+- `user_id` - User who attempted payment
+- `plan` - Subscription plan (trial/monthly/annual)
+- `amount` - Amount attempted
+- `error_message` - Full error text from Mollie/system
+- `error_context` - JSON with IP, user agent, session details
+- `request_data` - JSON of request parameters
+- `payment_id` - Mollie payment ID if created before failure
+- `created_at` - Error timestamp
+
 ### Subscription Plans
 
 - **Free Trial**: 3 months, no payment
@@ -167,6 +177,20 @@ Use `includes/subscription-check.php` to validate access:
 ```
 
 **Admin bypass**: Admins always have `has_access = true` regardless of subscription.
+
+### Payment Error Logging
+
+All payment failures are automatically logged to `payment_errors` table with full context. Admins can view errors at:
+
+**Admin Dashboard → Payment Errors** (`resources/views/admin/payment-errors.php`)
+
+Features:
+- Statistics (total errors, today, last 7 days, affected users)
+- Detailed error table with expandable details
+- User filtering and pagination
+- Full error context (IP, user agent, request data)
+
+**Important**: Webhook URL set to `null` for localhost (Mollie can't reach localhost). In production, update [database/classes/mollie.php:203](database/classes/mollie.php#L203) with publicly accessible webhook URL.
 
 ## Common Commands
 

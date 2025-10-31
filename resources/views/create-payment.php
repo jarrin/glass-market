@@ -90,39 +90,95 @@ if ($amount == 0) {
 require_once __DIR__ . '/../../vendor/autoload.php';
 require_once __DIR__ . '/../../database/classes/mollie.php';
 
+/**
+ * Log payment error to database
+ */
+function logPaymentError($pdo, $user_id, $plan, $amount, $error_message, $request_data = null, $payment_id = null) {
+    try {
+        $stmt = $pdo->prepare("
+            INSERT INTO payment_errors (user_id, plan, amount, error_message, error_context, payment_id, request_data, created_at)
+            VALUES (:user_id, :plan, :amount, :error_message, :error_context, :payment_id, :request_data, NOW())
+        ");
+
+        $error_context = json_encode([
+            'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown',
+            'ip_address' => $_SERVER['REMOTE_ADDR'] ?? 'Unknown',
+            'timestamp' => date('Y-m-d H:i:s'),
+            'session_id' => session_id()
+        ]);
+
+        $stmt->execute([
+            'user_id' => $user_id,
+            'plan' => $plan,
+            'amount' => $amount,
+            'error_message' => $error_message,
+            'error_context' => $error_context,
+            'payment_id' => $payment_id,
+            'request_data' => $request_data ? json_encode($request_data) : null
+        ]);
+
+        return $pdo->lastInsertId();
+    } catch (Exception $e) {
+        error_log('Failed to log payment error: ' . $e->getMessage());
+        return false;
+    }
+}
+
 try {
     $db_host = '127.0.0.1';
     $db_name = 'glass_market';
     $db_user = 'root';
     $db_pass = '';
-    
+
     $pdo = new PDO("mysql:host=$db_host;dbname=$db_name", $db_user, $db_pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
+
     $mollie = new MolliePayment();
-    
+
     if (!$mollie->isConfigured()) {
-        die('Error: Mollie is not configured. Please check your .env file for MOLLIE_TEST_API_KEY.');
-    }
-    
-    $result = $mollie->createSubscriptionPayment($user_id, $months, $pdo);
-    
-    if (is_array($result) && isset($result['error'])) {
-        // Show detailed error
-        die('Payment Error: ' . htmlspecialchars($result['error']) . '<br><br>
+        $error = 'Mollie is not configured. Please check your .env file for MOLLIE_TEST_API_KEY.';
+        logPaymentError($pdo, $user_id, $plan, $amount, $error);
+        die('Error: ' . $error . '<br><br>
              <a href="/glass-market/resources/views/pricing.php">← Back to Pricing</a>');
     }
-    
+
+    $result = $mollie->createSubscriptionPayment($user_id, $months, $pdo);
+
+    if (is_array($result) && isset($result['error'])) {
+        // Log the error
+        logPaymentError($pdo, $user_id, $plan, $amount, $result['error'], [
+            'months' => $months,
+            'description' => $description
+        ]);
+
+        // Show user-friendly error
+        die('Payment Error: ' . htmlspecialchars($result['error']) . '<br><br>
+             This error has been logged and our team will review it.<br><br>
+             <a href="/glass-market/resources/views/pricing.php">← Back to Pricing</a>');
+    }
+
     if ($result) {
         // Redirect to Mollie checkout
         header('Location: ' . $result);
         exit;
     } else {
+        $error = 'Failed to create payment. Unknown error occurred.';
+        logPaymentError($pdo, $user_id, $plan, $amount, $error);
         die('Failed to create payment. Please try again or contact support.<br><br>
              <a href="/glass-market/resources/views/pricing.php">← Back to Pricing</a>');
     }
-    
+
 } catch (Exception $e) {
+    // Log the exception
+    if (isset($pdo)) {
+        logPaymentError($pdo, $user_id, $plan, $amount, $e->getMessage(), [
+            'exception_type' => get_class($e),
+            'file' => $e->getFile(),
+            'line' => $e->getLine()
+        ]);
+    }
+
     die('Error: ' . htmlspecialchars($e->getMessage()) . '<br><br>
+         This error has been logged. Please try again or contact support.<br><br>
          <a href="/glass-market/resources/views/pricing.php">← Back to Pricing</a>');
 }
