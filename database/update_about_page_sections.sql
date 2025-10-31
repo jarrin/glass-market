@@ -19,36 +19,34 @@ INSERT INTO tmp_about_sections VALUES
 ('hero_description', 'textarea', 'Hero Section - Description', 4),
 ('hero_primary_label', 'text', 'Hero Section - Primary Button Label', 5),
 ('hero_primary_url', 'text', 'Hero Section - Primary Button URL', 6),
-('hero_secondary_label', 'text', 'Hero Section - Secondary Button Label', 7),
-('hero_secondary_url', 'text', 'Hero Section - Secondary Button URL', 8),
-('stats_1_value', 'text', 'Stats Card 1 - Value', 9),
-('stats_1_label', 'text', 'Stats Card 1 - Label', 10),
-('stats_2_value', 'text', 'Stats Card 2 - Value', 11),
-('stats_2_label', 'text', 'Stats Card 2 - Label', 12),
-('stats_3_value', 'text', 'Stats Card 3 - Value', 13),
-('stats_3_label', 'text', 'Stats Card 3 - Label', 14),
-('stats_4_value', 'text', 'Stats Card 4 - Value', 15),
-('stats_4_label', 'text', 'Stats Card 4 - Label', 16),
-('mission_title', 'text', 'Mission Section - Title', 17),
-('mission_text', 'textarea', 'Mission Section - Description', 18),
-('vision_title', 'text', 'Vision Section - Title', 19),
-('vision_text', 'textarea', 'Vision Section - Description', 20),
-('values_title', 'text', 'Values Section - Title', 21),
-('values_intro', 'textarea', 'Values Section - Intro', 22),
-('values_item_1_title', 'text', 'Values Card 1 - Title', 23),
-('values_item_1_text', 'textarea', 'Values Card 1 - Description', 24),
-('values_item_2_title', 'text', 'Values Card 2 - Title', 25),
-('values_item_2_text', 'textarea', 'Values Card 2 - Description', 26),
-('values_item_3_title', 'text', 'Values Card 3 - Title', 27),
-('values_item_3_text', 'textarea', 'Values Card 3 - Description', 28),
-('team_title', 'text', 'Team Section - Title', 29),
-('team_text', 'textarea', 'Team Section - Description', 30),
-('cta_title', 'text', 'CTA Section - Title', 31),
-('cta_text', 'textarea', 'CTA Section - Description', 32),
-('cta_primary_label', 'text', 'CTA Section - Primary Button Label', 33),
-('cta_primary_url', 'text', 'CTA Section - Primary Button URL', 34),
-('cta_secondary_label', 'text', 'CTA Section - Secondary Button Label', 35),
-('cta_secondary_url', 'text', 'CTA Section - Secondary Button URL', 36);
+('stats_1_value', 'text', 'Stats Card 1 - Value', 7),
+('stats_1_label', 'text', 'Stats Card 1 - Label', 8),
+('stats_2_value', 'text', 'Stats Card 2 - Value', 9),
+('stats_2_label', 'text', 'Stats Card 2 - Label', 10),
+('stats_3_value', 'text', 'Stats Card 3 - Value', 11),
+('stats_3_label', 'text', 'Stats Card 3 - Label', 12),
+('stats_4_value', 'text', 'Stats Card 4 - Value', 13),
+('stats_4_label', 'text', 'Stats Card 4 - Label', 14),
+('mission_title', 'text', 'Mission Section - Title', 15),
+('mission_text', 'textarea', 'Mission Section - Description', 16),
+('vision_title', 'text', 'Vision Section - Title', 17),
+('vision_text', 'textarea', 'Vision Section - Description', 18),
+('values_title', 'text', 'Values Section - Title', 19),
+('values_intro', 'textarea', 'Values Section - Intro', 20),
+('values_item_1_title', 'text', 'Values Card 1 - Title', 21),
+('values_item_1_text', 'textarea', 'Values Card 1 - Description', 22),
+('values_item_2_title', 'text', 'Values Card 2 - Title', 23),
+('values_item_2_text', 'textarea', 'Values Card 2 - Description', 24),
+('values_item_3_title', 'text', 'Values Card 3 - Title', 25),
+('values_item_3_text', 'textarea', 'Values Card 3 - Description', 26),
+('team_title', 'text', 'Team Section - Title', 27),
+('team_text', 'textarea', 'Team Section - Description', 28),
+('cta_title', 'text', 'CTA Section - Title', 29),
+('cta_text', 'textarea', 'CTA Section - Description', 30),
+('cta_primary_label', 'text', 'CTA Section - Primary Button Label', 31),
+('cta_primary_url', 'text', 'CTA Section - Primary Button URL', 32),
+('cta_secondary_label', 'text', 'CTA Section - Secondary Button Label', 33),
+('cta_secondary_url', 'text', 'CTA Section - Secondary Button URL', 34);
 
 -- Insert missing sections
 INSERT INTO page_sections (page_id, section_key, section_type, section_label, display_order)
@@ -67,8 +65,6 @@ CASE ps.section_key
     WHEN 'hero_description' THEN 'From Rotterdam to Singapore, Glass Market keeps premium cullet moving. Discover reliable supply, verified partners, and transparent pricing in one curated platform.'
     WHEN 'hero_primary_label' THEN 'Explore Marketplace'
     WHEN 'hero_primary_url' THEN '/browse'
-    WHEN 'hero_secondary_label' THEN ''
-    WHEN 'hero_secondary_url' THEN ''
     WHEN 'stats_1_value' THEN '432K'
     WHEN 'stats_1_label' THEN 'Tons of glass traded'
     WHEN 'stats_2_value' THEN '68'
@@ -103,15 +99,12 @@ FROM page_sections ps
 LEFT JOIN page_content pc ON pc.section_id = ps.id
 WHERE ps.page_id = @about_page_id AND pc.id IS NULL AND @about_page_id IS NOT NULL;
 
--- Remove legacy secondary hero CTA copy if still present
-UPDATE page_content pc
+-- Remove deprecated secondary hero CTA fields entirely
+DELETE pc FROM page_content pc
 JOIN page_sections ps ON ps.id = pc.section_id
-SET pc.content_value = ''
-WHERE ps.page_id = @about_page_id AND ps.section_key = 'hero_secondary_label';
+WHERE ps.page_id = @about_page_id AND ps.section_key IN ('hero_secondary_label', 'hero_secondary_url');
 
-UPDATE page_content pc
-JOIN page_sections ps ON ps.id = pc.section_id
-SET pc.content_value = ''
-WHERE ps.page_id = @about_page_id AND ps.section_key = 'hero_secondary_url';
+DELETE FROM page_sections
+WHERE page_id = @about_page_id AND section_key IN ('hero_secondary_label', 'hero_secondary_url');
 
 DROP TEMPORARY TABLE IF EXISTS tmp_about_sections;

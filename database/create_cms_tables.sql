@@ -58,36 +58,34 @@ INSERT INTO `page_sections` (`page_id`, `section_key`, `section_type`, `section_
 (@about_page_id, 'hero_description', 'textarea', 'Hero Section - Description', 4),
 (@about_page_id, 'hero_primary_label', 'text', 'Hero Section - Primary Button Label', 5),
 (@about_page_id, 'hero_primary_url', 'text', 'Hero Section - Primary Button URL', 6),
-(@about_page_id, 'hero_secondary_label', 'text', 'Hero Section - Secondary Button Label', 7),
-(@about_page_id, 'hero_secondary_url', 'text', 'Hero Section - Secondary Button URL', 8),
-(@about_page_id, 'stats_1_value', 'text', 'Stats Card 1 - Value', 9),
-(@about_page_id, 'stats_1_label', 'text', 'Stats Card 1 - Label', 10),
-(@about_page_id, 'stats_2_value', 'text', 'Stats Card 2 - Value', 11),
-(@about_page_id, 'stats_2_label', 'text', 'Stats Card 2 - Label', 12),
-(@about_page_id, 'stats_3_value', 'text', 'Stats Card 3 - Value', 13),
-(@about_page_id, 'stats_3_label', 'text', 'Stats Card 3 - Label', 14),
-(@about_page_id, 'stats_4_value', 'text', 'Stats Card 4 - Value', 15),
-(@about_page_id, 'stats_4_label', 'text', 'Stats Card 4 - Label', 16),
-(@about_page_id, 'mission_title', 'text', 'Mission Section - Title', 17),
-(@about_page_id, 'mission_text', 'textarea', 'Mission Section - Description', 18),
-(@about_page_id, 'vision_title', 'text', 'Vision Section - Title', 19),
-(@about_page_id, 'vision_text', 'textarea', 'Vision Section - Description', 20),
-(@about_page_id, 'values_title', 'text', 'Values Section - Title', 21),
-(@about_page_id, 'values_intro', 'textarea', 'Values Section - Intro', 22),
-(@about_page_id, 'values_item_1_title', 'text', 'Values Card 1 - Title', 23),
-(@about_page_id, 'values_item_1_text', 'textarea', 'Values Card 1 - Description', 24),
-(@about_page_id, 'values_item_2_title', 'text', 'Values Card 2 - Title', 25),
-(@about_page_id, 'values_item_2_text', 'textarea', 'Values Card 2 - Description', 26),
-(@about_page_id, 'values_item_3_title', 'text', 'Values Card 3 - Title', 27),
-(@about_page_id, 'values_item_3_text', 'textarea', 'Values Card 3 - Description', 28),
-(@about_page_id, 'team_title', 'text', 'Team Section - Title', 29),
-(@about_page_id, 'team_text', 'textarea', 'Team Section - Description', 30),
-(@about_page_id, 'cta_title', 'text', 'CTA Section - Title', 31),
-(@about_page_id, 'cta_text', 'textarea', 'CTA Section - Description', 32),
-(@about_page_id, 'cta_primary_label', 'text', 'CTA Section - Primary Button Label', 33),
-(@about_page_id, 'cta_primary_url', 'text', 'CTA Section - Primary Button URL', 34),
-(@about_page_id, 'cta_secondary_label', 'text', 'CTA Section - Secondary Button Label', 35),
-(@about_page_id, 'cta_secondary_url', 'text', 'CTA Section - Secondary Button URL', 36);
+(@about_page_id, 'stats_1_value', 'text', 'Stats Card 1 - Value', 7),
+(@about_page_id, 'stats_1_label', 'text', 'Stats Card 1 - Label', 8),
+(@about_page_id, 'stats_2_value', 'text', 'Stats Card 2 - Value', 9),
+(@about_page_id, 'stats_2_label', 'text', 'Stats Card 2 - Label', 10),
+(@about_page_id, 'stats_3_value', 'text', 'Stats Card 3 - Value', 11),
+(@about_page_id, 'stats_3_label', 'text', 'Stats Card 3 - Label', 12),
+(@about_page_id, 'stats_4_value', 'text', 'Stats Card 4 - Value', 13),
+(@about_page_id, 'stats_4_label', 'text', 'Stats Card 4 - Label', 14),
+(@about_page_id, 'mission_title', 'text', 'Mission Section - Title', 15),
+(@about_page_id, 'mission_text', 'textarea', 'Mission Section - Description', 16),
+(@about_page_id, 'vision_title', 'text', 'Vision Section - Title', 17),
+(@about_page_id, 'vision_text', 'textarea', 'Vision Section - Description', 18),
+(@about_page_id, 'values_title', 'text', 'Values Section - Title', 19),
+(@about_page_id, 'values_intro', 'textarea', 'Values Section - Intro', 20),
+(@about_page_id, 'values_item_1_title', 'text', 'Values Card 1 - Title', 21),
+(@about_page_id, 'values_item_1_text', 'textarea', 'Values Card 1 - Description', 22),
+(@about_page_id, 'values_item_2_title', 'text', 'Values Card 2 - Title', 23),
+(@about_page_id, 'values_item_2_text', 'textarea', 'Values Card 2 - Description', 24),
+(@about_page_id, 'values_item_3_title', 'text', 'Values Card 3 - Title', 25),
+(@about_page_id, 'values_item_3_text', 'textarea', 'Values Card 3 - Description', 26),
+(@about_page_id, 'team_title', 'text', 'Team Section - Title', 27),
+(@about_page_id, 'team_text', 'textarea', 'Team Section - Description', 28),
+(@about_page_id, 'cta_title', 'text', 'CTA Section - Title', 29),
+(@about_page_id, 'cta_text', 'textarea', 'CTA Section - Description', 30),
+(@about_page_id, 'cta_primary_label', 'text', 'CTA Section - Primary Button Label', 31),
+(@about_page_id, 'cta_primary_url', 'text', 'CTA Section - Primary Button URL', 32),
+(@about_page_id, 'cta_secondary_label', 'text', 'CTA Section - Secondary Button Label', 33),
+(@about_page_id, 'cta_secondary_url', 'text', 'CTA Section - Secondary Button URL', 34);
 
 -- Insert default content for About Us sections
 INSERT INTO `page_content` (`section_id`, `content_value`) 
@@ -98,8 +96,6 @@ SELECT id, CASE section_key
   WHEN 'hero_description' THEN 'From Rotterdam to Singapore, Glass Market keeps premium cullet moving. Discover reliable supply, verified partners, and transparent pricing in one curated platform.'
   WHEN 'hero_primary_label' THEN 'Explore Marketplace'
   WHEN 'hero_primary_url' THEN '/browse'
-  WHEN 'hero_secondary_label' THEN ''
-  WHEN 'hero_secondary_url' THEN ''
   WHEN 'stats_1_value' THEN '432K'
   WHEN 'stats_1_label' THEN 'Tons of glass traded'
   WHEN 'stats_2_value' THEN '68'
