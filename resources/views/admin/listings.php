@@ -273,21 +273,21 @@ try {
         }
 
         .btn-approve {
-            background: #10b981;
+            background: #6b6460;
             color: white;
         }
 
         .btn-approve:hover {
-            background: #059669;
+            background: #8b8480;
         }
 
         .btn-reject {
-            background: #ef4444;
+            background: #5a4a42;
             color: white;
         }
 
         .btn-reject:hover {
-            background: #dc2626;
+            background: #7a5a52;
         }
 
         .btn-back {

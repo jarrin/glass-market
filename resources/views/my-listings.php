@@ -292,39 +292,39 @@ try {
         }
 
         .btn-edit {
-            background: #3b82f6;
+            background: #2a2623;
             color: white;
         }
 
         .btn-edit:hover {
-            background: #2563eb;
+            background: #4a4643;
         }
 
         .btn-delete {
-            background: #ef4444;
+            background: #5a4a42;
             color: white;
         }
 
         .btn-delete:hover {
-            background: #dc2626;
+            background: #7a5a52;
         }
 
         .btn-publish {
-            background: #10b981;
+            background: #6b6460;
             color: white;
         }
 
         .btn-publish:hover {
-            background: #059669;
+            background: #8b8480;
         }
 
         .btn-unpublish {
-            background: #f59e0b;
+            background: #9a8a80;
             color: white;
         }
 
         .btn-unpublish:hover {
-            background: #d97706;
+            background: #baaaa0;
         }
 
         .btn-back {
