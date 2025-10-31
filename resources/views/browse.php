@@ -348,8 +348,7 @@
                 <div class="items-count">24 items</div>
                 <div>
                     <select aria-label="Sort" id="sortSelect">
-                        <option value="featured">Featured</option>
-                        <option value="newest">Newest</option>
+                        <option value="featured">No filters</option>
                         <option value="tons-low">Tons: Low to High</option>
                         <option value="tons-high">Tons: High to Low</option>
                     </select>
@@ -672,14 +671,9 @@
                 const sortValue = this.value;
 
                 if(sortValue === 'featured') {
-                    // Featured: restore original order (reset to cards array order)
+                    // No filters: restore original order (reset to cards array order)
                     visibleCards.sort((a, b) => {
                         return cards.indexOf(a) - cards.indexOf(b);
-                    });
-                } else if(sortValue === 'newest') {
-                    // Newest: reverse the original order
-                    visibleCards.sort((a, b) => {
-                        return cards.indexOf(b) - cards.indexOf(a);
                     });
                 } else if(sortValue === 'tons-low') {
                     // Tons: Low to High
