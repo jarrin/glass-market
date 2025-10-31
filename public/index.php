@@ -1,6 +1,31 @@
 <?php 
 session_start();
 require_once __DIR__ . '/../config.php'; 
+
+// Fetch latest listings from database
+require_once __DIR__ . '/../includes/db_connect.php';
+
+$featuredListings = [];
+try {
+    $stmt = $pdo->query("
+        SELECT 
+            l.id,
+            l.glass_type,
+            l.glass_type_other,
+            l.quantity_tons,
+            l.quantity_note,
+            l.image_path,
+            c.name as company_name
+        FROM listings l
+        LEFT JOIN companies c ON l.company_id = c.id
+        WHERE l.published = 1
+        ORDER BY l.created_at DESC
+        LIMIT 4
+    ");
+    $featuredListings = $stmt->fetchAll();
+} catch (PDOException $e) {
+    error_log("Database error in index.php: " . $e->getMessage());
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -33,38 +58,40 @@ require_once __DIR__ . '/../config.php';
                 <a class="link" href="../resources/views/browse.php">View All →</a>
             </div>
             <div class="container grid grid-4">
-                <article class="card">
-                    <img src="https://picsum.photos/seed/glass1/900/600" alt="Featured piece" />
-                    <div class="card-body">
-                        <h3 class="card-title">Venetian Crystal Vase</h3>
-                        <div class="card-meta">Artisan Glass Co.</div>
-                        <div class="card-price">$245.00</div>
-                    </div>
-                </article>
-                <article class="card">
-                    <img src="https://picsum.photos/seed/glass2/900/600" alt="Featured piece" />
-                    <div class="card-body">
-                        <h3 class="card-title">Hand-Blown Glass Bowl</h3>
-                        <div class="card-meta">Studio Lumina</div>
-                        <div class="card-price">$189.00</div>
-                    </div>
-                </article>
-                <article class="card">
-                    <img src="https://picsum.photos/seed/glass3/900/600" alt="Featured piece" />
-                    <div class="card-body">
-                        <h3 class="card-title">Murano Glass Sculpture</h3>
-                        <div class="card-meta">Venice Artworks</div>
-                        <div class="card-price">$520.00</div>
-                    </div>
-                </article>
-                <article class="card">
-                    <img src="https://picsum.photos/seed/glass4/900/600" alt="Featured piece" />
-                    <div class="card-body">
-                        <h3 class="card-title">Crystal Wine Glasses Set</h3>
-                        <div class="card-meta">Crystal Craft</div>
-                        <div class="card-price">$156.00</div>
-                    </div>
-                </article>
+                <?php if (!empty($featuredListings)): ?>
+                    <?php foreach ($featuredListings as $listing): ?>
+                        <?php
+                            $glassType = $listing['glass_type_other'] ?: $listing['glass_type'];
+                            $title = $listing['quantity_note'] ?: $glassType;
+                            $companyName = $listing['company_name'] ?: 'Glass Market';
+                            $tons = number_format($listing['quantity_tons'], 2);
+                            
+                            // Determine image URL
+                            $imageUrl = "https://picsum.photos/seed/glass{$listing['id']}/900/600";
+                            if (!empty($listing['image_path'])) {
+                                $imageUrl = PUBLIC_URL . '/' . $listing['image_path'];
+                            }
+                        ?>
+                        <article class="card">
+                            <img src="<?php echo htmlspecialchars($imageUrl, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?>" />
+                            <div class="card-body">
+                                <h3 class="card-title"><?php echo htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?></h3>
+                                <div class="card-meta"><?php echo htmlspecialchars($glassType, ENT_QUOTES, 'UTF-8'); ?> • <?php echo $tons; ?> tons</div>
+                                <div class="card-price"><?php echo htmlspecialchars($companyName, ENT_QUOTES, 'UTF-8'); ?></div>
+                            </div>
+                        </article>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <!-- Fallback if no listings -->
+                    <article class="card">
+                        <img src="https://picsum.photos/seed/glass1/900/600" alt="Featured piece" />
+                        <div class="card-body">
+                            <h3 class="card-title">No listings yet</h3>
+                            <div class="card-meta">Be the first to add a listing!</div>
+                            <div class="card-price">Glass Market</div>
+                        </div>
+                    </article>
+                <?php endif; ?>
             </div>
         </section>
 
