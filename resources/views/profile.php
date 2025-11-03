@@ -353,6 +353,48 @@ try {
     // Table might not exist yet
 }
 
+// Load user's subscriptions
+$user_subscriptions = [];
+try {
+    $pdo = new PDO("mysql:host=$db_host;dbname=$db_name", $db_user, $db_pass);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $stmt = $pdo->prepare('SELECT * FROM user_subscriptions WHERE user_id = :user_id ORDER BY created_at DESC');
+    $stmt->execute(['user_id' => $user['id']]);
+    $user_subscriptions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    // Table might not exist yet
+}
+
+// Handle subscription cancellation
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cancel_subscription'])) {
+    $subscription_id = $_POST['subscription_id'] ?? 0;
+    
+    try {
+        $pdo = new PDO("mysql:host=$db_host;dbname=$db_name", $db_user, $db_pass);
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        
+        // Verify the subscription belongs to this user before canceling
+        $stmt = $pdo->prepare('UPDATE user_subscriptions SET is_active = 0, updated_at = NOW() WHERE id = :id AND user_id = :user_id');
+        $stmt->execute([
+            'id' => $subscription_id,
+            'user_id' => $user['id']
+        ]);
+        
+        if ($stmt->rowCount() > 0) {
+            $success_message = 'Subscription cancelled successfully. You will have access until the end date.';
+            
+            // Reload subscriptions
+            $stmt = $pdo->prepare('SELECT * FROM user_subscriptions WHERE user_id = :user_id ORDER BY created_at DESC');
+            $stmt->execute(['user_id' => $user['id']]);
+            $user_subscriptions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } else {
+            $error_message = 'Subscription not found or already cancelled.';
+        }
+    } catch (PDOException $e) {
+        $error_message = 'Failed to cancel subscription: ' . $e->getMessage();
+    }
+}
+
 // Handle new glass listing
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_listing'])) {
     $title = trim($_POST['glass_title'] ?? '');
@@ -876,7 +918,6 @@ if (isset($_SESSION['listing_success'])) {
 
                     <div class="form-group">
                         <label for="glass_title">Listing Title</label>
-<<<<<<< HEAD
                         <input
                             type="text"
                             id="glass_title"
@@ -898,59 +939,6 @@ if (isset($_SESSION['listing_success'])) {
                             required
                         >
                         <small style="font-size: 11px; color: #999;">Specify the total weight in tons</small>
-=======
-                        <input type="text" id="glass_title" name="glass_title" placeholder="e.g., Premium Green Glass - High Quality" required />
-                    </div>
-                    <div class="form-group">
-                        <label for="company_name">Company</label>
-                        <input type="text" id="company_name" name="company_name" value="<?php echo htmlspecialchars($user['company_name'] ?? ''); ?>" readonly style="background:#eee;font-weight:bold;"/>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="side">WTS/WTB</label>
-                        <select id="side" name="side" required style="width:100%;padding:12px 14px;font-size:14px;border:1.5px solid #ddd;border-radius:6px;background:#fafafa;">
-                            <option value="WTS" selected>Want To Sell (WTS)</option>
-                            <option value="WTB">Want To Buy (WTB)</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="glass_type">Type of Glass (Cullet)</label>
-                        <select id="glass_type" name="glass_type" onchange="toggleGlassTypeOther(this)" required style="width:100%;padding:12px 14px;font-size:14px;border:1.5px solid #ddd;border-radius:6px;background:#fafafa;">
-                            <option value="">Select glass type...</option>
-                            <option value="green">Green Glass</option>
-                            <option value="white">White Glass</option>
-                            <option value="brown">Brown Glass</option>
-                            <option value="clear">Clear Glass</option>
-                            <option value="mixed">Mixed Glass</option>
-                            <option value="other">Other / Custom...</option>
-                        </select>
-                        <input type="text" id="glass_type_other" name="glass_type_other" placeholder="Describe glass type..." style="display:none;margin-top:8px;width:100%;padding:12px 14px;font-size:14px;border:1.5px solid #ddd;border-radius:6px;background:#fafafa;" />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="glass_tons">Quantity (in tons)</label>
-                        <input type="number" id="glass_tons" name="glass_tons" placeholder="0.00" step="0.01" min="0" required />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="recycled">Recycled</label>
-                        <select id="recycled" name="recycled" required>
-                            <option value="">Select...</option>
-                            <option value="recycled">Recycled</option>
-                            <option value="not_recycled">Not Recycled</option>
-                            <option value="unknown">Unknown</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="tested">Tested</label>
-                        <select id="tested" name="tested" required>
-                            <option value="">Select...</option>
-                            <option value="tested">Tested</option>
-                            <option value="untested">Untested</option>
-                            <option value="unknown">Unknown</option>
-                        </select>
->>>>>>> df1506e16269c82523fd260252509cb5f73eb14c
                     </div>
                     <div class="form-group">
                         <label for="storage_location">Storage Location</label>
@@ -1037,14 +1025,9 @@ if (isset($_SESSION['listing_success'])) {
                         <input type="file" id="glass_image" name="glass_image" accept="image/jpeg,image/jpg,image/png,image/webp" style="width:100%;padding:12px 14px;font-size:14px;border:1.5px solid #ddd;border-radius:6px;background:#fafafa;">
                         <small style="font-size:11px;color:#999;">Upload a photo of your glass (JPG, PNG, or WebP - Max 5MB)</small>
                     </div>
-<<<<<<< HEAD
 
                     <div style="background: #fffbeb; padding: 12px; border-radius: 6px; margin-bottom: 20px; font-size: 12px; color: #92400e;">
                         💡 <strong>Note:</strong> Your listing will be published immediately and visible to all marketplace users.
-=======
-                    <div style="background:#fffbeb;padding:12px;border-radius:6px;margin-bottom:20px;font-size:12px;color:#92400e;">
-                        💡 <strong>Note:</strong> Price will be negotiated directly with buyers. Your listing will be published immediately.
->>>>>>> df1506e16269c82523fd260252509cb5f73eb14c
                     </div>
                     <div style="margin-top:24px;">
                         <button type="submit" name="add_listing" class="btn btn-primary">Create Listing</button>
@@ -1438,6 +1421,125 @@ if (isset($_SESSION['listing_success'])) {
                 </div>
             </div>
 
+            <!-- Subscription Management -->
+            <div class="profile-section">
+                <div class="section-title">My Subscriptions</div>
+                <p style="font-size: 13px; color: #666; margin-bottom: 20px;">Manage your active subscriptions and payment plans</p>
+                
+                <?php if (count($user_subscriptions) > 0): ?>
+                    <?php foreach ($user_subscriptions as $subscription): ?>
+                        <?php 
+                            $is_active = $subscription['is_active'] == 1;
+                            $is_trial = $subscription['is_trial'] == 1;
+                            $start_date = new DateTime($subscription['start_date']);
+                            $end_date = new DateTime($subscription['end_date']);
+                            $today = new DateTime();
+                            $days_remaining = $today < $end_date ? $today->diff($end_date)->days : 0;
+                            $is_expired = $today > $end_date;
+                        ?>
+                        <div style="background: <?php echo $is_active && !$is_expired ? '#f0fdf4' : '#fafafa'; ?>; padding: 24px; border-radius: 8px; border: 1.5px solid <?php echo $is_active && !$is_expired ? '#bbf7d0' : '#e0e0e0'; ?>; margin-bottom: 16px;">
+                            <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 16px;">
+                                <div style="flex: 1; min-width: 250px;">
+                                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                                        <h3 style="font-size: 18px; font-weight: 700; margin: 0; color: #000;">
+                                            <?php echo $is_trial ? 'Trial Subscription' : 'Premium Subscription'; ?>
+                                        </h3>
+                                        <?php if ($is_active && !$is_expired): ?>
+                                            <span style="background: #16a34a; color: white; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; text-transform: uppercase;">Active</span>
+                                        <?php elseif ($is_expired): ?>
+                                            <span style="background: #dc2626; color: white; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; text-transform: uppercase;">Expired</span>
+                                        <?php else: ?>
+                                            <span style="background: #f59e0b; color: white; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; text-transform: uppercase;">Cancelled</span>
+                                        <?php endif; ?>
+                                    </div>
+                                    
+                                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-bottom: 12px;">
+                                        <div>
+                                            <div style="font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 4px;">Start Date</div>
+                                            <div style="font-size: 14px; color: #000; font-weight: 500;"><?php echo $start_date->format('M d, Y'); ?></div>
+                                        </div>
+                                        <div>
+                                            <div style="font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 4px;">End Date</div>
+                                            <div style="font-size: 14px; color: #000; font-weight: 500;"><?php echo $end_date->format('M d, Y'); ?></div>
+                                        </div>
+                                        <?php if ($is_active && !$is_expired): ?>
+                                            <div>
+                                                <div style="font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 4px;">Days Remaining</div>
+                                                <div style="font-size: 14px; color: #16a34a; font-weight: 600;"><?php echo $days_remaining; ?> days</div>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+                                    
+                                    <div style="font-size: 12px; color: #666;">
+                                        <?php if ($is_trial): ?>
+                                            <span style="display: inline-flex; align-items: center; gap: 4px;">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="14" height="14">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                                                </svg>
+                                                Free trial period
+                                            </span>
+                                        <?php else: ?>
+                                            <span>Monthly subscription • €9.99/month</span>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                                
+                                <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-end;">
+                                    <?php if ($is_active && !$is_expired): ?>
+                                        <form method="POST" action="" onsubmit="return confirm('Are you sure you want to cancel this subscription? You will still have access until <?php echo $end_date->format('M d, Y'); ?>.');">
+                                            <input type="hidden" name="subscription_id" value="<?php echo $subscription['id']; ?>">
+                                            <button type="submit" name="cancel_subscription" class="btn btn-secondary" style="background: #dc2626; color: white; border: none;" onmouseover="this.style.background='#b91c1c'" onmouseout="this.style.background='#dc2626'">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16" style="vertical-align: middle; margin-right: 4px;">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                                Cancel Subscription
+                                            </button>
+                                        </form>
+                                        <div style="font-size: 11px; color: #666; text-align: right;">
+                                            Access continues until end date
+                                        </div>
+                                    <?php elseif (!$is_active && !$is_expired): ?>
+                                        <div style="font-size: 13px; color: #f59e0b; font-weight: 600;">
+                                            ⚠️ Subscription cancelled
+                                        </div>
+                                        <div style="font-size: 11px; color: #666;">
+                                            Access until <?php echo $end_date->format('M d, Y'); ?>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                    
+                    <div style="background: #fffbeb; padding: 16px; border-radius: 8px; border: 1px solid #fde68a; margin-top: 16px;">
+                        <div style="display: flex; align-items: start; gap: 12px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#f59e0b" width="20" height="20" style="flex-shrink: 0; margin-top: 2px;">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                            </svg>
+                            <div>
+                                <div style="font-size: 13px; color: #92400e; font-weight: 600; margin-bottom: 4px;">Important Information</div>
+                                <div style="font-size: 12px; color: #92400e; line-height: 1.5;">
+                                    When you cancel a subscription, you'll continue to have access until the end date. No refunds are provided for partial months. To renew, please visit the subscription page.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <?php else: ?>
+                    <div style="background: #fafafa; padding: 40px 20px; border-radius: 8px; border: 1.5px solid #e0e0e0; text-align: center; color: #666;">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="48" height="48" style="margin: 0 auto 16px; color: #999;">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+                        </svg>
+                        <h3 style="font-size: 16px; font-weight: 600; margin: 0 0 8px 0; color: #000;">No Active Subscriptions</h3>
+                        <p style="font-size: 14px; margin: 0 0 20px 0;">You don't have any subscriptions yet.</p>
+                        <a href="<?php echo VIEWS_URL; ?>/subscription.php" class="btn btn-primary" style="display: inline-block;">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16" style="vertical-align: middle; margin-right: 6px;">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                            </svg>
+                            Subscribe Now
+                        </a>
+                    </div>
+                <?php endif; ?>
+            </div>
 
     </main>
     
