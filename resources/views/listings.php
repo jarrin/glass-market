@@ -68,8 +68,28 @@ if (!empty($listing['image_path'])) {
       <?= nl2br(htmlspecialchars($listing['quality_notes'] ?? 'Geen opmerkingen')) ?>
     </p>
 
+    <p><strong>Tested:</strong>
+      <?= htmlspecialchars($listing['tested'] ?? '-') ?>
+    </p>
+
+    <p><strong>Recycled:</strong>
+      <?= htmlspecialchars($listing['recycled'] ?? '-') ?>
+    </p>
+
+    <p><strong>WTB/WTS:</strong>
+      <?= htmlspecialchars($listing['side'] ?? '-') ?>
+    </p>
+
+    <p><strong>Currency:</strong>
+      <?= htmlspecialchars($listing['currency'] ?? '-') ?>
+    </p>
+
     <p><strong>Quantity:</strong>
       <?= htmlspecialchars($listing['quantity_tons'] ?? '-') ?> ton
+    </p>
+
+    <p><strong>Storage Location:</strong>
+      <?= htmlspecialchars($listing['storage_location'] ?? '-') ?>
     </p>
 
     <?php if ($listing['company_name']): ?>
