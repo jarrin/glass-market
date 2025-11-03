@@ -100,6 +100,9 @@
     <h1 class="page-title">Browse Collection</h1>
 
     <?php
+            $seller = null;
+            $sellerId = isset($_GET['seller']) ? (int)$_GET['seller'] : null;
+
         // Fetch products from database
         require_once __DIR__ . '/../../includes/db_connect.php';
         
@@ -107,9 +110,10 @@
         
         try {
             // Fetch all published listings from the database
-            $stmt = $pdo->query("
+            $stmt = $pdo->prepare("
                 SELECT 
                     l.id,
+                    l.company_id,
                     l.glass_type,
                     l.glass_type_other,
                     l.price_text,
@@ -128,110 +132,91 @@
                 WHERE l.published = 1
                 ORDER BY l.created_at DESC
             ");
-            
+            $stmt->execute();
             $listings = $stmt->fetchAll();
-            
-            // Map database listings to product format expected by browse page
-            $categoryMapping = [
-                'Clear Cullet' => 'Vases',
-                'Brown Cullet' => 'Tableware',
-                'Mixed Cullet' => 'Decorative',
-                'Green Cullet' => 'Vases & Vessels',
-                'Flat Glass' => 'Tableware',
-                'Container Glass' => 'Tableware'
-            ];
-            
-            foreach ($listings as $index => $listing) {
-                // Extract numeric price from price_text (e.g., "€120/ton CIF" -> 120)
-                $price = 0;
-                if (preg_match('/[\d,]+/', $listing['price_text'], $matches)) {
-                    $price = (int)str_replace(',', '', $matches[0]);
-                }
-                
-                // Map glass type to category
+
+            foreach ($listings as $listing) {
                 $glassType = $listing['glass_type_other'] ?: $listing['glass_type'];
-                $category = $categoryMapping[$listing['glass_type']] ?? 'Decorative';
-                
-                // Determine style based on recycled/tested status
-                $style = 'Contemporary';
-                if ($listing['recycled'] === 'recycled' && $listing['tested'] === 'tested') {
-                    $style = 'Art Deco';
-                } elseif ($listing['recycled'] === 'recycled') {
-                    $style = 'Murano';
-                } elseif ($listing['tested'] === 'tested') {
-                    $style = 'Contemporary';
-                } else {
-                    $style = 'Vintage';
-                }
-                
-                // Determine condition
-                $condition = 'New';
-                if ($listing['tested'] === 'tested') {
-                    $condition = 'New';
-                } elseif ($listing['tested'] === 'untested') {
-                    $condition = 'Vintage';
-                } else {
-                    $condition = 'Like New';
-                }
-                
-                // Determine image URL - use uploaded image if available, otherwise placeholder
+                $title = $listing['quantity_note'] ?: $glassType;
+                $companyName = $listing['company_name'] ?: 'Glass Market';
+                $tons = $listing['quantity_tons'];
+                // Determine image URL - uploaded or fallback
                 $imageUrl = "https://picsum.photos/seed/glass{$listing['id']}/800/800";
                 if (!empty($listing['image_path'])) {
                     $imageUrl = PUBLIC_URL . '/' . $listing['image_path'];
                 }
-                
+                // Map for card
                 $products[] = [
                     'id' => $listing['id'],
                     'title' => $glassType,
-                    'listing_title' => $listing['quantity_note'] ?: $glassType,
-                    'tons' => $listing['quantity_tons'],
-                    'category' => $category,
+                    'listing_title' => $title,
+                    'tons' => $tons,
+                    'category' => $glassType,
                     'image' => $imageUrl,
-                    'price' => $price,
-                    'style' => $style,
-                    'condition' => $condition,
-                    'description' => $listing['quality_notes'] ?: 'Quality glass material',
-                    'location' => $listing['storage_location']
+                    'price' => $listing['price_text'],
+                    'company' => $companyName,
+                    'recycled' => $listing['recycled'],
+                    'tested' => $listing['tested'],
+                    'storage_location' => $listing['storage_location'],
+                    'currency' => $listing['currency'],
+                    'side' => $listing['side'],
+                    'description' => $listing['quality_notes'],
                 ];
             }
-            
-            // If no products in database, add some demo products
-            if (empty($products)) {
-                $styles = ['Contemporary', 'Vintage', 'Art Deco', 'Murano', 'Bohemian'];
-                $conditions = ['New', 'Like New', 'Vintage'];
-                for($i=1;$i<=24;$i++){
-                    $price = rand(25, 950);
-                    $products[] = [
-                        'id'=>$i,
-                        'title'=>"Glass Item #$i",
-                        'category'=>($i%3==0)?'Tableware':(($i%3==1)?'Vases':'Sculptures'),
-                        'image'=>"https://picsum.photos/seed/glass{$i}/800/800",
-                        'price'=>$price,
-                        'style'=>$styles[array_rand($styles)],
-                        'condition'=>$conditions[array_rand($conditions)]
-                    ];
-                }
-            }
-            
         } catch (PDOException $e) {
-            // If database query fails, use demo products
             error_log("Database error in browse.php: " . $e->getMessage());
-            $styles = ['Contemporary', 'Vintage', 'Art Deco', 'Murano', 'Bohemian'];
-            $conditions = ['New', 'Like New', 'Vintage'];
-            for($i=1;$i<=24;$i++){
-                $price = rand(25, 950);
-                $products[] = [
-                    'id'=>$i,
-                    'title'=>"Glass Item #$i",
-                    'category'=>($i%3==0)?'Tableware':(($i%3==1)?'Vases':'Sculptures'),
-                    'image'=>"https://picsum.photos/seed/glass{$i}/800/800",
-                    'price'=>$price,
-                    'style'=>$styles[array_rand($styles)],
-                    'condition'=>$conditions[array_rand($conditions)]
-                ];
-            }
+            // Laat $products leeg bij fout (geen dummy invullen)
         }
     ?>
+
+        <?php if ($seller): ?>
+            <section style="background:transparent;padding:18px 0 8px;margin-bottom:8px">
+                <div style="max-width:1200px;margin:0 auto;padding:0 20px;display:flex;gap:20px;align-items:center;justify-content:space-between;flex-wrap:wrap">
+                    <div style="display:flex;gap:18px;align-items:center;flex:1;min-width:260px">
+                        <div style="width:120px;height:120px;border-radius:999px;overflow:hidden;background:#e8e3dd;flex-shrink:0">
+                            <img src="<?php echo htmlspecialchars('https://picsum.photos/seed/seller' . $seller['id'] . '/600/600', ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($seller['name'], ENT_QUOTES, 'UTF-8'); ?>" style="width:100%;height:100%;object-fit:cover;display:block">
+                        </div>
+                        <div>
+                            <h2 style="font-family: Georgia, 'Times New Roman', serif;font-size:28px;margin:0"><?php echo htmlspecialchars($seller['name'], ENT_QUOTES, 'UTF-8'); ?></h2>
+                            <div style="color:#6b6460;margin-top:6px;font-size:14px"><?php echo htmlspecialchars($seller['website'] ?? '', ENT_QUOTES, 'UTF-8'); ?></div>
+                            <p style="color:#6b6460;margin:8px 0 0;max-width:760px"><?php echo htmlspecialchars($seller['company_type'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
+                        </div>
+                    </div>
+
+                    <div style="display:flex;gap:12px;align-items:stretch">
+                        <?php
+                            $activeListings = 0;
+                            $totalSales = 0;
+                            $avgRating = number_format(4.6 + (rand(0, 35) / 100), 1);
+                            try {
+                                $s = $pdo->prepare('SELECT COUNT(*) as cnt, COALESCE(SUM(quantity_tons),0) as total_tons FROM listings WHERE published = 1 AND company_id = ?');
+                                $s->execute([$sellerId]);
+                                $r = $s->fetch();
+                                $activeListings = $r['cnt'] ?? 0;
+                                $totalTons = $r['total_tons'] ?? 0;
+                                $totalSales = $activeListings * 20; // approximate
+                            } catch (Exception $e) {}
+                        ?>
+                        <div style="background:#fff;border:1px solid #e8e3dd;padding:14px;border-radius:8px;text-align:center;min-width:110px">
+                            <div style="font-family: Georgia, 'Times New Roman', serif;font-size:24px;font-weight:700"><?php echo number_format($totalSales); ?></div>
+                            <div style="color:#6b6460;font-size:12px">Total Sales</div>
+                        </div>
+                        <div style="background:#fff;border:1px solid #e8e3dd;padding:14px;border-radius:8px;text-align:center;min-width:110px">
+                            <div style="font-family: Georgia, 'Times New Roman', serif;font-size:24px;font-weight:700"><?php echo number_format($activeListings); ?></div>
+                            <div style="color:#6b6460;font-size:12px">Active Listings</div>
+                        </div>
+                        <div style="background:#fff;border:1px solid #e8e3dd;padding:14px;border-radius:8px;text-align:center;min-width:110px">
+                            <div style="font-family: Georgia, 'Times New Roman', serif;font-size:24px;font-weight:700"><?php echo $avgRating; ?></div>
+                            <div style="color:#6b6460;font-size:12px">Average Rating</div>
+                        </div>
+                        <div style="background:#fff;border:1px solid #e8e3dd;padding:14px;border-radius:8px;text-align:center;min-width:140px">
+                            <div style="font-family: Georgia, 'Times New Roman', serif;font-size:14px;font-weight:700">Within 24 hours</div>
+                            <div style="color:#6b6460;font-size:12px">Response Time</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        <?php endif; ?>
 
     <!-- Filter toggle button (visible only on mobile) -->
     <button class="filter-toggle-btn" id="filterToggle">🔍 Filters tonen/verbergen</button>
@@ -313,6 +298,32 @@
             <div class="divider"></div>
 
             <div class="panel">
+                <h4>Condition</h4>
+                <ul class="filter-list" id="conditions-list">
+                    <?php
+                        $allConditions = ['New', 'Like New', 'Vintage'];
+                        // compute counts from products
+                        $conditionCounts = array_fill_keys($allConditions, 0);
+                        if(isset($products) && is_array($products)){
+                            foreach($products as $pp){
+                                if(isset($pp['condition']) && isset($conditionCounts[$pp['condition']])){
+                                    $conditionCounts[$pp['condition']]++;
+                                }
+                            }
+                        }
+                        foreach($allConditions as $condition){
+                            $count = isset($conditionCounts[$condition]) ? $conditionCounts[$condition] : 0;
+                            // sanitize id for input
+                            $id = 'condition_' . preg_replace('/[^a-z0-9]+/i','_', strtolower($condition));
+                            echo "<li><label><input type=\"checkbox\" class=\"condition-filter\" id=\"$id\" value=\"".htmlspecialchars($condition,ENT_QUOTES,'UTF-8')."\"> <span>".htmlspecialchars($condition,ENT_QUOTES,'UTF-8')."</span></label> <span class=\"count\">$count</span></li>";
+                        }
+                    ?>
+                </ul>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="panel">
                 <button id="clear-filters" style="width:100%;padding:10px;border:1px solid #6b6460;background:#fff;color:#6b6460;border-radius:4px;cursor:pointer;">Clear All Filters</button>
             </div>
         </aside>
@@ -322,8 +333,7 @@
                 <div class="items-count">24 items</div>
                 <div>
                     <select aria-label="Sort" id="sortSelect">
-                        <option value="featured">Featured</option>
-                        <option value="newest">Newest</option>
+                        <option value="featured">No filters</option>
                         <option value="tons-low">Tons: Low to High</option>
                         <option value="tons-high">Tons: High to Low</option>
                     </select>
@@ -334,7 +344,7 @@
 
             <div class="grid">
                 <?php foreach($products as $p): ?>
-                    <article class="card" data-id="<?php echo htmlspecialchars($p['id'], ENT_QUOTES, 'UTF-8'); ?>" data-glass-type="<?php echo htmlspecialchars($p['title'], ENT_QUOTES, 'UTF-8'); ?>" data-tons="<?php echo isset($p['tons']) ? (float)$p['tons'] : 0; ?>" data-condition="<?php echo htmlspecialchars($p['condition'], ENT_QUOTES, 'UTF-8'); ?>">
+                    <article class="card" data-glass-type="<?php echo htmlspecialchars($p['title'], ENT_QUOTES, 'UTF-8'); ?>" data-tons="<?php echo isset($p['tons']) ? (float)$p['tons'] : 0; ?>" onclick="window.location.href='listings.php?id=<?php echo urlencode($p['id']); ?>'" style="cursor:pointer">
                         <div class="media" role="img" aria-label="<?php echo htmlspecialchars($p['title'], ENT_QUOTES, 'UTF-8'); ?>">
                             <img src="<?php echo htmlspecialchars($p['image'], ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($p['title'], ENT_QUOTES, 'UTF-8'); ?>" style="width:100%;height:100%;object-fit:cover;display:block">
                         </div>
@@ -394,12 +404,19 @@
             let maxTonsValue = <?php echo $maxTons; ?>;
 
             function applyFilters(){
+                console.log('=== APPLY FILTERS CALLED ===');
+
                 const activeGlassTypes = glassTypeCheckboxes.filter(cb=>cb.checked).map(cb=>cb.value);
                 const activeConditions = conditionCheckboxes.filter(cb=>cb.checked).map(cb=>cb.value);
-                const min = parseFloat(minRange.value) || 0;
-                const max = parseFloat(maxRange.value) || maxTonsValue;
-                
-                console.log('Filtering with tons range:', min, 'to', max);
+
+                // FIX: Use minPrice/maxPrice instead of minRange/maxRange
+                const min = parseFloat(minPrice.value) || 0;
+                const max = parseFloat(maxPrice.value) || maxTonsValue;
+
+                console.log('Active Glass Types:', activeGlassTypes);
+                console.log('Active Conditions:', activeConditions);
+                console.log('Tons range:', min, 'to', max);
+                console.log('Total cards:', cards.length);
 
                 // compute counts per glass type and condition for the current filters
                 const glassTypeCounts = {};
@@ -407,8 +424,8 @@
                 visibleCards = [];
                 
                 cards.forEach(c=>{
-                    const glassType = c.getAttribute('data-glass-type');
-                    const condition = c.getAttribute('data-condition');
+                    const glassType = (c.getAttribute('data-glass-type') || '').trim();
+                    const condition = (c.getAttribute('data-condition') || '').trim();
                     const tons = parseFloat(c.getAttribute('data-tons')) || 0;
                     const tonsMatch = tons >= min && tons <= max;
                     const glassTypeMatch = activeGlassTypes.length ? activeGlassTypes.indexOf(glassType) !== -1 : true;
@@ -425,22 +442,37 @@
                 });
 
                 cards.forEach((c, index) => {
-                    const glassType = c.getAttribute('data-glass-type');
-                    const condition = c.getAttribute('data-condition');
+                    const glassType = (c.getAttribute('data-glass-type') || '').trim();
+                    const condition = (c.getAttribute('data-condition') || '').trim();
                     const tons = parseFloat(c.getAttribute('data-tons')) || 0;
                     const glassTypeMatch = activeGlassTypes.length ? activeGlassTypes.indexOf(glassType) !== -1 : true;
                     const conditionMatch = activeConditions.length ? activeConditions.indexOf(condition) !== -1 : true;
                     const tonsMatch = tons >= min && tons <= max;
-                    
-                    if(index === 0) {
-                        console.log('First card tons:', tons, 'Match:', tonsMatch);
+
+                    // Log first 3 cards for debugging
+                    if(index < 3) {
+                        console.log(`Card ${index}:`, {
+                            glassType: `"${glassType}"`,
+                            activeGlassTypes,
+                            indexOfResult: activeGlassTypes.indexOf(glassType),
+                            glassTypeMatch,
+                            condition: `"${condition}"`,
+                            conditionMatch,
+                            tons,
+                            tonsMatch,
+                            willShow: glassTypeMatch && conditionMatch && tonsMatch
+                        });
                     }
-                    
+
                     if(glassTypeMatch && conditionMatch && tonsMatch){
                         visibleCards.push(c);
                     }
                 });
                 
+                console.log('Visible cards after filter:', visibleCards.length);
+                console.log('Glass type counts:', glassTypeCounts);
+                console.log('Condition counts:', conditionCounts);
+
                 itemsCount.textContent = visibleCards.length + ' items';
 
                 // update count labels in sidebar
@@ -456,13 +488,21 @@
                     const condition = input.value;
                     el.textContent = conditionCounts[condition] !== undefined ? conditionCounts[condition] : 0;
                 });
-                
+
                 // Reset to page 1 when filters change
                 currentPage = 1;
                 updatePagination();
+                console.log('=== FILTER COMPLETE ===\n');
             }
             
             function updatePagination(){
+                console.log('=== UPDATE PAGINATION CALLED ===');
+                console.log('Total cards:', cards.length);
+                console.log('Visible cards:', visibleCards.length);
+                console.log('Current page:', currentPage);
+                
+                const grid = document.querySelector('.grid');
+                
                 // Hide all cards first
                 cards.forEach(c => c.style.display = 'none');
                 
@@ -470,11 +510,21 @@
                 const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
                 const endIndex = startIndex + ITEMS_PER_PAGE;
                 
-                // Show only cards for current page
-                visibleCards.slice(startIndex, endIndex).forEach(c => c.style.display = '');
+                console.log('Start index:', startIndex, 'End index:', endIndex);
+                console.log('Cards to show:', visibleCards.slice(startIndex, endIndex).length);
+                
+                // Show cards for current page in the correct order
+                const cardsToShow = visibleCards.slice(startIndex, endIndex);
+                cardsToShow.forEach((c, idx) => {
+                    console.log(`Showing card ${idx}:`, c.getAttribute('data-glass-type'));
+                    c.style.display = '';
+                    // Reorder in DOM to match sorted order
+                    grid.appendChild(c);
+                });
                 
                 // Render pagination controls
                 renderPaginationControls(totalPages);
+                console.log('=== PAGINATION UPDATE COMPLETE ===\n');
             }
             
             function renderPaginationControls(totalPages){
@@ -604,19 +654,30 @@
             const sortSelect = document.getElementById('sortSelect');
             sortSelect.addEventListener('change', function() {
                 const sortValue = this.value;
-                if(sortValue === 'tons-low') {
+
+                if(sortValue === 'featured') {
+                    // No filters: restore original order (reset to cards array order)
+                    visibleCards.sort((a, b) => {
+                        return cards.indexOf(a) - cards.indexOf(b);
+                    });
+                } else if(sortValue === 'tons-low') {
+                    // Tons: Low to High
                     visibleCards.sort((a, b) => {
                         const tonsA = parseFloat(a.getAttribute('data-tons')) || 0;
                         const tonsB = parseFloat(b.getAttribute('data-tons')) || 0;
                         return tonsA - tonsB;
                     });
                 } else if(sortValue === 'tons-high') {
+                    // Tons: High to Low
                     visibleCards.sort((a, b) => {
                         const tonsA = parseFloat(a.getAttribute('data-tons')) || 0;
                         const tonsB = parseFloat(b.getAttribute('data-tons')) || 0;
                         return tonsB - tonsA;
                     });
                 }
+
+                // Reset to first page after sorting
+                currentPage = 1;
                 updatePagination();
             });
 
@@ -667,21 +728,6 @@
             syncRanges();
             applyFilters();
         })();
-    </script>
-
-    <!-- Klikbare cards script -->
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        document.querySelectorAll('.card[data-id]').forEach(function(card) {
-            card.style.cursor = "pointer";
-            card.addEventListener('click', function() {
-                var id = card.getAttribute('data-id');
-                if (id) {
-                    window.location.href = 'listings.php?id=' + encodeURIComponent(id);
-                }
-            });
-        });
-    });
     </script>
 
 </main>
