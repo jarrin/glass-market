@@ -13,33 +13,30 @@ if (!defined('BASE_URL')) {
         <div class="footer-cols">
             <div class="footer-col">
                 <h5>Shop</h5>
-                <a href="#">Browse All</a>
-                <a href="#">Categories</a>
-                <a href="#">New Arrivals</a>
-                <a href="#">Featured</a>
+                <a href="<?php echo BASE_URL; ?>/resources/views/browse.php">Browse All</a>
             </div>
             <div class="footer-col">
                 <h5>Sell</h5>
-                <a href="#">Start Selling</a>
-                <a href="#">Seller Dashboard</a>
-                <a href="#">Guidelines</a>
-                <a href="#">Fees</a>
+                <a href="<?php echo BASE_URL; ?>/resources/views/pricing.php">Start Selling</a>
+                <a href="<?php echo BASE_URL; ?>/resources/views/my-listings.php">Seller Dashboard</a>
+                <a href="<?php echo PUBLIC_URL; ?>/seller-guidelines.php">Guidelines</a>
+                <a href="<?php echo BASE_URL; ?>/resources/views/pricing.php">Fees</a>
             </div>
             <div class="footer-col">
                 <h5>Support</h5>
-                <a href="#">Help Center</a>
-                <a href="#">Contact Us</a>
-                <a href="#">Shipping</a>
-                <a href="#">Returns</a>
+                <a href="<?php echo PUBLIC_URL; ?>/help.php">Help Center</a>
+                <a href="<?php echo PUBLIC_URL; ?>/contact.php">Contact Us</a>
+                <a href="<?php echo PUBLIC_URL; ?>/shipping.php">Shipping</a>
+                <a href="<?php echo PUBLIC_URL; ?>/returns.php">Returns</a>
             </div>
         </div>
     </div>
     <div class="container footer-bottom">
         <div>© 2025 Glass Market. All rights reserved.</div>
         <div class="footer-links">
-            <a href="#">Privacy</a>
-            <a href="#">Terms</a>
-            <a href="#">Cookies</a>
+            <a href="<?php echo PUBLIC_URL; ?>/privacy.php">Privacy</a>
+            <a href="<?php echo PUBLIC_URL; ?>/terms.php">Terms</a>
+            <a href="<?php echo BASE_URL; ?>/resources/views/about.php">About</a>
         </div>
     </div>
 </footer>
