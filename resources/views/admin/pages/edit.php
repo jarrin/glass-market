@@ -14,7 +14,7 @@ $page_slug = $_GET['page'] ?? 'about-us';
 
 try {
     $pdo = new PDO("mysql:host=$db_host;dbname=$db_name", $db_user, $db_pass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION)};
     
     // Handle form submission
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_content'])) {
@@ -50,9 +50,12 @@ try {
                 ]);
             }
         }
-        ?>
         
-        <style>
+        $success_message = 'Content updated successfully!';
+    }
+    ?>
+        
+        <style> 
             :root {
                 --editor-bg: #f5f6fb;
                 --editor-surface: #ffffff;
@@ -591,7 +594,7 @@ try {
                     width: 100%;
                 }
             }
-        </style>
+
 
         .form-hint {
             font-size: 12px;

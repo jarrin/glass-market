@@ -208,8 +208,8 @@
   
   .btn-secondary {
     background: transparent;
-    color: var(--ink);
-    border: 1px solid var(--ink);
+    color: var(--bg);
+    border: 1px solid var(--bg);
   }
   
   .btn-secondary:hover {

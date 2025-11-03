@@ -798,35 +798,73 @@ if (isset($_SESSION['listing_success'])) {
                 
                 <form method="POST" action="" enctype="multipart/form-data">
                     <div class="form-group">
+                        <label for="company_name_display">Company</label>
+                        <input
+                            type="text"
+                            id="company_name_display"
+                            value="<?php echo htmlspecialchars(!empty($user['company_name']) ? $user['company_name'] : $user['name'] . "'s Company"); ?>"
+                            disabled
+                            style="background: #f5f5f5; color: #666; cursor: not-allowed;"
+                        >
+                        <small style="font-size: 11px; color: #999;">Update your company name in the profile section below</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="side">Listing Type</label>
+                        <select
+                            id="side"
+                            name="side"
+                            style="width: 100%; padding: 12px 14px; font-size: 14px; border: 1.5px solid #ddd; border-radius: 6px; background: #fafafa;"
+                            required
+                        >
+                            <option value="WTS">Want To Sell (WTS)</option>
+                            <option value="WTB">Want To Buy (WTB)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="glass_type">Type of Glass (Cullet)</label>
+                        <select
+                            id="glass_type"
+                            name="glass_type"
+                            style="width: 100%; padding: 12px 14px; font-size: 14px; border: 1.5px solid #ddd; border-radius: 6px; background: #fafafa;"
+                            onchange="toggleOtherGlassType(this)"
+                            required
+                        >
+                            <option value="">Select glass type...</option>
+                            <option value="Clear Cullet">Clear Cullet</option>
+                            <option value="Green Cullet">Green Cullet</option>
+                            <option value="Brown Cullet">Brown Cullet</option>
+                            <option value="Amber Cullet">Amber Cullet</option>
+                            <option value="Mixed Cullet">Mixed Cullet</option>
+                            <option value="Flint Cullet">Flint Cullet</option>
+                            <option value="other">Other (specify)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="glass_type_other_container" style="display: none;">
+                        <label for="glass_type_other">Specify Glass Type</label>
+                        <input
+                            type="text"
+                            id="glass_type_other"
+                            name="glass_type_other"
+                            placeholder="Enter custom glass type"
+                        >
+                    </div>
+
+                    <div class="form-group">
                         <label for="glass_title">Listing Title</label>
                         <input
                             type="text"
                             id="glass_title"
                             name="glass_title"
-                            placeholder="e.g., Premium Green Glass - High Quality"
+                            placeholder="e.g., Premium Green Cullet - High Quality"
                             required
                         >
                     </div>
 
                     <div class="form-group">
-                        <label for="glass_type">Glass Type</label>
-                        <select
-                            id="glass_type"
-                            name="glass_type"
-                            style="width: 100%; padding: 12px 14px; font-size: 14px; border: 1.5px solid #ddd; border-radius: 6px; background: #fafafa;"
-                            required
-                        >
-                            <option value="">Select glass type...</option>
-                            <option value="green">Green Glass</option>
-                            <option value="white">White Glass</option>
-                            <option value="brown">Brown Glass</option>
-                            <option value="clear">Clear Glass</option>
-                            <option value="mixed">Mixed Glass</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="glass_tons">Tonnage (Tons)</label>
+                        <label for="glass_tons">Quantity (in tons)</label>
                         <input
                             type="number"
                             id="glass_tons"
@@ -837,6 +875,69 @@ if (isset($_SESSION['listing_success'])) {
                             required
                         >
                         <small style="font-size: 11px; color: #999;">Specify the total weight in tons</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="recycled">Recycled Status</label>
+                        <select
+                            id="recycled"
+                            name="recycled"
+                            style="width: 100%; padding: 12px 14px; font-size: 14px; border: 1.5px solid #ddd; border-radius: 6px; background: #fafafa;"
+                            required
+                        >
+                            <option value="recycled">Recycled</option>
+                            <option value="not_recycled">Not Recycled</option>
+                            <option value="unknown">Unknown</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tested">Testing Status</label>
+                        <select
+                            id="tested"
+                            name="tested"
+                            style="width: 100%; padding: 12px 14px; font-size: 14px; border: 1.5px solid #ddd; border-radius: 6px; background: #fafafa;"
+                            required
+                        >
+                            <option value="tested">Tested</option>
+                            <option value="untested">Untested</option>
+                            <option value="unknown">Unknown</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="storage_location">Storage Location</label>
+                        <input
+                            type="text"
+                            id="storage_location"
+                            name="storage_location"
+                            placeholder="e.g., Rotterdam warehouse, Dock 5"
+                        >
+                        <small style="font-size: 11px; color: #999;">Optional - Where is the glass currently stored?</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="price_text">Price</label>
+                        <div style="display: grid; grid-template-columns: 1fr 120px; gap: 12px;">
+                            <input
+                                type="text"
+                                id="price_text"
+                                name="price_text"
+                                placeholder="e.g., €120/ton CIF or Negotiable"
+                            >
+                            <select
+                                id="currency"
+                                name="currency"
+                                style="width: 100%; padding: 12px 14px; font-size: 14px; border: 1.5px solid #ddd; border-radius: 6px; background: #fafafa;"
+                            >
+                                <option value="EUR" selected>EUR (€)</option>
+                                <option value="USD">USD ($)</option>
+                                <option value="GBP">GBP (£)</option>
+                                <option value="CNY">CNY (¥)</option>
+                                <option value="JPY">JPY (¥)</option>
+                            </select>
+                        </div>
+                        <small style="font-size: 11px; color: #999;">Optional - Enter price or leave blank for negotiation</small>
                     </div>
 
                     <div class="form-group">
@@ -864,7 +965,7 @@ if (isset($_SESSION['listing_success'])) {
                     </div>
 
                     <div style="background: #fffbeb; padding: 12px; border-radius: 6px; margin-bottom: 20px; font-size: 12px; color: #92400e;">
-                        💡 <strong>Note:</strong> Price will be negotiated directly with buyers. Your listing will be published immediately.
+                        💡 <strong>Note:</strong> Your listing will be published immediately and visible to all marketplace users.
                     </div>
 
                     <div style="margin-top: 24px;">
