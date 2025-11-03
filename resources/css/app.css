@@ -142,9 +142,7 @@
     align-items: center;
     gap: 8px;
     padding: 8px 10px;
-    border: 1px solid var(--ring);
-    border-radius: 6px;
-    background: rgba(255, 255, 255, 0.6);
+
   }
   
   .search input {
@@ -208,8 +206,8 @@
   
   .btn-secondary {
     background: transparent;
-    color: var(--ink);
-    border: 1px solid var(--ink);
+    color: var(--bg);
+    border: 1px solid var(--bg);
   }
   
   .btn-secondary:hover {
