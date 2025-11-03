@@ -94,6 +94,13 @@ $admin_email = $_SESSION['user_email'] ?? '';
                 </div>
             </div>
             <div class="header-nav">
+                <a href="<?php echo PUBLIC_URL; ?>/index.php" class="btn-view-site" style="background: rgba(255,255,255,0.15); padding: 8px 16px; border-radius: 6px; color: white; text-decoration: none; font-size: 14px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; margin-right: 16px; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="18" height="18">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    View Site
+                </a>
                 <div class="nav-dropdown">
                     <button class="nav-dropdown-btn">
                         Manage Pages

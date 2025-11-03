@@ -312,15 +312,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_listing'])) {
 
                 <form method="POST" action="" enctype="multipart/form-data">
                     <div class="form-group">
-                        <label for="glass_title">Listing Title</label>
+                        <label for="company_name_display">Company</label>
                         <input
                             type="text"
-                            id="glass_title"
-                            name="glass_title"
-                            value="<?php echo htmlspecialchars($listing['quantity_note'] ?? ''); ?>"
-                            placeholder="e.g., Premium Green Glass - High Quality"
-                            required
+                            id="company_name_display"
+                            value="<?php echo htmlspecialchars($listing['company_name'] ?? ''); ?>"
+                            disabled
+                            style="background: #f5f5f5; color: #666; cursor: not-allowed;"
                         >
+                        <small>Company information cannot be changed from listing</small>
                     </div>
 
                     <div class="form-group">
@@ -332,23 +332,58 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_listing'])) {
                     </div>
 
                     <div class="form-group">
-                        <label for="glass_type">Glass Type</label>
-                        <select id="glass_type" name="glass_type" required>
+                        <label for="glass_type">Type of Glass (Cullet)</label>
+                        <select id="glass_type" name="glass_type" onchange="toggleOtherGlassType(this)" required>
                             <option value="">Select glass type...</option>
                             <?php
-                                $types = ['green', 'white', 'brown', 'clear', 'mixed'];
-                                $current_type = strtolower(str_replace(' Glass', '', $listing['glass_type'] ?? ''));
+                                $glass_types = [
+                                    'Clear Cullet',
+                                    'Green Cullet',
+                                    'Brown Cullet',
+                                    'Amber Cullet',
+                                    'Mixed Cullet',
+                                    'Flint Cullet'
+                                ];
+                                $current_type = $listing['glass_type'] ?? '';
+                                $is_other = !in_array($current_type, $glass_types) && !empty($current_type);
                                 
-                                foreach ($types as $type) {
+                                foreach ($glass_types as $type) {
                                     $selected = ($current_type === $type) ? 'selected' : '';
-                                    echo "<option value=\"$type\" $selected>" . ucfirst($type) . " Glass</option>";
+                                    echo "<option value=\"$type\" $selected>$type</option>";
                                 }
+                                
+                                // Add "Other" option
+                                $other_selected = $is_other ? 'selected' : '';
+                                echo "<option value=\"other\" $other_selected>Other (specify)</option>";
                             ?>
                         </select>
                     </div>
 
+                    <div class="form-group" id="glass_type_other_container" style="<?php echo $is_other ? '' : 'display: none;'; ?>">
+                        <label for="glass_type_other">Specify Glass Type</label>
+                        <input
+                            type="text"
+                            id="glass_type_other"
+                            name="glass_type_other"
+                            value="<?php echo $is_other ? htmlspecialchars($current_type) : ''; ?>"
+                            placeholder="Enter custom glass type"
+                        >
+                    </div>
+
                     <div class="form-group">
-                        <label for="glass_tons">Tonnage (Tons)</label>
+                        <label for="glass_title">Listing Title</label>
+                        <input
+                            type="text"
+                            id="glass_title"
+                            name="glass_title"
+                            value="<?php echo htmlspecialchars($listing['quantity_note'] ?? ''); ?>"
+                            placeholder="e.g., Premium Green Cullet - High Quality"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="glass_tons">Quantity (in tons)</label>
                         <input
                             type="number"
                             id="glass_tons"
@@ -360,6 +395,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_listing'])) {
                             required
                         >
                         <small>Specify the total weight in tons</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="recycled">Recycled Status</label>
+                        <select id="recycled" name="recycled" required>
+                            <option value="recycled" <?php echo ($listing['recycled'] ?? 'unknown') === 'recycled' ? 'selected' : ''; ?>>Recycled</option>
+                            <option value="not_recycled" <?php echo ($listing['recycled'] ?? 'unknown') === 'not_recycled' ? 'selected' : ''; ?>>Not Recycled</option>
+                            <option value="unknown" <?php echo ($listing['recycled'] ?? 'unknown') === 'unknown' ? 'selected' : ''; ?>>Unknown</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tested">Testing Status</label>
+                        <select id="tested" name="tested" required>
+                            <option value="tested" <?php echo ($listing['tested'] ?? 'unknown') === 'tested' ? 'selected' : ''; ?>>Tested</option>
+                            <option value="untested" <?php echo ($listing['tested'] ?? 'unknown') === 'untested' ? 'selected' : ''; ?>>Untested</option>
+                            <option value="unknown" <?php echo ($listing['tested'] ?? 'unknown') === 'unknown' ? 'selected' : ''; ?>>Unknown</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="storage_location">Storage Location</label>
+                        <input
+                            type="text"
+                            id="storage_location"
+                            name="storage_location"
+                            value="<?php echo htmlspecialchars($listing['storage_location'] ?? ''); ?>"
+                            placeholder="e.g., Rotterdam warehouse, Dock 5"
+                        >
+                        <small>Optional - Where is the glass currently stored?</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="price_text">Price</label>
+                        <div style="display: grid; grid-template-columns: 1fr 120px; gap: 12px;">
+                            <input
+                                type="text"
+                                id="price_text"
+                                name="price_text"
+                                value="<?php echo htmlspecialchars($listing['price_text'] ?? ''); ?>"
+                                placeholder="e.g., €120/ton CIF or Negotiable"
+                            >
+                            <select id="currency" name="currency">
+                                <option value="EUR" <?php echo ($listing['currency'] ?? 'EUR') === 'EUR' ? 'selected' : ''; ?>>EUR (€)</option>
+                                <option value="USD" <?php echo ($listing['currency'] ?? 'EUR') === 'USD' ? 'selected' : ''; ?>>USD ($)</option>
+                                <option value="GBP" <?php echo ($listing['currency'] ?? 'EUR') === 'GBP' ? 'selected' : ''; ?>>GBP (£)</option>
+                                <option value="CNY" <?php echo ($listing['currency'] ?? 'EUR') === 'CNY' ? 'selected' : ''; ?>>CNY (¥)</option>
+                                <option value="JPY" <?php echo ($listing['currency'] ?? 'EUR') === 'JPY' ? 'selected' : ''; ?>>JPY (¥)</option>
+                            </select>
+                        </div>
+                        <small>Optional - Enter price or leave blank for negotiation</small>
                     </div>
 
                     <div class="form-group">
