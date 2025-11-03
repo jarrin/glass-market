@@ -110,139 +110,62 @@
         
         try {
             // Fetch all published listings from the database
-                // If a seller id is present, show the seller shop view (seller info + their listings)
-                if ($sellerId) {
-                        $stmt = $pdo->prepare("SELECT * FROM companies WHERE id = :cid LIMIT 1");
-                    $stmt->execute([$sellerId]);
-                    $seller = $stmt->fetch();
-                }
-
-                $stmt = $pdo->prepare("
-                    SELECT 
-                        l.id,
-                        l.company_id,
-                        l.glass_type,
-                        l.glass_type_other,
-                        l.price_text,
-                        l.currency,
-                        l.quantity_tons,
-                        l.quantity_note,
-                        l.side,
-                        l.recycled,
-                        l.tested,
-                        l.storage_location,
-                        l.quality_notes,
-                        l.image_path,
-                        c.name as company_name
-                    FROM listings l
-                    LEFT JOIN companies c ON l.company_id = c.id
-                    WHERE l.published = 1
-                        AND (l.company_id = :cid OR :cid IS NULL)
-                    ORDER BY l.created_at DESC
-                ");
-                $stmt->execute([':cid' => $sellerId]);
-            
+            $stmt = $pdo->prepare("
+                SELECT 
+                    l.id,
+                    l.company_id,
+                    l.glass_type,
+                    l.glass_type_other,
+                    l.price_text,
+                    l.currency,
+                    l.quantity_tons,
+                    l.quantity_note,
+                    l.side,
+                    l.recycled,
+                    l.tested,
+                    l.storage_location,
+                    l.quality_notes,
+                    l.image_path,
+                    c.name as company_name
+                FROM listings l
+                LEFT JOIN companies c ON l.company_id = c.id
+                WHERE l.published = 1
+                ORDER BY l.created_at DESC
+            ");
+            $stmt->execute();
             $listings = $stmt->fetchAll();
-            
-            // Map database listings to product format expected by browse page
-            $categoryMapping = [
-                'Clear Cullet' => 'Vases',
-                'Brown Cullet' => 'Tableware',
-                'Mixed Cullet' => 'Decorative',
-                'Green Cullet' => 'Vases & Vessels',
-                'Flat Glass' => 'Tableware',
-                'Container Glass' => 'Tableware'
-            ];
-            
-            foreach ($listings as $index => $listing) {
-                // Extract numeric price from price_text (e.g., "€120/ton CIF" -> 120)
-                $price = 0;
-                if (preg_match('/[\d,]+/', $listing['price_text'], $matches)) {
-                    $price = (int)str_replace(',', '', $matches[0]);
-                }
-                
-                // Map glass type to category
+
+            foreach ($listings as $listing) {
                 $glassType = $listing['glass_type_other'] ?: $listing['glass_type'];
-                $category = $categoryMapping[$listing['glass_type']] ?? 'Decorative';
-                
-                // Determine style based on recycled/tested status
-                $style = 'Contemporary';
-                if ($listing['recycled'] === 'recycled' && $listing['tested'] === 'tested') {
-                    $style = 'Art Deco';
-                } elseif ($listing['recycled'] === 'recycled') {
-                    $style = 'Murano';
-                } elseif ($listing['tested'] === 'tested') {
-                    $style = 'Contemporary';
-                } else {
-                    $style = 'Vintage';
-                }
-                
-                // Determine condition
-                $condition = 'New';
-                if ($listing['tested'] === 'tested') {
-                    $condition = 'New';
-                } elseif ($listing['tested'] === 'untested') {
-                    $condition = 'Vintage';
-                } else {
-                    $condition = 'Like New';
-                }
-                
-                // Determine image URL - use uploaded image if available, otherwise placeholder
+                $title = $listing['quantity_note'] ?: $glassType;
+                $companyName = $listing['company_name'] ?: 'Glass Market';
+                $tons = $listing['quantity_tons'];
+                // Determine image URL - uploaded or fallback
                 $imageUrl = "https://picsum.photos/seed/glass{$listing['id']}/800/800";
                 if (!empty($listing['image_path'])) {
                     $imageUrl = PUBLIC_URL . '/' . $listing['image_path'];
                 }
-                
+                // Map for card
                 $products[] = [
                     'id' => $listing['id'],
                     'title' => $glassType,
-                    'listing_title' => $listing['quantity_note'] ?: $glassType,
-                    'tons' => $listing['quantity_tons'],
-                    'category' => $category,
+                    'listing_title' => $title,
+                    'tons' => $tons,
+                    'category' => $glassType,
                     'image' => $imageUrl,
-                    'price' => $price,
-                    'style' => $style,
-                    'condition' => $condition,
-                    'description' => $listing['quality_notes'] ?: 'Quality glass material',
-                    'location' => $listing['storage_location']
+                    'price' => $listing['price_text'],
+                    'company' => $companyName,
+                    'recycled' => $listing['recycled'],
+                    'tested' => $listing['tested'],
+                    'storage_location' => $listing['storage_location'],
+                    'currency' => $listing['currency'],
+                    'side' => $listing['side'],
+                    'description' => $listing['quality_notes'],
                 ];
             }
-            
-            // If no products in database, add some demo products
-            if (empty($products)) {
-                $styles = ['Contemporary', 'Vintage', 'Art Deco', 'Murano', 'Bohemian'];
-                $conditions = ['New', 'Like New', 'Vintage'];
-                for($i=1;$i<=24;$i++){
-                    $price = rand(25, 950);
-                    $products[] = [
-                        'id'=>$i,
-                        'title'=>"Glass Item #$i",
-                        'category'=>($i%3==0)?'Tableware':(($i%3==1)?'Vases':'Sculptures'),
-                        'image'=>"https://picsum.photos/seed/glass{$i}/800/800",
-                        'price'=>$price,
-                        'style'=>$styles[array_rand($styles)],
-                        'condition'=>$conditions[array_rand($conditions)]
-                    ];
-                }
-            }
-            
         } catch (PDOException $e) {
-            // If database query fails, use demo products
             error_log("Database error in browse.php: " . $e->getMessage());
-            $styles = ['Contemporary', 'Vintage', 'Art Deco', 'Murano', 'Bohemian'];
-            $conditions = ['New', 'Like New', 'Vintage'];
-            for($i=1;$i<=24;$i++){
-                $price = rand(25, 950);
-                $products[] = [
-                    'id'=>$i,
-                    'title'=>"Glass Item #$i",
-                    'category'=>($i%3==0)?'Tableware':(($i%3==1)?'Vases':'Sculptures'),
-                    'image'=>"https://picsum.photos/seed/glass{$i}/800/800",
-                    'price'=>$price,
-                    'style'=>$styles[array_rand($styles)],
-                    'condition'=>$conditions[array_rand($conditions)]
-                ];
-            }
+            // Laat $products leeg bij fout (geen dummy invullen)
         }
     ?>
 
@@ -421,7 +344,7 @@
 
             <div class="grid">
                 <?php foreach($products as $p): ?>
-                    <article class="card" data-glass-type="<?php echo htmlspecialchars($p['title'], ENT_QUOTES, 'UTF-8'); ?>" data-tons="<?php echo isset($p['tons']) ? (float)$p['tons'] : 0; ?>" data-condition="<?php echo htmlspecialchars($p['condition'], ENT_QUOTES, 'UTF-8'); ?>">
+                    <article class="card" data-glass-type="<?php echo htmlspecialchars($p['title'], ENT_QUOTES, 'UTF-8'); ?>" data-tons="<?php echo isset($p['tons']) ? (float)$p['tons'] : 0; ?>" onclick="window.location.href='listings.php?id=<?php echo urlencode($p['id']); ?>'" style="cursor:pointer">
                         <div class="media" role="img" aria-label="<?php echo htmlspecialchars($p['title'], ENT_QUOTES, 'UTF-8'); ?>">
                             <img src="<?php echo htmlspecialchars($p['image'], ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($p['title'], ENT_QUOTES, 'UTF-8'); ?>" style="width:100%;height:100%;object-fit:cover;display:block">
                         </div>
