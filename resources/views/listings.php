@@ -11,7 +11,7 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
 $id = (int) $_GET['id'];
 
 // Haal de specifieke listing op
-$stmt = $pdo->prepare("SELECT * FROM listings WHERE id = ? AND published = 1 LIMIT 1");
+$stmt = $pdo->prepare("SELECT l.*, u.company_name, u.email AS company_email FROM listings l LEFT JOIN users u ON (l.company_id = u.company_id) WHERE l.id = ? AND l.published = 1 LIMIT 1");
 $stmt->execute([$id]);
 $listing = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -29,7 +29,7 @@ if (!empty($listing['image_path'])) {
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <title><?= htmlspecialchars($listing['glass_type']) ?> - Glass Market</title>
+    <title><?= htmlspecialchars($listing['quantity_note']) ?> - Glass Market</title>
     <link rel="stylesheet" href="../css/app.css">
 </head>
 <body>
@@ -39,7 +39,7 @@ if (!empty($listing['image_path'])) {
 <!-- Hero -->
 <section class="hero hero-muted text-center">
   <div class="container">
-    <h1 class="page-title"><?= htmlspecialchars($listing['glass_type']) ?></h1>
+    <h1 class="page-title"><?= htmlspecialchars($listing['quantity_note']) ?></h1>
     <?php if (!empty($listing['glass_type_other'])): ?>
         <p class="page-subtitle"><?= htmlspecialchars($listing['glass_type_other']) ?></p>
     <?php endif; ?>
@@ -50,12 +50,13 @@ if (!empty($listing['image_path'])) {
 <section class="section">
   <div class="container" style="max-width:900px; margin:0 auto;">
     <div class="media" style="height:400px; overflow:hidden; margin-bottom:20px;">
-        <img src="<?= htmlspecialchars($imageUrl, ENT_QUOTES, 'UTF-8') ?>" 
-             alt="<?= htmlspecialchars($listing['glass_type'], ENT_QUOTES, 'UTF-8') ?>" 
+        <img src="<?= htmlspecialchars($imageUrl, ENT_QUOTES, 'UTF-8') ?>"
+             alt="<?= htmlspecialchars($listing['quantity_note'], ENT_QUOTES, 'UTF-8') ?>"
              style="width:100%;height:100%;object-fit:cover;display:block">
     </div>
 
-    <h2><?= htmlspecialchars($listing['glass_type']) ?></h2>
+    <h2><?= htmlspecialchars($listing['quantity_note']) ?></h2>
+
 
     <?php if ($listing['glass_type_other']): ?>
       <p><em><?= htmlspecialchars($listing['glass_type_other']) ?></em></p>
@@ -63,17 +64,23 @@ if (!empty($listing['image_path'])) {
 
 
 
-    <p><strong>Beschrijving</strong><br>
+    <p><strong>Notes:</strong><br>
       <?= nl2br(htmlspecialchars($listing['quality_notes'] ?? 'Geen opmerkingen')) ?>
     </p>
 
-    <p><strong>Hoeveelheid:</strong>
+    <p><strong>Quantity:</strong>
       <?= htmlspecialchars($listing['quantity_tons'] ?? '-') ?> ton
-      <?= $listing['quantity_note'] ? '(' . htmlspecialchars($listing['quantity_note']) . ')' : '' ?>
     </p>
 
+    <?php if ($listing['company_name']): ?>
+      <p><strong>Company:</strong> <?= htmlspecialchars($listing['company_name']) ?></p>
+      <div style="margin: 10px 0;">
+        <a href="mailto:<?= htmlspecialchars($listing['company_email']) ?>" class="btn btn-primary" style="background: #166534; color: #fff; padding: 10px 24px; border-radius: 6px; text-decoration: none; font-weight: 600;">Contact company</a>
+      </div>
+    <?php endif; ?>
+
     <div style="margin-top:30px;">
-      <a href="browse.php" class="btn btn-secondary">← Terug naar overzicht</a>
+      <a href="browse.php" class="btn btn-secondary">← Back to listings</a>
     </div>
   </div>
 </section>

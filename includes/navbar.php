@@ -1,6 +1,6 @@
 <?php
 // Blurry glass navbar include
-// Usage: <?php include __DIR__ . '/includes/navbar.php'; 
+// Usage: <?php include __DIR__ . '/includes/navbar.php';
 
 // Start session if not already started
 if (session_status() === PHP_SESSION_NONE) {
@@ -34,7 +34,7 @@ $is_admin = $is_logged_in ? ($_SESSION['is_admin'] ?? 0) : 0;
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   backdrop-filter: blur(20px) saturate(180%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08),
               inset 0 1px 0 rgba(255, 255, 255, 0.5);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -368,7 +368,7 @@ $is_admin = $is_logged_in ? ($_SESSION['is_admin'] ?? 0) : 0;
   background: rgba(255, 255, 255, 0.2);
   -webkit-backdrop-filter: blur(24px) saturate(200%);
   backdrop-filter: blur(24px) saturate(200%);
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1), 
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1),
               inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 </style>
@@ -393,13 +393,12 @@ window.addEventListener('scroll', function() {
 
   <nav class="nav-links" role="navigation" aria-label="Primary">
     <a href="<?php echo VIEWS_URL; ?>/browse.php">Browse</a>
-    <!-- <a href="<?php echo VIEWS_URL; ?>/categories.php">Categories</a> -->
     <a href="<?php echo VIEWS_URL; ?>/sellers.php">Sellers</a>
-    <a href="<?php echo VIEWS_URL; ?>/about.php">About</a>
+    <!-- <a href="<?php echo VIEWS_URL; ?>/about.php">About</a> -->
   </nav>
 
-  <div class="search" role="search">
-    <input type="search" placeholder="Search glass art, crystals..." aria-label="Search">
+  <div class="search">
+
   </div>
 
   <div class="auth-buttons">
