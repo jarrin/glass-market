@@ -1,13 +1,48 @@
 <?php 
 session_start();
 require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../includes/db_connect.php';
+
+// Fetch Privacy page content from database
+$page_slug = 'privacy';
+
+try {
+    // Get page
+    $stmt = $pdo->prepare("SELECT * FROM pages WHERE slug = ? AND is_active = 1");
+    $stmt->execute([$page_slug]);
+    $page = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if (!$page) {
+        die('Page not found. Please run the seed script first.');
+    }
+    
+    // Get all sections with content
+    $stmt = $pdo->prepare("
+        SELECT ps.section_key, ps.section_type, ps.section_group, pc.content_value
+        FROM page_sections ps
+        LEFT JOIN page_content pc ON ps.id = pc.section_id
+        WHERE ps.page_id = ?
+        ORDER BY ps.display_order
+    ");
+    $stmt->execute([$page['id']]);
+    $sections = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Organize sections by key for easy access
+    $content = [];
+    foreach ($sections as $section) {
+        $content[$section['section_key']] = $section['content_value'] ?? '';
+    }
+    
+} catch (PDOException $e) {
+    die('Database error: ' . $e->getMessage());
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Privacy Policy - Glass Market</title>
+    <title><?php echo htmlspecialchars($page['title']); ?> - Glass Market</title>
     <link rel="stylesheet" href="<?php echo PUBLIC_URL; ?>/css/app.css">
     <style>
         .policy-page {
@@ -111,204 +146,126 @@ require_once __DIR__ . '/../config.php';
     
     <div class="policy-page">
         <div class="policy-hero">
-            <h1>Privacy Policy</h1>
-            <p>How we collect, use, and protect your information</p>
+            <h1><?php echo htmlspecialchars($content['hero_title'] ?? 'Privacy Policy'); ?></h1>
+            <p><?php echo htmlspecialchars($content['hero_subtitle'] ?? ''); ?></p>
         </div>
         
         <div class="policy-container">
             <div class="policy-card">
                 <div class="last-updated">
-                    <strong>Last Updated:</strong> November 3, 2025
+                    <strong>Last Updated:</strong> <?php echo htmlspecialchars($content['last_updated'] ?? ''); ?>
                 </div>
                 
-                <p>At Glass Market, we take your privacy seriously. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our platform.</p>
+                <p><?php echo nl2br(htmlspecialchars($content['intro_text'] ?? '')); ?></p>
                 
+                <?php if (!empty($content['info_box_text'])): ?>
                 <div class="info-box">
-                    <p><strong>Your Rights:</strong> You have the right to access, correct, or delete your personal information at any time. Contact us at privacy@glassmarket.com for assistance.</p>
+                    <p><strong><?php echo nl2br(htmlspecialchars($content['info_box_text'])); ?></strong></p>
                 </div>
+                <?php endif; ?>
                 
-                <h2>1. Information We Collect</h2>
+                <!-- Section 1: Information We Collect -->
+                <h2><?php echo htmlspecialchars($content['section_1_title'] ?? ''); ?></h2>
                 
-                <h3>Information You Provide</h3>
-                <p>We collect information you voluntarily provide when using our services:</p>
+                <h3><?php echo htmlspecialchars($content['section_1_subtitle_1'] ?? ''); ?></h3>
+                <p><?php echo nl2br(htmlspecialchars($content['section_1_intro_1'] ?? '')); ?></p>
                 <ul>
-                    <li><strong>Account Information:</strong> Name, email address, phone number, password</li>
-                    <li><strong>Profile Information:</strong> Profile photo, bio, business name, location</li>
-                    <li><strong>Payment Information:</strong> Credit card details, billing address, payment history</li>
-                    <li><strong>Listing Information:</strong> Product descriptions, photos, pricing</li>
-                    <li><strong>Communication:</strong> Messages, reviews, support inquiries</li>
-                    <li><strong>Verification Data:</strong> Government ID, business documents (for sellers)</li>
+                    <li><strong><?php echo htmlspecialchars($content['section_1_info_1'] ?? ''); ?></strong></li>
+                    <li><strong><?php echo htmlspecialchars($content['section_1_info_2'] ?? ''); ?></strong></li>
+                    <li><strong><?php echo htmlspecialchars($content['section_1_info_3'] ?? ''); ?></strong></li>
+                    <li><strong><?php echo htmlspecialchars($content['section_1_info_4'] ?? ''); ?></strong></li>
+                    <li><strong><?php echo htmlspecialchars($content['section_1_info_5'] ?? ''); ?></strong></li>
+                    <li><strong><?php echo htmlspecialchars($content['section_1_info_6'] ?? ''); ?></strong></li>
                 </ul>
                 
-                <h3>Automatically Collected Information</h3>
-                <p>When you use our platform, we automatically collect:</p>
+                <h3><?php echo htmlspecialchars($content['section_1_subtitle_2'] ?? ''); ?></h3>
+                <p><?php echo nl2br(htmlspecialchars($content['section_1_intro_2'] ?? '')); ?></p>
                 <ul>
-                    <li><strong>Device Information:</strong> IP address, browser type, operating system</li>
-                    <li><strong>Usage Data:</strong> Pages viewed, time spent, clicks, search queries</li>
-                    <li><strong>Location Data:</strong> Approximate location based on IP address</li>
-                    <li><strong>Cookies & Tracking:</strong> Session data, preferences, analytics</li>
+                    <li><strong><?php echo htmlspecialchars($content['section_1_auto_1'] ?? ''); ?></strong></li>
+                    <li><strong><?php echo htmlspecialchars($content['section_1_auto_2'] ?? ''); ?></strong></li>
+                    <li><strong><?php echo htmlspecialchars($content['section_1_auto_3'] ?? ''); ?></strong></li>
+                    <li><strong><?php echo htmlspecialchars($content['section_1_auto_4'] ?? ''); ?></strong></li>
                 </ul>
                 
-                <h2>2. How We Use Your Information</h2>
-                <p>We use your information to:</p>
+                <!-- Section 2: How We Use Your Information -->
+                <h2><?php echo htmlspecialchars($content['section_2_title'] ?? ''); ?></h2>
+                <p><?php echo nl2br(htmlspecialchars($content['section_2_intro'] ?? '')); ?></p>
                 <ul>
-                    <li><strong>Provide Services:</strong> Process transactions, facilitate buying and selling</li>
-                    <li><strong>Account Management:</strong> Create and manage your account</li>
-                    <li><strong>Communication:</strong> Send order updates, notifications, and support responses</li>
-                    <li><strong>Improve Platform:</strong> Analyze usage to enhance features and user experience</li>
-                    <li><strong>Security:</strong> Detect fraud, prevent abuse, and protect user safety</li>
-                    <li><strong>Marketing:</strong> Send promotional emails (you can opt out anytime)</li>
-                    <li><strong>Legal Compliance:</strong> Meet legal obligations and enforce our terms</li>
-                    <li><strong>Personalization:</strong> Customize content and recommendations</li>
+                    <li><strong><?php echo htmlspecialchars($content['section_2_use_1'] ?? ''); ?></strong></li>
+                    <li><strong><?php echo htmlspecialchars($content['section_2_use_2'] ?? ''); ?></strong></li>
+                    <li><strong><?php echo htmlspecialchars($content['section_2_use_3'] ?? ''); ?></strong></li>
+                    <li><strong><?php echo htmlspecialchars($content['section_2_use_4'] ?? ''); ?></strong></li>
+                    <li><strong><?php echo htmlspecialchars($content['section_2_use_5'] ?? ''); ?></strong></li>
+                    <li><strong><?php echo htmlspecialchars($content['section_2_use_6'] ?? ''); ?></strong></li>
+                    <li><strong><?php echo htmlspecialchars($content['section_2_use_7'] ?? ''); ?></strong></li>
+                    <li><strong><?php echo htmlspecialchars($content['section_2_use_8'] ?? ''); ?></strong></li>
                 </ul>
                 
-                <h2>3. Information Sharing</h2>
+                <!-- Section 3: Information Sharing -->
+                <h2><?php echo htmlspecialchars($content['section_3_title'] ?? ''); ?></h2>
                 
-                <h3>We Share Your Information With:</h3>
+                <h3><?php echo htmlspecialchars($content['section_3_subtitle_1'] ?? ''); ?></h3>
                 <ul>
-                    <li><strong>Other Users:</strong> Buyers and sellers see necessary transaction information</li>
-                    <li><strong>Service Providers:</strong> Payment processors, shipping carriers, email services</li>
-                    <li><strong>Business Partners:</strong> Marketing partners (only with your consent)</li>
-                    <li><strong>Legal Authorities:</strong> When required by law or to protect rights</li>
-                    <li><strong>Business Transfers:</strong> In case of merger, acquisition, or sale</li>
+                    <li><strong><?php echo htmlspecialchars($content['section_3_share_1'] ?? ''); ?></strong></li>
+                    <li><strong><?php echo htmlspecialchars($content['section_3_share_2'] ?? ''); ?></strong></li>
+                    <li><strong><?php echo htmlspecialchars($content['section_3_share_3'] ?? ''); ?></strong></li>
+                    <li><strong><?php echo htmlspecialchars($content['section_3_share_4'] ?? ''); ?></strong></li>
+                    <li><strong><?php echo htmlspecialchars($content['section_3_share_5'] ?? ''); ?></strong></li>
                 </ul>
                 
-                <h3>We Do NOT:</h3>
+                <h3><?php echo htmlspecialchars($content['section_3_subtitle_2'] ?? ''); ?></h3>
                 <ul>
-                    <li>Sell your personal information to third parties</li>
-                    <li>Share your data for unrelated purposes without consent</li>
-                    <li>Disclose your payment details to other users</li>
+                    <li><?php echo htmlspecialchars($content['section_3_not_1'] ?? ''); ?></li>
+                    <li><?php echo htmlspecialchars($content['section_3_not_2'] ?? ''); ?></li>
+                    <li><?php echo htmlspecialchars($content['section_3_not_3'] ?? ''); ?></li>
                 </ul>
                 
-                <h2>4. Data Security</h2>
-                <p>We implement security measures to protect your information:</p>
+                <!-- Section 4: Data Security -->
+                <h2><?php echo htmlspecialchars($content['section_4_title'] ?? ''); ?></h2>
+                <p><?php echo nl2br(htmlspecialchars($content['section_4_intro'] ?? '')); ?></p>
                 <ul>
-                    <li><strong>Encryption:</strong> SSL/TLS encryption for data transmission</li>
-                    <li><strong>Secure Storage:</strong> Encrypted databases and secure servers</li>
-                    <li><strong>Access Controls:</strong> Limited employee access to personal data</li>
-                    <li><strong>Regular Audits:</strong> Security assessments and vulnerability testing</li>
-                    <li><strong>Payment Security:</strong> PCI-DSS compliant payment processing</li>
+                    <li><strong><?php echo htmlspecialchars($content['section_4_security_1'] ?? ''); ?></strong></li>
+                    <li><strong><?php echo htmlspecialchars($content['section_4_security_2'] ?? ''); ?></strong></li>
+                    <li><strong><?php echo htmlspecialchars($content['section_4_security_3'] ?? ''); ?></strong></li>
+                    <li><strong><?php echo htmlspecialchars($content['section_4_security_4'] ?? ''); ?></strong></li>
+                    <li><strong><?php echo htmlspecialchars($content['section_4_security_5'] ?? ''); ?></strong></li>
                 </ul>
                 
-                <p>However, no method of transmission over the internet is 100% secure. While we strive to protect your data, we cannot guarantee absolute security.</p>
+                <p><?php echo nl2br(htmlspecialchars($content['section_4_disclaimer'] ?? '')); ?></p>
                 
-                <h2>5. Your Privacy Rights</h2>
+                <!-- Section 5: Your Privacy Rights -->
+                <h2><?php echo htmlspecialchars($content['section_5_title'] ?? ''); ?></h2>
                 
-                <h3>You Have the Right To:</h3>
+                <h3><?php echo htmlspecialchars($content['section_5_subtitle'] ?? ''); ?></h3>
                 <ul>
-                    <li><strong>Access:</strong> Request a copy of your personal information</li>
-                    <li><strong>Correction:</strong> Update or correct inaccurate information</li>
-                    <li><strong>Deletion:</strong> Request deletion of your account and data</li>
-                    <li><strong>Opt-Out:</strong> Unsubscribe from marketing emails</li>
-                    <li><strong>Data Portability:</strong> Receive your data in a portable format</li>
-                    <li><strong>Object:</strong> Object to certain processing of your data</li>
-                    <li><strong>Withdraw Consent:</strong> Revoke consent where applicable</li>
+                    <li><strong><?php echo htmlspecialchars($content['section_5_right_1'] ?? ''); ?></strong></li>
+                    <li><strong><?php echo htmlspecialchars($content['section_5_right_2'] ?? ''); ?></strong></li>
+                    <li><strong><?php echo htmlspecialchars($content['section_5_right_3'] ?? ''); ?></strong></li>
+                    <li><strong><?php echo htmlspecialchars($content['section_5_right_4'] ?? ''); ?></strong></li>
+                    <li><strong><?php echo htmlspecialchars($content['section_5_right_5'] ?? ''); ?></strong></li>
+                    <li><strong><?php echo htmlspecialchars($content['section_5_right_6'] ?? ''); ?></strong></li>
+                    <li><strong><?php echo htmlspecialchars($content['section_5_right_7'] ?? ''); ?></strong></li>
                 </ul>
                 
-                <p>To exercise these rights, contact us at privacy@glassmarket.com or through your account settings.</p>
+                <p><?php echo nl2br(htmlspecialchars($content['section_5_contact'] ?? '')); ?></p>
                 
-                <h2>6. Cookies & Tracking Technologies</h2>
-                <p>We use cookies and similar technologies to:</p>
-                <ul>
-                    <li>Remember your preferences and settings</li>
-                    <li>Keep you logged in to your account</li>
-                    <li>Analyze site traffic and usage patterns</li>
-                    <li>Provide targeted advertising</li>
-                    <li>Improve platform functionality</li>
-                </ul>
-                
-                <p>You can control cookies through your browser settings. Note that disabling cookies may limit functionality.</p>
-                
-                <h3>Types of Cookies We Use:</h3>
-                <ul>
-                    <li><strong>Essential Cookies:</strong> Required for basic site functionality</li>
-                    <li><strong>Performance Cookies:</strong> Help us analyze usage and improve services</li>
-                    <li><strong>Functional Cookies:</strong> Remember your preferences</li>
-                    <li><strong>Advertising Cookies:</strong> Deliver relevant ads (can be disabled)</li>
-                </ul>
-                
-                <h2>7. Data Retention</h2>
-                <p>We retain your information for as long as necessary to:</p>
-                <ul>
-                    <li>Provide services and maintain your account</li>
-                    <li>Comply with legal obligations</li>
-                    <li>Resolve disputes and enforce agreements</li>
-                    <li>Prevent fraud and maintain security</li>
-                </ul>
-                
-                <p>After account deletion, we may retain certain information for legal and business purposes. Transaction records are typically kept for 7 years.</p>
-                
-                <h2>8. Children's Privacy</h2>
-                <p>Our platform is not intended for children under 18. We do not knowingly collect information from minors. If you believe we have collected information from a child, please contact us immediately.</p>
-                
-                <h2>9. International Data Transfers</h2>
-                <p>Your information may be transferred to and processed in countries other than your own. We ensure appropriate safeguards are in place to protect your data in accordance with this Privacy Policy.</p>
-                
-                <h2>10. Third-Party Links</h2>
-                <p>Our platform may contain links to third-party websites. We are not responsible for the privacy practices of these sites. We encourage you to read their privacy policies.</p>
-                
-                <h2>11. Marketing Communications</h2>
-                <p>We may send you promotional emails about:</p>
-                <ul>
-                    <li>New products and features</li>
-                    <li>Special offers and discounts</li>
-                    <li>Tips and guides</li>
-                    <li>Platform updates</li>
-                </ul>
-                
-                <p>You can opt out anytime by:</p>
-                <ul>
-                    <li>Clicking "Unsubscribe" in any email</li>
-                    <li>Updating preferences in your account settings</li>
-                    <li>Contacting us at unsubscribe@glassmarket.com</li>
-                </ul>
-                
-                <h2>12. California Privacy Rights (CCPA)</h2>
-                <p>California residents have additional rights under the CCPA:</p>
-                <ul>
-                    <li>Right to know what personal information is collected</li>
-                    <li>Right to know if information is sold or shared</li>
-                    <li>Right to opt-out of the sale of personal information</li>
-                    <li>Right to deletion of personal information</li>
-                    <li>Right to non-discrimination for exercising CCPA rights</li>
-                </ul>
-                
-                <p><strong>Note:</strong> We do not sell your personal information.</p>
-                
-                <h2>13. European Privacy Rights (GDPR)</h2>
-                <p>If you are in the European Economic Area (EEA), you have rights under GDPR:</p>
-                <ul>
-                    <li>Right to access your personal data</li>
-                    <li>Right to rectification of inaccurate data</li>
-                    <li>Right to erasure ("right to be forgotten")</li>
-                    <li>Right to restrict processing</li>
-                    <li>Right to data portability</li>
-                    <li>Right to object to processing</li>
-                    <li>Right to lodge a complaint with supervisory authority</li>
-                </ul>
-                
-                <h2>14. Changes to This Policy</h2>
-                <p>We may update this Privacy Policy from time to time. We will notify you of significant changes by:</p>
-                <ul>
-                    <li>Posting the new policy on this page</li>
-                    <li>Updating the "Last Updated" date</li>
-                    <li>Sending an email notification (for material changes)</li>
-                </ul>
-                
-                <p>Continued use of our platform after changes constitutes acceptance of the updated policy.</p>
-                
-                <h2>15. Contact Us</h2>
-                <p>If you have questions about this Privacy Policy or our privacy practices, please contact us:</p>
+                <!-- Contact Information -->
+                <h2><?php echo htmlspecialchars($content['contact_title'] ?? ''); ?></h2>
+                <p><?php echo nl2br(htmlspecialchars($content['contact_intro'] ?? '')); ?></p>
                 
                 <ul style="list-style: none; padding: 0;">
-                    <li><strong>Email:</strong> privacy@glassmarket.com</li>
-                    <li><strong>Phone:</strong> 1-800-GLASS-123</li>
-                    <li><strong>Mail:</strong> Glass Market, 123 Glass Street, New York, NY 10001</li>
-                    <li><strong>Data Protection Officer:</strong> dpo@glassmarket.com</li>
+                    <li><strong>Email:</strong> <?php echo htmlspecialchars($content['contact_email'] ?? ''); ?></li>
+                    <li><strong>Phone:</strong> <?php echo htmlspecialchars($content['contact_phone'] ?? ''); ?></li>
+                    <li><strong>Mail:</strong> <?php echo htmlspecialchars($content['contact_address'] ?? ''); ?></li>
+                    <li><strong>Data Protection Officer:</strong> <?php echo htmlspecialchars($content['contact_dpo'] ?? ''); ?></li>
                 </ul>
                 
                 <div class="info-box" style="margin-top: 40px;">
-                    <p><strong>Quick Links:</strong> <a href="<?php echo PUBLIC_URL; ?>/terms" style="color: #2f6df5;">Terms of Service</a> | <a href="<?php echo PUBLIC_URL; ?>/help" style="color: #2f6df5;">Help Center</a> | <a href="<?php echo PUBLIC_URL; ?>/contact" style="color: #2f6df5;">Contact Us</a></p>
+                    <p><strong>Quick Links:</strong> 
+                        <a href="<?php echo PUBLIC_URL; ?>/terms.php" style="color: #2f6df5;">Terms of Service</a> | 
+                        <a href="<?php echo PUBLIC_URL; ?>/help.php" style="color: #2f6df5;">Help Center</a> | 
+                        <a href="<?php echo PUBLIC_URL; ?>/contact.php" style="color: #2f6df5;">Contact Us</a>
+                    </p>
                 </div>
             </div>
         </div>
