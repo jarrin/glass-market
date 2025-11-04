@@ -6,98 +6,489 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Browse Collection</title>
+    <title>Browse Collection - Glass Market</title>
     <link rel="stylesheet" href="<?php echo CSS_URL; ?>/app.css">
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <style>
-        body{font-family: Arial, Helvetica, sans-serif; background:#f6f0eb; color:#111; margin:0}
-        .container{max-width:1200px;margin:40px auto;padding:0 20px}
-        .page-title{font-family: Georgia, 'Times New Roman', serif; font-size:48px; margin-bottom:6px}
-        .subtitle{color:#6b6460;margin-bottom:18px}
-        .layout{display:flex;gap:30px}
-        /* Sidebar */
-        .sidebar{width:260px;position:sticky;top:20px;height:fit-content}
-        .panel{background:transparent;padding:12px 0}
-        .panel h4{margin:0 0 12px 0;font-size:16px}
-        .filter-list{list-style:none;padding:0;margin:0}
-        .filter-list li{display:flex;justify-content:space-between;padding:8px 6px;color:#6b6460}
-        .divider{height:1px;background:#e3dad3;margin:18px 0}
+        :root {
+            --browse-bg: #f5f5f7;
+            --browse-text: #1d1d1f;
+            --browse-muted: #6e6e73;
+            --browse-card-bg: rgba(255, 255, 255, 0.9);
+            --browse-border: rgba(15, 23, 42, 0.08);
+            --browse-accent: #2f6df5;
+        }
 
-        /* Enhanced Price Range */
-        .price-range-container{margin:12px 0}
-        .price-range-display{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;font-weight:600;color:#2a2623}
-        .price-inputs{display:flex;gap:12px;align-items:center}
-        .price-input-group{display:flex;align-items:center}
-        .price-input{ width:80px;padding:8px;border:1px solid #d4c5b3;border-radius:6px;text-align:center;font-size:14px;background:#fff;color:#2a2623}
-        .price-input:focus{outline:none;border-color:#8c8278}
-        .price-slider-container{margin:16px 0}
-        .price-slider{background:linear-gradient(to right, #e3dad3 0%, #e3dad3 100%);height:6px;border-radius:3px;position:relative}
-        .price-slider-fill{background:#8c8278;height:100%;border-radius:3px;position:absolute;left:0;right:0}
-        .price-slider-thumb{position:absolute;top:50%;transform:translateY(-50%);width:20px;height:20px;background:#fff;border:2px solid #8c8278;border-radius:50%;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.1)}
-        .price-slider-thumb:hover{box-shadow:0 4px 12px rgba(0,0,0,0.15)}
+        body {
+            font-family: "SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: var(--browse-bg);
+            color: var(--browse-text);
+            margin: 0;
+            line-height: 1.6;
+        }
 
-        /* Grid */
-        .content{flex:1}
-        .toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-        .items-count{color:#6b6460}
-        .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
-        .card{background:#fff;border-radius:6px;overflow:hidden;border:1px solid rgba(0,0,0,0.06)}
-        .card .media{height:320px;background:#ddd;background-size:cover;background-position:center}
-        .card .meta{padding:12px}
-        .card .meta .cat{font-size:12px;color:#8b8683}
-        .card .meta .title{font-weight:700;margin-top:6px}
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 40px 32px;
+        }
 
-        /* Styled Select Dropdown */
-        .toolbar select {
-            padding: 8px 12px;
-            border: 1px solid #d4c5b3;
-            border-radius: 6px;
-            background: #fff;
-            color: #2a2623;
+        .page-header {
+            text-align: center;
+            padding: 60px 0 40px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.5) 0%, transparent 100%);
+        }
+
+        .page-title {
+            font-size: clamp(38px, 6vw, 56px);
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--browse-text);
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            color: var(--browse-muted);
+            margin-bottom: 32px;
+            font-weight: 400;
+        }
+
+        .layout {
+            display: flex;
+            gap: 32px;
+            align-items: flex-start;
+        }
+
+        /* Sidebar Filters */
+        .sidebar {
+            width: 280px;
+            position: sticky;
+            top: 100px;
+            background: var(--browse-card-bg);
+            border: 1px solid var(--browse-border);
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: 0 8px 24px -12px rgba(15, 23, 42, 0.12);
+            backdrop-filter: blur(10px);
+        }
+
+        .panel {
+            padding: 0 0 24px 0;
+        }
+
+        .panel h4 {
+            margin: 0 0 18px 0;
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--browse-text);
+            letter-spacing: -0.01em;
+        }
+
+        .filter-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .filter-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            color: var(--browse-text);
+            border-bottom: 1px solid rgba(0,0,0,0.04);
+            transition: background-color 0.2s ease;
+        }
+
+        .filter-list li:last-child {
+            border-bottom: none;
+        }
+
+        .filter-list li:hover {
+            background-color: rgba(47, 109, 245, 0.02);
+            margin: 0 -8px;
+            padding-left: 8px;
+            padding-right: 8px;
+            border-radius: 8px;
+        }
+
+        .filter-list label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            flex: 1;
+            font-size: 15px;
+            font-weight: 400;
+        }
+
+        .filter-list input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--browse-accent);
+        }
+
+        .filter-list .count {
+            font-size: 13px;
+            color: var(--browse-muted);
+            font-weight: 500;
+            background: rgba(15, 23, 42, 0.05);
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+
+        .divider {
+            height: 1px;
+            background: var(--browse-border);
+            margin: 20px 0;
+        }
+
+        /* Price Range */
+        .price-range-container {
+            margin: 16px 0;
+        }
+
+        .price-range-display {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            font-weight: 600;
             font-size: 14px;
+            color: var(--browse-text);
+        }
+
+        .price-inputs {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .price-input-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .price-input-group label {
+            font-size: 12px;
+            color: var(--browse-muted);
+            font-weight: 500;
+        }
+
+        .price-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--browse-border);
+            border-radius: 10px;
+            text-align: center;
+            font-size: 14px;
+            background: #fff;
+            color: var(--browse-text);
+            font-weight: 500;
+        }
+
+        .price-input:focus {
+            outline: none;
+            border-color: var(--browse-accent);
+        }
+
+        .price-slider-container {
+            margin: 16px 0;
+        }
+
+        .price-slider {
+            background: #e3e3e8;
+            height: 6px;
+            border-radius: 3px;
+            position: relative;
+        }
+
+        .price-slider-fill {
+            background: var(--browse-accent);
+            height: 100%;
+            border-radius: 3px;
+            position: absolute;
+        }
+
+        .price-slider-thumb {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border: 2px solid var(--browse-accent);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            transition: box-shadow 0.2s ease;
+        }
+
+        .price-slider-thumb:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        }
+
+        /* Content Area */
+        .content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            padding: 24px 0 16px;
+            border-bottom: 1px solid var(--browse-border);
+        }
+
+        .items-count {
+            font-size: 15px;
+            color: var(--browse-muted);
+            font-weight: 500;
+        }
+
+        .items-count strong {
+            color: var(--browse-text);
+            font-weight: 600;
+        }
+
+        .toolbar select {
+            padding: 11px 18px;
+            border: 1px solid var(--browse-border);
+            border-radius: 12px;
+            background: var(--browse-card-bg);
+            color: var(--browse-text);
+            font-size: 14px;
+            font-weight: 500;
             cursor: pointer;
             outline: none;
-            transition: border-color 0.2s ease;
-            min-width: 180px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            min-width: 200px;
         }
+
         .toolbar select:focus {
-            border-color: #8c8278;
+            border-color: var(--browse-accent);
+            box-shadow: 0 0 0 3px rgba(47, 109, 245, 0.08);
         }
+
         .toolbar select:hover {
-            border-color: #8c8278;
+            border-color: var(--browse-accent);
+        }
+
+        /* Product Grid */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 28px;
+        }
+
+        .card {
+            background: var(--browse-card-bg);
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid var(--browse-border);
+            box-shadow: 0 4px 16px -8px rgba(15, 23, 42, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 16px 40px -16px rgba(15, 23, 42, 0.2);
+            border-color: rgba(47, 109, 245, 0.2);
+        }
+
+        .card .media {
+            height: 280px;
+            background: #e8e9ed;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card .media::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.05) 100%);
+        }
+
+        .card .meta {
+            padding: 20px;
+        }
+
+        .card .meta .cat {
+            font-size: 12px;
+            color: var(--browse-accent);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 8px;
+        }
+
+        .card .meta .title {
+            font-weight: 600;
+            font-size: 18px;
+            margin-top: 0;
+            color: var(--browse-text);
+            line-height: 1.4;
+            letter-spacing: -0.01em;
+        }
+
+        /* Filter Toggle Button */
+        .filter-toggle-btn {
+            display: none;
+            width: 100%;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            background: var(--browse-text);
+            color: #fff;
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            letter-spacing: -0.01em;
+        }
+
+        .filter-toggle-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .filter-toggle-btn:active {
+            transform: scale(0.98);
         }
 
         /* Pagination */
-        .pagination{display:flex;justify-content:center;align-items:center;gap:8px;margin-top:40px;padding:20px 0}
-        .pagination button{padding:8px 14px;border:1px solid #d4c5b3;background:#fff;color:#2a2623;border-radius:6px;cursor:pointer;font-size:14px;transition:all 0.2s ease}
-        .pagination button:hover:not(:disabled){background:#f6f0eb;border-color:#8c8278}
-        .pagination button:disabled{opacity:0.4;cursor:not-allowed}
-        .pagination button.active{background:#2a2623;color:#fff;border-color:#2a2623}
-        .pagination .page-number{padding:8px 14px;border:1px solid #d4c5b3;background:#fff;color:#2a2623;border-radius:6px;cursor:pointer;font-size:14px;transition:all 0.2s ease;min-width:40px;text-align:center}
-        .pagination .page-number:hover{background:#f6f0eb;border-color:#8c8278}
-        .pagination .page-number.active{background:#2a2623;color:#fff;border-color:#2a2623;font-weight:600}
-        .pagination .page-ellipsis{padding:8px;color:#6b6460}
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 56px;
+            padding: 32px 0;
+        }
 
-        /* Filter toggle button for mobile */
-        .filter-toggle-btn{display:none;width:100%;padding:12px 16px;margin-bottom:16px;background:#2a2623;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:14px;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
-        .filter-toggle-btn:hover{background:#1a1614}
-        .filter-toggle-btn:active{transform:scale(0.98)}
-        
-        @media (max-width:980px){.grid{grid-template-columns:repeat(2,1fr)}}
-        @media (max-width:640px){
-            .layout{flex-direction:column}
-            .sidebar{width:100%;display:none;margin-bottom:20px;position:relative;z-index:10;background:#f6f0eb;padding:16px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.1)}
-            .sidebar.show{display:block}
-            .grid{grid-template-columns:1fr}
-            .filter-toggle-btn{display:block}
+        .pagination button,
+        .pagination .page-number {
+            padding: 10px 16px;
+            border: 1px solid var(--browse-border);
+            background: var(--browse-card-bg);
+            color: var(--browse-text);
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            min-width: 44px;
+            text-align: center;
+        }
+
+        .pagination button:hover:not(:disabled),
+        .pagination .page-number:hover {
+            background: var(--browse-accent);
+            color: #fff;
+            border-color: var(--browse-accent);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(47, 109, 245, 0.2);
+        }
+
+        .pagination button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .pagination button.active,
+        .pagination .page-number.active {
+            background: var(--browse-accent);
+            color: #fff;
+            border-color: var(--browse-accent);
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(47, 109, 245, 0.2);
+        }
+
+        .pagination .page-ellipsis {
+            padding: 10px;
+            color: var(--browse-muted);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .grid {
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 20px;
+            }
+
+            .page-header {
+                padding: 60px 0 32px;
+            }
+
+            .layout {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                display: none;
+                position: relative;
+                top: 0;
+                margin-bottom: 24px;
+            }
+
+            .sidebar.show {
+                display: block;
+            }
+
+            .filter-toggle-btn {
+                display: block;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .toolbar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+
+            .toolbar select {
+                width: 100%;
+            }
+
+            .pagination {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
         }
     </style>
 </head>
 <body>
     <?php include __DIR__ . '/../../includes/navbar.php'; ?>
     <?php include __DIR__ . '/../../includes/subscription-notification.php'; ?>
-<main class="container" style="padding-top: 70px;">
-    <h1 class="page-title">Browse Collection</h1>
+<main style="padding-top: 70px;">
+    <div class="page-header">
+        <h1 class="page-title">Browse Collection</h1>
+        <p class="subtitle">Discover premium glass from verified sellers worldwide</p>
+    </div>
 
     <?php
             $seller = null;
@@ -218,10 +609,16 @@
             </section>
         <?php endif; ?>
 
-    <!-- Filter toggle button (visible only on mobile) -->
-    <button class="filter-toggle-btn" id="filterToggle">🔍 Filters tonen/verbergen</button>
-    
-    <div class="layout">
+    <div class="container">
+        <!-- Filter toggle button (visible only on mobile) -->
+        <button class="filter-toggle-btn" id="filterToggle">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                <path d="M22 3H2L10 12.46V19L14 21V12.46L22 3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Show Filters
+        </button>
+        
+        <div class="layout">
         <aside class="sidebar" id="filterSidebar">
             <div class="panel">
                 <h4>Glass Type</h4>
@@ -330,7 +727,7 @@
 
         <section class="content">
             <div class="toolbar">
-                <div class="items-count">24 items</div>
+                <div class="items-count"><strong id="itemCountNum">0</strong> listings found</div>
                 <div>
                     <select aria-label="Sort" id="sortSelect">
                         <option value="featured">No filters</option>
@@ -473,7 +870,11 @@
                 console.log('Glass type counts:', glassTypeCounts);
                 console.log('Condition counts:', conditionCounts);
 
-                itemsCount.textContent = visibleCards.length + ' items';
+                // Update count
+                const countNum = document.getElementById('itemCountNum');
+                if (countNum) {
+                    countNum.textContent = visibleCards.length;
+                }
 
                 // update count labels in sidebar
                 document.querySelectorAll('#glass-types-list .count').forEach(el=>{
@@ -730,6 +1131,7 @@
         })();
     </script>
 
+    </div> <!-- .container -->
 </main>
     <?php include __DIR__ . '/../../includes/footer.php'; ?>
 </body>

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 03, 2025 at 11:10 AM
+-- Generation Time: Nov 04, 2025 at 11:18 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -85,7 +85,8 @@ INSERT INTO `companies` (`id`, `name`, `company_type`, `website`, `phone`, `crea
 (1, 'GlassRecycle BV', 'Glass Recycle Plant', 'https://grb.example', '+31 10 123 4567', '2025-10-15 11:48:18'),
 (2, 'GlassFactory NL', 'Glass Factory', 'https://gfnl.example', '+31 20 987 6543', '2025-10-15 11:48:18'),
 (3, 'CollectionCo BE', 'Collection Company', 'https://ccbe.example', '+32 2 555 1234', '2025-10-15 11:48:18'),
-(4, 'testaccount', 'Other', NULL, NULL, '2025-10-31 10:14:41');
+(4, 'testaccount', 'Other', NULL, NULL, '2025-10-31 10:14:41'),
+(5, 'test_sub', 'Other', NULL, NULL, '2025-11-03 12:45:22');
 
 -- --------------------------------------------------------
 
@@ -191,7 +192,9 @@ INSERT INTO `listings` (`id`, `location_id`, `company_id`, `side`, `glass_type`,
 (1, 1, 1, 'WTS', 'Clear Cullet', NULL, 250.00, NULL, 'recycled', 'tested', 'Rotterdam yard', '€120/ton CIF', 'EUR', '2025-10-15 11:48:18', NULL, 1, 'Low Fe content', NULL, 0),
 (2, 2, 2, 'WTB', 'Brown Cullet', NULL, 150.00, NULL, 'recycled', 'tested', 'Amsterdam warehouse', '€110/ton CIF', 'EUR', '2025-10-15 11:48:18', NULL, 1, 'High purity required', NULL, 0),
 (3, 3, 3, 'WTS', 'Mixed Cullet', NULL, 100.00, NULL, 'not_recycled', 'untested', 'Brussels yard', '€80/ton EXW', 'EUR', '2025-10-15 11:48:18', NULL, 1, 'Unsorted mix', NULL, 0),
-(4, NULL, 4, 'WTS', 'Brown Glass', NULL, 432545.00, 'asdfasdf!', 'unknown', 'unknown', NULL, '', 'EUR', '2025-10-31 10:16:48', NULL, 1, 'rtwert', 'uploads/listings/listing_1761905808_69048c908d4b3.jpeg', 0);
+(4, NULL, 4, 'WTS', 'Brown Glass', NULL, 432545.00, 'asdfasdf!', 'unknown', 'unknown', NULL, '', 'EUR', '2025-10-31 10:16:48', NULL, 1, 'rtwert', 'uploads/listings/listing_1761905808_69048c908d4b3.jpeg', 0),
+(5, NULL, 5, 'WTS', 'Green Glass', NULL, 324.00, 'ifjbnwjri', 'unknown', 'unknown', NULL, NULL, 'EUR', '2025-11-03 12:45:22', NULL, 1, 'asdf', 'uploads/listings/listing_1762173922_6908a3e2cb7ea.png', 0),
+(6, NULL, 5, 'WTS', 'Green Glass', NULL, 234.00, 'asdfasdf', 'unknown', 'unknown', NULL, NULL, 'EUR', '2025-11-03 12:48:53', NULL, 0, 'erwt', 'uploads/listings/listing_1762174133_6908a4b57b97e.png', 0);
 
 -- --------------------------------------------------------
 
@@ -291,7 +294,8 @@ INSERT INTO `mollie_payments` (`id`, `user_id`, `payment_id`, `amount`, `status`
 (1, 10, 'tr_Uw2jPryC4LCoRCeP82LGJ', 9.99, 'open', 1, '2025-10-31 09:09:16', NULL, NULL),
 (2, 10, 'tr_8gyXjjsWQ3Zhn2XaC2LGJ', 9.99, 'open', 1, '2025-10-31 09:10:00', NULL, NULL),
 (3, 10, 'tr_L2Fa4kHzTS6UtpynC2LGJ', 9.99, 'paid', 1, '2025-10-31 09:10:02', '2025-10-31 09:22:15', '2025-10-31 09:22:15'),
-(4, 11, 'tr_HoaNUqcvAgr6cSzER5LGJ', 9.99, 'paid', 1, '2025-10-31 09:41:27', '2025-10-31 09:42:51', '2025-10-31 09:42:51');
+(4, 11, 'tr_HoaNUqcvAgr6cSzER5LGJ', 9.99, 'paid', 1, '2025-10-31 09:41:27', '2025-10-31 09:42:51', '2025-10-31 09:42:51'),
+(5, 10, 'tr_HwHjPAt8YXQsH2AotGUGJ', 9.99, 'open', 1, '2025-11-03 13:42:41', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -300,21 +304,21 @@ INSERT INTO `mollie_payments` (`id`, `user_id`, `payment_id`, `amount`, `status`
 --
 
 CREATE TABLE `pages` (
-  `id` bigint(20) NOT NULL,
-  `slug` varchar(100) NOT NULL COMMENT 'URL-friendly identifier (e.g., about-us, contact)',
-  `title` varchar(255) NOT NULL COMMENT 'Page title',
-  `meta_description` text DEFAULT NULL,
+  `id` int(11) NOT NULL,
+  `slug` varchar(100) NOT NULL,
+  `title` varchar(255) NOT NULL,
   `is_active` tinyint(1) DEFAULT 1,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp()
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `pages`
 --
 
-INSERT INTO `pages` (`id`, `slug`, `title`, `meta_description`, `is_active`, `created_at`, `updated_at`) VALUES
-(1, 'about-us', 'About Us', 'Learn more about Glass Market and our mission', 1, '2025-10-31 10:45:31', NULL);
+INSERT INTO `pages` (`id`, `slug`, `title`, `is_active`, `created_at`, `updated_at`) VALUES
+(1, 'terms', 'Terms of Service', 1, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(2, 'privacy', 'Privacy Policy', 1, '2025-11-03 15:27:47', '2025-11-03 15:27:47');
 
 -- --------------------------------------------------------
 
@@ -323,53 +327,142 @@ INSERT INTO `pages` (`id`, `slug`, `title`, `meta_description`, `is_active`, `cr
 --
 
 CREATE TABLE `page_content` (
-  `id` bigint(20) NOT NULL,
-  `section_id` bigint(20) NOT NULL,
-  `content_value` longtext DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `updated_by` bigint(20) DEFAULT NULL COMMENT 'User ID who last updated'
+  `id` int(11) NOT NULL,
+  `section_id` int(11) NOT NULL,
+  `content_value` text NOT NULL,
+  `updated_by` int(11) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `page_content`
 --
 
-INSERT INTO `page_content` (`id`, `section_id`, `content_value`, `updated_at`, `updated_by`) VALUES
-(1, 2, 'Connecting the global glass recycling industry with innovative marketplace solutions', '2025-10-31 11:21:43', 4),
-(2, 1, 'About Glass Market!', '2025-10-31 11:21:43', 4),
-(3, 4, 'Glass Market is dedicated to creating a sustainable future by facilitating the efficient exchange of recycled glass materials. We connect glass recycling plants, factories, and collection companies worldwide, making it easier to source and supply quality glass cullet.', '2025-10-31 11:21:43', 4),
-(4, 3, 'Our Mission', '2025-10-31 11:21:43', 4),
-(5, 10, 'Glass Market is built by a passionate team of industry experts, developers, and environmental advocates. We bring together decades of experience in glass recycling, supply chain management, and digital marketplace innovation.', '2025-10-31 11:21:43', 4),
-(6, 9, 'Our Team', '2025-10-31 11:21:43', 4),
-(7, 8, 'Sustainability: We prioritize environmental responsibility in everything we do.\r\nTransparency: We believe in open, honest communication and fair pricing.\r\nInnovation: We continuously improve our platform to serve our community better.\r\nQuality: We maintain high standards for all listings and transactions.', '2025-10-31 11:21:43', 4),
-(8, 7, 'Our Values', '2025-10-31 11:21:43', 4),
-(9, 6, 'We envision a world where glass recycling is seamless, transparent, and accessible to all stakeholders in the industry. By providing a centralized platform, we aim to reduce waste, lower costs, and support environmental sustainability.', '2025-10-31 11:21:43', 4),
-(10, 5, 'Our Vision', '2025-10-31 11:21:43', 4),
-(16, 34, 'Request a Demo', '2025-10-31 11:21:43', 4),
-(17, 35, '/demo', '2025-10-31 11:21:43', 4),
-(18, 36, 'Talk to Operations', '2025-10-31 11:21:43', 4),
-(19, 37, 'mailto:hello@glassmarket.com', '2025-10-31 11:21:43', 4),
-(20, 33, 'Whether you handle production cullet...', '2025-10-31 11:21:43', 4),
-(21, 32, 'Join the Circular Glass Movement', '2025-10-31 11:21:43', 4),
-(22, 12, 'From Rotterdam to Singapore, Glass Market keeps premium cullet moving...', '2025-10-31 11:21:43', 4),
-(23, 11, 'About Glass Market', '2025-10-31 11:21:43', 4),
-(24, 13, 'Explore Marketplace', '2025-10-31 11:21:43', 4),
-(25, 14, '/glass-market/resources/views/browse.php', '2025-10-31 11:21:43', 4),
-(28, 18, 'Tons of glass traded', '2025-10-31 11:21:43', 4),
-(29, 17, '432K', '2025-10-31 11:21:43', 4),
-(30, 20, 'Active partner locations', '2025-10-31 11:21:43', 4),
-(31, 19, '68', '2025-10-31 11:21:43', 4),
-(32, 22, 'Average listing approval', '2025-10-31 11:21:43', 4),
-(33, 21, '24 hrs', '2025-10-31 11:21:43', 4),
-(34, 24, 'Fulfilment satisfaction rate', '2025-10-31 11:21:43', 4),
-(35, 23, '98%', '2025-10-31 11:21:43', 4),
-(36, 25, 'We design technology and partnerships...', '2025-10-31 11:21:43', 4),
-(37, 27, 'Live logistics, pricing transparency...', '2025-10-31 11:21:43', 4),
-(38, 26, 'Clarity First', '2025-10-31 11:21:43', 4),
-(39, 29, 'We vet every supplier and logistics partner...', '2025-10-31 11:21:43', 4),
-(40, 28, 'Reliable Partnerships', '2025-10-31 11:21:43', 4),
-(41, 31, 'Our roadmap is focused on reducing waste...', '2025-10-31 11:21:43', 4),
-(42, 30, 'Sustainable Growth', '2025-10-31 11:21:43', 4);
+INSERT INTO `page_content` (`id`, `section_id`, `content_value`, `updated_by`, `created_at`, `updated_at`) VALUES
+(1, 1, 'Terms of Service!', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(2, 2, 'Agreement for using Glass Market platform', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(3, 3, 'November 3, 2025', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(4, 4, 'Welcome to Glass Market. By accessing or using our platform, you agree to be bound by these Terms of Service (\"Terms\"). Please read them carefully.', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(5, 5, 'Important: These Terms contain a mandatory arbitration provision and class action waiver. Please review Section 14 carefully.', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(6, 6, '1. Acceptance of Terms', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(7, 7, 'By creating an account, accessing, or using Glass Market, you agree to:', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(8, 8, 'Comply with these Terms and all applicable laws', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(9, 9, 'Our Privacy Policy', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(10, 10, 'Our Seller Guidelines (if selling)', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(11, 11, 'Any additional policies and guidelines posted on our platform', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(12, 12, 'If you do not agree to these Terms, you may not use our services.', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(13, 13, '2. Eligibility', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(14, 14, 'To use Glass Market, you must:', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(15, 15, 'Be at least 18 years old', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(16, 16, 'Have the legal capacity to enter into binding contracts', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(17, 17, 'Not be prohibited from using our services under applicable law', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(18, 18, 'Provide accurate and complete registration information', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(19, 19, 'Maintain the security of your account credentials', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(20, 20, '3. Account Responsibilities', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(21, 21, 'You are responsible for:', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(22, 22, 'All activity that occurs under your account', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(23, 23, 'Maintaining the confidentiality of your password', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(24, 24, 'Notifying us immediately of any unauthorized use', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(25, 25, 'Providing truthful and accurate information', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(26, 26, 'Updating your information to keep it current', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(27, 27, 'You may NOT:', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(28, 28, 'Share your account with others', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(29, 29, 'Create multiple accounts to circumvent restrictions', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(30, 30, 'Impersonate another person or entity', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(31, 31, 'Use automated tools to access our platform (bots, scrapers)', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(32, 32, 'Sell, transfer, or rent your account to others', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(33, 33, '4. Platform Usage', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(34, 34, 'Permitted Use', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(35, 35, 'You may use Glass Market to:', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(36, 36, 'Browse and purchase glass products', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(37, 37, 'List and sell glass products (if approved as a seller)', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(38, 38, 'Communicate with other users for legitimate transactions', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(39, 39, 'Access features and tools provided by our platform', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(40, 40, 'Prohibited Activities', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(41, 41, 'You may NOT:', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(42, 42, 'Violate any laws or regulations', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(43, 43, 'Infringe on intellectual property rights', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(44, 44, 'Post false, misleading, or deceptive content', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(45, 45, 'Engage in fraudulent transactions', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(46, 46, 'Harass, threaten, or abuse other users', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(47, 47, 'Spam or send unsolicited communications', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(48, 48, 'Attempt to circumvent fees or payments', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(49, 49, 'Interfere with platform operation or security', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(50, 50, 'Transmit viruses or malicious code', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(51, 51, 'Collect user data without permission', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(52, 52, 'Complete transactions off-platform to avoid fees', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(53, 53, '16. Contact Information', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(54, 54, 'Questions about these Terms? Contact us:', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(55, 55, 'legal@glassmarket.com', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(56, 56, '1-800-GLASS-123', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(57, 57, 'Glass Market Legal Department\r\n123 Glass Street\r\nNew York, NY 10001', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(58, 58, 'Thank you for using Glass Market! We\'re committed to providing a safe, transparent marketplace for glass buyers and sellers.', 4, '2025-11-03 14:10:34', '2025-11-04 09:27:12'),
+(59, 59, 'Privacy Policy', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(60, 60, 'How we collect, use, and protect your information', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(61, 61, 'November 3, 2025', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(62, 62, 'At Glass Market, we take your privacy seriously. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our platform.', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(63, 63, 'Your Rights: You have the right to access, correct, or delete your personal information at any time. Contact us at privacy@glassmarket.com for assistance.', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(64, 64, '1. Information We Collect', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(65, 65, 'Information You Provide', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(66, 66, 'We collect information you voluntarily provide when using our services:', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(67, 67, 'Account Information: Name, email address, phone number, password', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(68, 68, 'Profile Information: Profile photo, bio, business name, location', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(69, 69, 'Payment Information: Credit card details, billing address, payment history', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(70, 70, 'Listing Information: Product descriptions, photos, pricing', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(71, 71, 'Communication: Messages, reviews, support inquiries', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(72, 72, 'Verification Data: Government ID, business documents (for sellers)', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(73, 73, 'Automatically Collected Information', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(74, 74, 'When you use our platform, we automatically collect:', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(75, 75, 'Device Information: IP address, browser type, operating system', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(76, 76, 'Usage Data: Pages viewed, time spent, clicks, search queries', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(77, 77, 'Location Data: Approximate location based on IP address', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(78, 78, 'Cookies & Tracking: Session data, preferences, analytics', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(79, 79, '2. How We Use Your Information', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(80, 80, 'We use your information to:', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(81, 81, 'Provide Services: Process transactions, facilitate buying and selling', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(82, 82, 'Account Management: Create and manage your account', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(83, 83, 'Communication: Send order updates, notifications, and support responses', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(84, 84, 'Improve Platform: Analyze usage to enhance features and user experience', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(85, 85, 'Security: Detect fraud, prevent abuse, and protect user safety', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(86, 86, 'Marketing: Send promotional emails (you can opt out anytime)', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(87, 87, 'Legal Compliance: Meet legal obligations and enforce our terms', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(88, 88, 'Personalization: Customize content and recommendations', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(89, 89, '3. Information Sharing', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(90, 90, 'We Share Your Information With:', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(91, 91, 'Other Users: Buyers and sellers see necessary transaction information', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(92, 92, 'Service Providers: Payment processors, shipping carriers, email services', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(93, 93, 'Business Partners: Marketing partners (only with your consent)', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(94, 94, 'Legal Authorities: When required by law or to protect rights', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(95, 95, 'Business Transfers: In case of merger, acquisition, or sale', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(96, 96, 'We Do NOT:', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(97, 97, 'Sell your personal information to third parties', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(98, 98, 'Share your data for unrelated purposes without consent', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(99, 99, 'Disclose your payment details to other users', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(100, 100, '4. Data Security', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(101, 101, 'We implement security measures to protect your information:', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(102, 102, 'Encryption: SSL/TLS encryption for data transmission', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(103, 103, 'Secure Storage: Encrypted databases and secure servers', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(104, 104, 'Access Controls: Limited employee access to personal data', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(105, 105, 'Regular Audits: Security assessments and vulnerability testing', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(106, 106, 'Payment Security: PCI-DSS compliant payment processing', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(107, 107, 'However, no method of transmission over the internet is 100% secure. While we strive to protect your data, we cannot guarantee absolute security.', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(108, 108, '5. Your Privacy Rights', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(109, 109, 'You Have the Right To:', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(110, 110, 'Access: Request a copy of your personal information', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(111, 111, 'Correction: Update or correct inaccurate information', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(112, 112, 'Deletion: Request deletion of your account and data', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(113, 113, 'Opt-Out: Unsubscribe from marketing emails', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(114, 114, 'Data Portability: Receive your data in a portable format', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(115, 115, 'Object: Object to certain processing of your data', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(116, 116, 'Withdraw Consent: Revoke consent where applicable', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(117, 117, 'To exercise these rights, contact us at privacy@glassmarket.com or through your account settings.', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(118, 118, '15. Contact Us', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(119, 119, 'If you have questions about this Privacy Policy or our privacy practices, please contact us:', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(120, 120, 'privacy@glassmarket.com', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(121, 121, '1-800-GLASS-123', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(122, 122, 'Glass Market, 123 Glass Street, New York, NY 10001', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(123, 123, 'dpo@glassmarket.com', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47');
 
 -- --------------------------------------------------------
 
@@ -378,55 +471,145 @@ INSERT INTO `page_content` (`id`, `section_id`, `content_value`, `updated_at`, `
 --
 
 CREATE TABLE `page_sections` (
-  `id` bigint(20) NOT NULL,
-  `page_id` bigint(20) NOT NULL,
-  `section_key` varchar(100) NOT NULL COMMENT 'Unique identifier for this section (e.g., hero_title, mission_text)',
-  `section_type` varchar(50) NOT NULL DEFAULT 'text' COMMENT 'text, textarea, image, html, url',
-  `section_label` varchar(255) NOT NULL COMMENT 'Human-readable label for admin UI',
+  `id` int(11) NOT NULL,
+  `page_id` int(11) NOT NULL,
+  `section_key` varchar(100) NOT NULL,
+  `section_label` varchar(255) NOT NULL,
+  `section_type` varchar(50) DEFAULT 'text',
+  `section_group` varchar(100) DEFAULT NULL,
   `display_order` int(11) DEFAULT 0,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `page_sections`
 --
 
-INSERT INTO `page_sections` (`id`, `page_id`, `section_key`, `section_type`, `section_label`, `display_order`, `created_at`) VALUES
-(1, 1, 'hero_title', 'text', 'Hero Section - Main Title', 2, '2025-10-31 10:45:32'),
-(2, 1, 'hero_subtitle', 'textarea', 'Hero Section - Subtitle', 3, '2025-10-31 10:45:32'),
-(3, 1, 'mission_title', 'text', 'Mission Section - Title', 15, '2025-10-31 10:45:32'),
-(4, 1, 'mission_text', 'textarea', 'Mission Section - Description', 16, '2025-10-31 10:45:32'),
-(5, 1, 'vision_title', 'text', 'Vision Section - Title', 17, '2025-10-31 10:45:32'),
-(6, 1, 'vision_text', 'textarea', 'Vision Section - Description', 18, '2025-10-31 10:45:32'),
-(7, 1, 'values_title', 'text', 'Values Section - Title', 19, '2025-10-31 10:45:32'),
-(8, 1, 'values_text', 'textarea', 'Values Section - Description', 8, '2025-10-31 10:45:32'),
-(9, 1, 'team_title', 'text', 'Team Section - Title', 27, '2025-10-31 10:45:32'),
-(10, 1, 'team_text', 'textarea', 'Team Section - Description', 28, '2025-10-31 10:45:32'),
-(11, 1, 'hero_kicker', 'text', 'Hero Section - Kicker', 1, '2025-10-31 11:04:37'),
-(12, 1, 'hero_description', 'textarea', 'Hero Section - Description', 4, '2025-10-31 11:04:37'),
-(13, 1, 'hero_primary_label', 'text', 'Hero Section - Primary Button Label', 5, '2025-10-31 11:04:37'),
-(14, 1, 'hero_primary_url', 'text', 'Hero Section - Primary Button URL', 6, '2025-10-31 11:04:37'),
-(17, 1, 'stats_1_value', 'text', 'Stats Card 1 - Value', 7, '2025-10-31 11:04:37'),
-(18, 1, 'stats_1_label', 'text', 'Stats Card 1 - Label', 8, '2025-10-31 11:04:37'),
-(19, 1, 'stats_2_value', 'text', 'Stats Card 2 - Value', 9, '2025-10-31 11:04:37'),
-(20, 1, 'stats_2_label', 'text', 'Stats Card 2 - Label', 10, '2025-10-31 11:04:37'),
-(21, 1, 'stats_3_value', 'text', 'Stats Card 3 - Value', 11, '2025-10-31 11:04:37'),
-(22, 1, 'stats_3_label', 'text', 'Stats Card 3 - Label', 12, '2025-10-31 11:04:37'),
-(23, 1, 'stats_4_value', 'text', 'Stats Card 4 - Value', 13, '2025-10-31 11:04:37'),
-(24, 1, 'stats_4_label', 'text', 'Stats Card 4 - Label', 14, '2025-10-31 11:04:37'),
-(25, 1, 'values_intro', 'textarea', 'Values Section - Intro', 20, '2025-10-31 11:04:37'),
-(26, 1, 'values_item_1_title', 'text', 'Values Card 1 - Title', 21, '2025-10-31 11:04:37'),
-(27, 1, 'values_item_1_text', 'textarea', 'Values Card 1 - Description', 22, '2025-10-31 11:04:37'),
-(28, 1, 'values_item_2_title', 'text', 'Values Card 2 - Title', 23, '2025-10-31 11:04:37'),
-(29, 1, 'values_item_2_text', 'textarea', 'Values Card 2 - Description', 24, '2025-10-31 11:04:37'),
-(30, 1, 'values_item_3_title', 'text', 'Values Card 3 - Title', 25, '2025-10-31 11:04:37'),
-(31, 1, 'values_item_3_text', 'textarea', 'Values Card 3 - Description', 26, '2025-10-31 11:04:37'),
-(32, 1, 'cta_title', 'text', 'CTA Section - Title', 29, '2025-10-31 11:04:37'),
-(33, 1, 'cta_text', 'textarea', 'CTA Section - Description', 30, '2025-10-31 11:04:37'),
-(34, 1, 'cta_primary_label', 'text', 'CTA Section - Primary Button Label', 31, '2025-10-31 11:04:37'),
-(35, 1, 'cta_primary_url', 'text', 'CTA Section - Primary Button URL', 32, '2025-10-31 11:04:37'),
-(36, 1, 'cta_secondary_label', 'text', 'CTA Section - Secondary Button Label', 33, '2025-10-31 11:04:37'),
-(37, 1, 'cta_secondary_url', 'text', 'CTA Section - Secondary Button URL', 34, '2025-10-31 11:04:37');
+INSERT INTO `page_sections` (`id`, `page_id`, `section_key`, `section_label`, `section_type`, `section_group`, `display_order`, `created_at`, `updated_at`) VALUES
+(1, 1, 'hero_title', 'Hero Title', 'text', 'hero', 1, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(2, 1, 'hero_subtitle', 'Hero Subtitle', 'text', 'hero', 2, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(3, 1, 'last_updated', 'Last Updated Date', 'text', 'hero', 3, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(4, 1, 'intro_text', 'Introduction Text', 'textarea', 'introduction', 4, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(5, 1, 'warning_text', 'Warning Box Text', 'textarea', 'introduction', 5, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(6, 1, 'section_1_title', 'Section 1 Title', 'text', 'section_1', 6, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(7, 1, 'section_1_intro', 'Section 1 Introduction', 'textarea', 'section_1', 7, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(8, 1, 'section_1_point_1', 'Agreement Point 1', 'text', 'section_1', 8, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(9, 1, 'section_1_point_2', 'Agreement Point 2', 'text', 'section_1', 9, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(10, 1, 'section_1_point_3', 'Agreement Point 3', 'text', 'section_1', 10, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(11, 1, 'section_1_point_4', 'Agreement Point 4', 'text', 'section_1', 11, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(12, 1, 'section_1_closing', 'Section 1 Closing', 'textarea', 'section_1', 12, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(13, 1, 'section_2_title', 'Section 2 Title', 'text', 'section_2', 13, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(14, 1, 'section_2_intro', 'Section 2 Introduction', 'textarea', 'section_2', 14, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(15, 1, 'section_2_point_1', 'Eligibility Point 1', 'text', 'section_2', 15, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(16, 1, 'section_2_point_2', 'Eligibility Point 2', 'text', 'section_2', 16, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(17, 1, 'section_2_point_3', 'Eligibility Point 3', 'text', 'section_2', 17, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(18, 1, 'section_2_point_4', 'Eligibility Point 4', 'text', 'section_2', 18, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(19, 1, 'section_2_point_5', 'Eligibility Point 5', 'text', 'section_2', 19, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(20, 1, 'section_3_title', 'Section 3 Title', 'text', 'section_3', 20, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(21, 1, 'section_3_subtitle_1', 'Responsibilities Subtitle', 'text', 'section_3', 21, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(22, 1, 'section_3_resp_1', 'Responsibility 1', 'text', 'section_3', 22, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(23, 1, 'section_3_resp_2', 'Responsibility 2', 'text', 'section_3', 23, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(24, 1, 'section_3_resp_3', 'Responsibility 3', 'text', 'section_3', 24, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(25, 1, 'section_3_resp_4', 'Responsibility 4', 'text', 'section_3', 25, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(26, 1, 'section_3_resp_5', 'Responsibility 5', 'text', 'section_3', 26, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(27, 1, 'section_3_subtitle_2', 'Prohibitions Subtitle', 'text', 'section_3', 27, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(28, 1, 'section_3_prohibit_1', 'Prohibition 1', 'text', 'section_3', 28, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(29, 1, 'section_3_prohibit_2', 'Prohibition 2', 'text', 'section_3', 29, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(30, 1, 'section_3_prohibit_3', 'Prohibition 3', 'text', 'section_3', 30, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(31, 1, 'section_3_prohibit_4', 'Prohibition 4', 'text', 'section_3', 31, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(32, 1, 'section_3_prohibit_5', 'Prohibition 5', 'text', 'section_3', 32, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(33, 1, 'section_4_title', 'Section 4 Title', 'text', 'section_4', 33, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(34, 1, 'section_4_subtitle_1', 'Permitted Use Subtitle', 'text', 'section_4', 34, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(35, 1, 'section_4_intro_1', 'Permitted Use Introduction', 'textarea', 'section_4', 35, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(36, 1, 'section_4_permitted_1', 'Permitted Activity 1', 'text', 'section_4', 36, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(37, 1, 'section_4_permitted_2', 'Permitted Activity 2', 'text', 'section_4', 37, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(38, 1, 'section_4_permitted_3', 'Permitted Activity 3', 'text', 'section_4', 38, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(39, 1, 'section_4_permitted_4', 'Permitted Activity 4', 'text', 'section_4', 39, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(40, 1, 'section_4_subtitle_2', 'Prohibited Activities Subtitle', 'text', 'section_4', 40, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(41, 1, 'section_4_intro_2', 'Prohibited Activities Introduction', 'textarea', 'section_4', 41, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(42, 1, 'section_4_prohibited_1', 'Prohibited Activity 1', 'text', 'section_4', 42, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(43, 1, 'section_4_prohibited_2', 'Prohibited Activity 2', 'text', 'section_4', 43, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(44, 1, 'section_4_prohibited_3', 'Prohibited Activity 3', 'text', 'section_4', 44, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(45, 1, 'section_4_prohibited_4', 'Prohibited Activity 4', 'text', 'section_4', 45, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(46, 1, 'section_4_prohibited_5', 'Prohibited Activity 5', 'text', 'section_4', 46, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(47, 1, 'section_4_prohibited_6', 'Prohibited Activity 6', 'text', 'section_4', 47, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(48, 1, 'section_4_prohibited_7', 'Prohibited Activity 7', 'text', 'section_4', 48, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(49, 1, 'section_4_prohibited_8', 'Prohibited Activity 8', 'text', 'section_4', 49, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(50, 1, 'section_4_prohibited_9', 'Prohibited Activity 9', 'text', 'section_4', 50, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(51, 1, 'section_4_prohibited_10', 'Prohibited Activity 10', 'text', 'section_4', 51, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(52, 1, 'section_4_prohibited_11', 'Prohibited Activity 11', 'text', 'section_4', 52, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(53, 1, 'contact_title', 'Contact Section Title', 'text', 'contact', 100, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(54, 1, 'contact_intro', 'Contact Introduction', 'textarea', 'contact', 101, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(55, 1, 'contact_email', 'Contact Email', 'text', 'contact', 102, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(56, 1, 'contact_phone', 'Contact Phone', 'text', 'contact', 103, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(57, 1, 'contact_address', 'Contact Address', 'textarea', 'contact', 104, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(58, 1, 'closing_message', 'Closing Message', 'textarea', 'contact', 105, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
+(59, 2, 'hero_title', 'Hero Title', 'text', 'hero', 1, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(60, 2, 'hero_subtitle', 'Hero Subtitle', 'text', 'hero', 2, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(61, 2, 'last_updated', 'Last Updated Date', 'text', 'hero', 3, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(62, 2, 'intro_text', 'Introduction Text', 'textarea', 'introduction', 4, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(63, 2, 'info_box_text', 'Info Box Text', 'textarea', 'introduction', 5, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(64, 2, 'section_1_title', 'Section 1 Title', 'text', 'section_1', 6, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(65, 2, 'section_1_subtitle_1', 'Information You Provide Subtitle', 'text', 'section_1', 7, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(66, 2, 'section_1_intro_1', 'Information You Provide Intro', 'textarea', 'section_1', 8, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(67, 2, 'section_1_info_1', 'Account Information', 'text', 'section_1', 9, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(68, 2, 'section_1_info_2', 'Profile Information', 'text', 'section_1', 10, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(69, 2, 'section_1_info_3', 'Payment Information', 'text', 'section_1', 11, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(70, 2, 'section_1_info_4', 'Listing Information', 'text', 'section_1', 12, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(71, 2, 'section_1_info_5', 'Communication', 'text', 'section_1', 13, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(72, 2, 'section_1_info_6', 'Verification Data', 'text', 'section_1', 14, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(73, 2, 'section_1_subtitle_2', 'Automatically Collected Subtitle', 'text', 'section_1', 15, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(74, 2, 'section_1_intro_2', 'Automatically Collected Intro', 'textarea', 'section_1', 16, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(75, 2, 'section_1_auto_1', 'Device Information', 'text', 'section_1', 17, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(76, 2, 'section_1_auto_2', 'Usage Data', 'text', 'section_1', 18, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(77, 2, 'section_1_auto_3', 'Location Data', 'text', 'section_1', 19, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(78, 2, 'section_1_auto_4', 'Cookies & Tracking', 'text', 'section_1', 20, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(79, 2, 'section_2_title', 'Section 2 Title', 'text', 'section_2', 21, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(80, 2, 'section_2_intro', 'Section 2 Introduction', 'textarea', 'section_2', 22, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(81, 2, 'section_2_use_1', 'Provide Services', 'text', 'section_2', 23, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(82, 2, 'section_2_use_2', 'Account Management', 'text', 'section_2', 24, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(83, 2, 'section_2_use_3', 'Communication', 'text', 'section_2', 25, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(84, 2, 'section_2_use_4', 'Improve Platform', 'text', 'section_2', 26, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(85, 2, 'section_2_use_5', 'Security', 'text', 'section_2', 27, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(86, 2, 'section_2_use_6', 'Marketing', 'text', 'section_2', 28, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(87, 2, 'section_2_use_7', 'Legal Compliance', 'text', 'section_2', 29, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(88, 2, 'section_2_use_8', 'Personalization', 'text', 'section_2', 30, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(89, 2, 'section_3_title', 'Section 3 Title', 'text', 'section_3', 31, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(90, 2, 'section_3_subtitle_1', 'We Share Subtitle', 'text', 'section_3', 32, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(91, 2, 'section_3_share_1', 'Other Users', 'text', 'section_3', 33, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(92, 2, 'section_3_share_2', 'Service Providers', 'text', 'section_3', 34, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(93, 2, 'section_3_share_3', 'Business Partners', 'text', 'section_3', 35, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(94, 2, 'section_3_share_4', 'Legal Authorities', 'text', 'section_3', 36, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(95, 2, 'section_3_share_5', 'Business Transfers', 'text', 'section_3', 37, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(96, 2, 'section_3_subtitle_2', 'We Do NOT Subtitle', 'text', 'section_3', 38, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(97, 2, 'section_3_not_1', 'Not Sell Data', 'text', 'section_3', 39, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(98, 2, 'section_3_not_2', 'Not Share Unrelated', 'text', 'section_3', 40, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(99, 2, 'section_3_not_3', 'Not Disclose Payment', 'text', 'section_3', 41, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(100, 2, 'section_4_title', 'Section 4 Title', 'text', 'section_4', 42, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(101, 2, 'section_4_intro', 'Section 4 Introduction', 'textarea', 'section_4', 43, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(102, 2, 'section_4_security_1', 'Encryption', 'text', 'section_4', 44, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(103, 2, 'section_4_security_2', 'Secure Storage', 'text', 'section_4', 45, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(104, 2, 'section_4_security_3', 'Access Controls', 'text', 'section_4', 46, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(105, 2, 'section_4_security_4', 'Regular Audits', 'text', 'section_4', 47, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(106, 2, 'section_4_security_5', 'Payment Security', 'text', 'section_4', 48, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(107, 2, 'section_4_disclaimer', 'Security Disclaimer', 'textarea', 'section_4', 49, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(108, 2, 'section_5_title', 'Section 5 Title', 'text', 'section_5', 50, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(109, 2, 'section_5_subtitle', 'Rights Subtitle', 'text', 'section_5', 51, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(110, 2, 'section_5_right_1', 'Access', 'text', 'section_5', 52, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(111, 2, 'section_5_right_2', 'Correction', 'text', 'section_5', 53, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(112, 2, 'section_5_right_3', 'Deletion', 'text', 'section_5', 54, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(113, 2, 'section_5_right_4', 'Opt-Out', 'text', 'section_5', 55, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(114, 2, 'section_5_right_5', 'Data Portability', 'text', 'section_5', 56, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(115, 2, 'section_5_right_6', 'Object', 'text', 'section_5', 57, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(116, 2, 'section_5_right_7', 'Withdraw Consent', 'text', 'section_5', 58, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(117, 2, 'section_5_contact', 'Exercise Rights Text', 'textarea', 'section_5', 59, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(118, 2, 'contact_title', 'Contact Section Title', 'text', 'contact', 100, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(119, 2, 'contact_intro', 'Contact Introduction', 'textarea', 'contact', 101, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(120, 2, 'contact_email', 'Contact Email', 'text', 'contact', 102, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(121, 2, 'contact_phone', 'Contact Phone', 'text', 'contact', 103, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(122, 2, 'contact_address', 'Contact Address', 'text', 'contact', 104, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(123, 2, 'contact_dpo', 'Data Protection Officer Email', 'text', 'contact', 105, '2025-11-03 15:27:47', '2025-11-03 15:27:47');
 
 -- --------------------------------------------------------
 
@@ -587,7 +770,7 @@ INSERT INTO `users` (`id`, `company_id`, `created_by`, `email`, `avatar`, `email
 (6, NULL, NULL, 'gijs@gmail.com', NULL, '2025-10-27 13:33:45', '$2y$10$qiL225fIXPba/gq8Z/mZwOGOaXBiYU8lmIjQzBMy4vn6mZ4X0fWoa', NULL, 'Gijsje Radijsje', NULL, NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-10-27 13:33:06', '2025-10-27 13:33:45'),
 (7, NULL, NULL, 'Kaj@gmail.com', NULL, '2025-10-27 14:04:47', '$2y$10$e3IsWujghleCxhlVwmlOwOph2Ijlq3gOfOMc8EcTxIUJVkZL6wpdq', NULL, 'Kaj', NULL, NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-10-27 13:56:22', '2025-10-27 14:04:47'),
 (9, NULL, NULL, 'colinpoort12@hotmail.com', NULL, NULL, '$2y$10$5LuxQblwc2OqwTw7tzQU7eDA3g1QV4L/.3rn6XsQSn5301dSLpcQ.', NULL, 'Colin', NULL, NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-10-28 14:15:57', '2025-10-29 13:40:57'),
-(10, NULL, NULL, 'test_sub@testsub.com', NULL, '2025-10-29 14:07:18', '$2y$10$qYcQxm8kHYBDjXc2Skh05erADJ5uxwub0DOHWojfcgYLEVfiKHwOi', NULL, 'test_sub', 'test_sub', NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-10-29 14:06:07', '2025-10-29 14:07:18'),
+(10, 5, NULL, 'test_sub@testsub.com', NULL, '2025-10-29 14:07:18', '$2y$10$qYcQxm8kHYBDjXc2Skh05erADJ5uxwub0DOHWojfcgYLEVfiKHwOi', NULL, 'test_sub', 'test_sub', NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-10-29 14:06:07', '2025-11-03 12:45:22'),
 (11, 4, NULL, 'testaccount@gmail.com', '/glass-market/public/uploads/avatars/avatar_11_1761905779.jpg', '2025-10-31 09:40:18', '$2y$10$9SuQyKcOKfwc5v5Nxep.tOeqwCztfV3ikKI/cQHFRq2Sx.9IHj.h.', NULL, 'testaccount', 'testaccount', NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-10-31 09:39:51', '2025-10-31 10:16:19');
 
 -- --------------------------------------------------------
@@ -755,24 +938,24 @@ ALTER TABLE `mollie_payments`
 ALTER TABLE `pages`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `slug` (`slug`),
-  ADD KEY `idx_page_slug` (`slug`);
+  ADD KEY `idx_slug` (`slug`),
+  ADD KEY `idx_active` (`is_active`);
 
 --
 -- Indexes for table `page_content`
 --
 ALTER TABLE `page_content`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `section_id` (`section_id`),
-  ADD KEY `updated_by` (`updated_by`);
+  ADD UNIQUE KEY `unique_content` (`section_id`),
+  ADD KEY `idx_section` (`section_id`);
 
 --
 -- Indexes for table `page_sections`
 --
 ALTER TABLE `page_sections`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `page_section_unique` (`page_id`,`section_key`),
-  ADD KEY `page_id` (`page_id`),
-  ADD KEY `idx_section_order` (`page_id`,`display_order`);
+  ADD UNIQUE KEY `unique_section` (`page_id`,`section_key`),
+  ADD KEY `idx_page_order` (`page_id`,`display_order`);
 
 --
 -- Indexes for table `payment_cards`
@@ -855,7 +1038,7 @@ ALTER TABLE `capacities`
 -- AUTO_INCREMENT for table `companies`
 --
 ALTER TABLE `companies`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `contracts`
@@ -867,7 +1050,7 @@ ALTER TABLE `contracts`
 -- AUTO_INCREMENT for table `listings`
 --
 ALTER TABLE `listings`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `locations`
@@ -885,25 +1068,25 @@ ALTER TABLE `maintenance_events`
 -- AUTO_INCREMENT for table `mollie_payments`
 --
 ALTER TABLE `mollie_payments`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `pages`
 --
 ALTER TABLE `pages`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `page_content`
 --
 ALTER TABLE `page_content`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=189;
 
 --
 -- AUTO_INCREMENT for table `page_sections`
 --
 ALTER TABLE `page_sections`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=189;
 
 --
 -- AUTO_INCREMENT for table `payment_cards`
@@ -1005,8 +1188,7 @@ ALTER TABLE `mollie_payments`
 -- Constraints for table `page_content`
 --
 ALTER TABLE `page_content`
-  ADD CONSTRAINT `page_content_ibfk_1` FOREIGN KEY (`section_id`) REFERENCES `page_sections` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `page_content_ibfk_2` FOREIGN KEY (`updated_by`) REFERENCES `users` (`id`) ON DELETE SET NULL;
+  ADD CONSTRAINT `page_content_ibfk_1` FOREIGN KEY (`section_id`) REFERENCES `page_sections` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `page_sections`
