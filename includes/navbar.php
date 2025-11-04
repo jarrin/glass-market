@@ -285,11 +285,13 @@ $is_admin = $is_logged_in ? ($_SESSION['is_admin'] ?? 0) : 0;
   backdrop-filter: blur(4px);
   z-index: 999;
   opacity: 0;
+  pointer-events: none;
   transition: opacity 0.3s ease;
 }
 
 .mobile-menu-overlay.active {
   opacity: 1;
+  pointer-events: auto;
 }
 
 /* Mobile Menu Panel */
@@ -310,10 +312,12 @@ $is_admin = $is_logged_in ? ($_SESSION['is_admin'] ?? 0) : 0;
   transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow-y: auto;
   padding: 24px 0;
+  pointer-events: none;
 }
 
 .mobile-menu.active {
   right: 0;
+  pointer-events: auto;
 }
 
 .mobile-menu-section {
