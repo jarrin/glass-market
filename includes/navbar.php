@@ -760,27 +760,56 @@ window.addEventListener('scroll', function() {
 </div>
 
 <script>
-  // Mobile menu toggle
-  const hamburgerBtn = document.getElementById('hamburgerBtn');
-  const mobileMenu = document.getElementById('mobileMenu');
-  const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+  // Mobile menu toggle - prevent duplicate event listeners
+  (function() {
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
 
-  function toggleMobileMenu() {
-    hamburgerBtn.classList.toggle('active');
-    mobileMenu.classList.toggle('active');
-    mobileMenuOverlay.classList.toggle('active');
-    document.body.style.overflow = mobileMenu.classList.contains('active') ? 'hidden' : '';
-  }
+    // Exit if elements don't exist
+    if (!hamburgerBtn || !mobileMenu || !mobileMenuOverlay) {
+      return;
+    }
 
-  hamburgerBtn.addEventListener('click', toggleMobileMenu);
-  mobileMenuOverlay.addEventListener('click', toggleMobileMenu);
-
-  // Close menu when clicking a link
-  document.querySelectorAll('.mobile-menu-links a').forEach(link => {
-    link.addEventListener('click', () => {
-      if (mobileMenu.classList.contains('active')) {
-        toggleMobileMenu();
+    function toggleMobileMenu(event) {
+      // Prevent event from bubbling
+      if (event) {
+        event.stopPropagation();
       }
+      
+      const isActive = mobileMenu.classList.contains('active');
+      
+      hamburgerBtn.classList.toggle('active');
+      mobileMenu.classList.toggle('active');
+      mobileMenuOverlay.classList.toggle('active');
+      document.body.style.overflow = !isActive ? 'hidden' : '';
+    }
+
+    function closeMobileMenu(event) {
+      if (event) {
+        event.stopPropagation();
+      }
+      
+      if (mobileMenu.classList.contains('active')) {
+        hamburgerBtn.classList.remove('active');
+        mobileMenu.classList.remove('active');
+        mobileMenuOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    }
+
+    // Only add event listeners once
+    hamburgerBtn.addEventListener('click', toggleMobileMenu, { once: false });
+    mobileMenuOverlay.addEventListener('click', closeMobileMenu, { once: false });
+
+    // Close menu when clicking a link
+    document.querySelectorAll('.mobile-menu-links a').forEach(link => {
+      link.addEventListener('click', closeMobileMenu, { once: false });
     });
-  });
+
+    // Prevent clicks inside the menu from closing it
+    mobileMenu.addEventListener('click', function(event) {
+      event.stopPropagation();
+    });
+  })();
 </script>
