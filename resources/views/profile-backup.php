@@ -558,52 +558,36 @@ if (isset($_SESSION['listing_success'])) {
     <title>My Profile - Glass Market</title>
     <link rel="stylesheet" href="<?php echo CSS_URL; ?>/app.css">
     <style>
-        :root {
-            --profile-bg: #f5f5f7;
-            --profile-text: #1d1d1f;
-            --profile-muted: #6e6e73;
-            --profile-accent: #2f6df5;
-            --profile-card-bg: rgba(255, 255, 255, 0.9);
-            --profile-border: rgba(15, 23, 42, 0.08);
-        }
-
         body {
-            font-family: "SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            background: var(--profile-bg);
-            color: var(--profile-text);
-            margin: 0;
-            line-height: 1.6;
+            background: #f5f5f5;
         }
 
         .profile-container {
-            max-width: 1200px;
+            max-width: 900px;
             margin: 0 auto;
-            padding: 80px 32px 60px;
+            padding: 40px 20px;
         }
 
         .profile-header {
-            background: var(--profile-card-bg);
-            border: 1px solid var(--profile-border);
-            border-radius: 20px;
+            background: white;
+            border-radius: 12px;
             padding: 40px;
-            margin-bottom: 32px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-            display: flex;
-            align-items: center;
-            gap: 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            text-align: center;
         }
 
         .profile-avatar-large {
-            width: 100px;
-            height: 100px;
+            width: 120px;
+            height: 120px;
             border-radius: 50%;
-            background: linear-gradient(135deg, rgba(47, 109, 245, 0.1) 0%, rgba(30, 77, 184, 0.1) 100%);
+            margin: 0 auto 20px;
+            background: #f0f0f0;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            border: 3px solid rgba(47, 109, 245, 0.2);
-            flex-shrink: 0;
+            border: 4px solid #000;
         }
 
         .profile-avatar-large img {
@@ -613,168 +597,94 @@ if (isset($_SESSION['listing_success'])) {
         }
 
         .profile-avatar-large svg {
-            width: 50px;
-            height: 50px;
-            color: var(--profile-accent);
+            width: 60px;
+            height: 60px;
+            color: #666;
         }
 
-        .profile-info {
-            flex: 1;
+        .profile-header h1 {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            color: #000;
         }
 
-        .profile-info h1 {
-            font-size: 32px;
-            font-weight: 700;
-            margin: 0 0 8px 0;
-            color: var(--profile-text);
-            letter-spacing: -0.02em;
+        .profile-header .email {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 16px;
         }
 
-        .profile-info .email {
-            font-size: 15px;
-            color: var(--profile-muted);
-            margin-bottom: 12px;
+        .profile-header .member-since {
+            font-size: 12px;
+            color: #999;
         }
 
-        .profile-stats {
-            display: flex;
-            gap: 32px;
-            margin-top: 16px;
-        }
-
-        .profile-stat {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .profile-stat-number {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--profile-text);
-        }
-
-        .profile-stat-label {
-            font-size: 13px;
-            color: var(--profile-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        /* Tabs */
-        .profile-tabs {
-            background: var(--profile-card-bg);
-            border: 1px solid var(--profile-border);
-            border-radius: 16px 16px 0 0;
-            padding: 0 32px;
-            display: flex;
-            gap: 8px;
-            overflow-x: auto;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-        }
-
-        .profile-tab {
-            padding: 16px 24px;
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--profile-muted);
-            background: none;
-            border: none;
-            border-bottom: 3px solid transparent;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            white-space: nowrap;
-        }
-
-        .profile-tab:hover {
-            color: var(--profile-text);
-            background: rgba(47, 109, 245, 0.04);
-        }
-
-        .profile-tab.active {
-            color: var(--profile-accent);
-            border-bottom-color: var(--profile-accent);
-        }
-
-        .profile-content {
-            background: var(--profile-card-bg);
-            border: 1px solid var(--profile-border);
-            border-top: none;
-            border-radius: 0 0 16px 16px;
-            padding: 40px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-            min-height: 400px;
-        }
-
-        .tab-panel {
-            display: none;
-        }
-
-        .tab-panel.active {
-            display: block;
+        .profile-section {
+            background: white;
+            border-radius: 12px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
 
         .section-title {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--profile-text);
-            margin-bottom: 24px;
-            letter-spacing: -0.01em;
+            font-size: 18px;
+            font-weight: 800;
+            color: #000;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .alert {
-            padding: 14px 18px;
-            border-radius: 12px;
-            margin-bottom: 24px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
             font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
         }
 
         .alert-danger {
-            background: rgba(220, 38, 38, 0.1);
+            background: #fef2f2;
             color: #991b1b;
-            border: 1px solid rgba(220, 38, 38, 0.2);
+            border: 1px solid #fecaca;
         }
 
         .alert-success {
-            background: rgba(16, 185, 129, 0.1);
-            color: #065f46;
-            border: 1px solid rgba(16, 185, 129, 0.2);
+            background: #f0fdf4;
+            color: #166534;
+            border: 1px solid #bbf7d0;
         }
 
         .form-group {
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
 
         .form-group label {
             display: block;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 600;
-            color: var(--profile-text);
+            color: #222;
             margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        .form-group input,
-        .form-group textarea,
-        .form-group select {
+        .form-group input {
             width: 100%;
-            padding: 12px 16px;
-            font-size: 15px;
-            border: 1px solid var(--profile-border);
-            border-radius: 12px;
-            background: white;
+            padding: 12px 14px;
+            font-size: 14px;
+            border: 1.5px solid #ddd;
+            border-radius: 6px;
+            background: #fafafa;
             transition: all 0.2s ease;
-            font-family: inherit;
-            box-sizing: border-box;
+            outline: none;
         }
 
-        .form-group input:focus,
-        .form-group textarea:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: var(--profile-accent);
-            box-shadow: 0 0 0 3px rgba(47, 109, 245, 0.1);
+        .form-group input:focus {
+            border-color: #000;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.08);
         }
 
         .form-group input:disabled {
@@ -783,87 +693,93 @@ if (isset($_SESSION['listing_success'])) {
             cursor: not-allowed;
         }
 
-        .form-group textarea {
-            min-height: 120px;
-            resize: vertical;
-        }
-
         .btn {
             padding: 12px 24px;
-            font-size: 15px;
+            font-size: 13px;
             font-weight: 600;
-            border-radius: 12px;
+            border-radius: 4px;
             cursor: pointer;
             border: none;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
             transition: all 0.2s ease;
             text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
+            display: inline-block;
         }
 
         .btn-primary {
-            background: var(--profile-accent);
-            color: white;
-            box-shadow: 0 4px 12px rgba(47, 109, 245, 0.2);
+            background: #000;
+            color: #fff;
         }
 
         .btn-primary:hover {
-            background: #1e4db8;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(47, 109, 245, 0.3);
+            background: #333;
         }
 
         .btn-secondary {
             background: transparent;
-            color: var(--profile-muted);
-            border: 1px solid var(--profile-border);
+            color: #666;
+            border: 1.5px solid #ddd;
         }
 
         .btn-secondary:hover {
-            color: var(--profile-text);
-            border-color: var(--profile-text);
-            background: rgba(0, 0, 0, 0.02);
+            color: #000;
+            border-color: #000;
         }
 
-        .form-grid {
+        .stats-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(3, 1fr);
             gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .stat-card.clickable {
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            color: inherit;
+        }
+
+        .stat-card.clickable:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            background: #fafafa;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 800;
+            color: #000;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         @media (max-width: 768px) {
-            .profile-container {
-                padding: 80px 20px 40px;
+            .stats-grid {
+                grid-template-columns: 1fr;
             }
 
             .profile-header {
-                flex-direction: column;
-                text-align: center;
-                padding: 32px 24px;
+                padding: 24px;
             }
 
-            .profile-stats {
-                justify-content: center;
-                flex-wrap: wrap;
-            }
-
-            .profile-tabs {
-                padding: 0 16px;
-                gap: 4px;
-            }
-
-            .profile-tab {
-                padding: 12px 16px;
-                font-size: 14px;
-            }
-
-            .profile-content {
-                padding: 24px 20px;
-            }
-
-            .form-grid {
-                grid-template-columns: 1fr;
+            .profile-section {
+                padding: 24px;
             }
         }
     </style>
@@ -872,126 +788,77 @@ if (isset($_SESSION['listing_success'])) {
     <?php include __DIR__ . '/../../includes/navbar.php'; ?>
     <?php include __DIR__ . '/../../includes/subscription-notification.php'; ?>
 
-    <div class="profile-container">
-        <!-- Profile Header -->
-        <div class="profile-header">
-            <div class="profile-avatar-large">
-                <?php if (!empty($user['avatar'])): ?>
-                    <img src="<?php echo htmlspecialchars($user['avatar']); ?>" alt="<?php echo htmlspecialchars($user['name']); ?>">
-                <?php else: ?>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="12" cy="7" r="4"></circle>
-                    </svg>
-                <?php endif; ?>
-            </div>
-            <div class="profile-info">
+    <main style="padding-top: 80px;">
+        <div class="profile-container">
+            <!-- Profile Header -->
+            <div class="profile-header">
+                <div class="profile-avatar-large">
+                    <?php if (!empty($user['avatar'])): ?>
+                        <img src="<?php echo htmlspecialchars($user['avatar']); ?>" alt="<?php echo htmlspecialchars($user['name']); ?>">
+                    <?php else: ?>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                    <?php endif; ?>
+                </div>
                 <h1><?php echo htmlspecialchars($user['name']); ?></h1>
-                <div class="email"><?php echo htmlspecialchars($user['email']); ?></div>
                 <?php if (!empty($user['company_name'])): ?>
-                    <div style="display: inline-block; background: white; border: 1px solid var(--profile-border); padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; margin-top: 8px; color: var(--profile-text);">
+                    <div style="display: inline-block; background: #faf8f5; color: #5a5a5a; padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; margin: 8px 0 12px 0; letter-spacing: 0.5px; border: 2px solid #e8e4dd; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);">
                         <?php echo htmlspecialchars($user['company_name']); ?>
                     </div>
                 <?php endif; ?>
-                <div class="profile-stats">
-                    <div class="profile-stat">
-                        <div class="profile-stat-number"><?php echo $user_listings_count; ?></div>
-                        <div class="profile-stat-label">Listings</div>
-                    </div>
-                    <?php if ($user['created_at']): ?>
-                        <div class="profile-stat">
-                            <div class="profile-stat-number"><?php echo date('Y', strtotime($user['created_at'])); ?></div>
-                            <div class="profile-stat-label">Member Since</div>
-                        </div>
-                    <?php endif; ?>
+                <div class="email"><?php echo htmlspecialchars($user['email']); ?></div>
+                <?php if ($user['created_at']): ?>
+                    <div class="member-since">Member since <?php echo date('F Y', strtotime($user['created_at'])); ?></div>
+                <?php endif; ?>
+                <div style="margin-top: 20px;">
+                    <a href="<?php echo VIEWS_URL; ?>/logout.php" class="btn btn-secondary" style="display: inline-block;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 6px;">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
+                        Logout
+                    </a>
                 </div>
             </div>
-            <div>
-                <a href="<?php echo VIEWS_URL; ?>/logout.php" class="btn btn-secondary">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
-                    </svg>
-                    Logout
-                </a>
-            </div>
-        </div>
 
-        <!-- Alerts -->
-        <?php if ($error_message): ?>
-            <div class="alert alert-danger">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="12" y1="8" x2="12" y2="12"></line>
-                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                </svg>
-                <?php echo htmlspecialchars($error_message); ?>
+            <!-- Stats -->
+            <div class="profile-section">
+                <div class="section-title">Account Overview</div>
+                <div class="stats-grid">
+                    <a href="<?php echo VIEWS_URL; ?>/my-listings.php" class="stat-card clickable">
+                        <div class="stat-number"><?php echo $user_listings_count; ?></div>
+                        <div class="stat-label">Listings</div>
+                    </a>
+                    <div class="stat-card">
+                        <div class="stat-number">0</div>
+                        <div class="stat-label">Orders</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">0</div>
+                        <div class="stat-label">Reviews</div>
+                    </div>
+                </div>
             </div>
-        <?php endif; ?>
-        
-        <?php if ($success_message): ?>
-            <div class="alert alert-success">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                </svg>
-                <?php echo htmlspecialchars($success_message); ?>
-            </div>
-        <?php endif; ?>
 
-        <!-- Tabs Navigation -->
-        <div class="profile-tabs">
-            <button class="profile-tab active" data-tab="overview">Overview</button>
-            <button class="profile-tab" data-tab="listings">My Listings</button>
-            <button class="profile-tab" data-tab="profile">Edit Profile</button>
-            <button class="profile-tab" data-tab="subscription">Subscription</button>
-        </div>
-
-        <!-- Tab Content -->
-        <div class="profile-content">
-            <!-- Overview Tab -->
-            <div class="tab-panel active" id="tab-overview">
-                <h2 class="section-title">Account Overview</h2>
+                        <!-- Add New Glass Listing -->
+            <div class="profile-section">
+                <div class="section-title">Add New Glass Listing</div>
+                <p style="font-size: 13px; color: #666; margin-bottom: 20px;">List your green, white, or brown glass. Price will be negotiated after listing.</p>
                 
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 32px;">
-                    <div style="background: white; border: 1px solid var(--profile-border); border-radius: 16px; padding: 24px; text-align: center; transition: all 0.2s ease;" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow=''">
-                        <div style="font-size: 32px; font-weight: 700; color: var(--profile-text); margin-bottom: 8px;"><?php echo $user_listings_count; ?></div>
-                        <div style="font-size: 13px; color: var(--profile-muted); text-transform: uppercase; letter-spacing: 0.5px;">Active Listings</div>
+                <?php if ($error_message): ?>
+                    <div class="alert alert-danger">
+                        <?php echo htmlspecialchars($error_message); ?>
                     </div>
-                    <div style="background: white; border: 1px solid var(--profile-border); border-radius: 16px; padding: 24px; text-align: center; transition: all 0.2s ease;" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow=''">
-                        <div style="font-size: 32px; font-weight: 700; color: var(--profile-text); margin-bottom: 8px;">0</div>
-                        <div style="font-size: 13px; color: var(--profile-muted); text-transform: uppercase; letter-spacing: 0.5px;">Completed Orders</div>
-                    </div>
-                    <div style="background: white; border: 1px solid var(--profile-border); border-radius: 16px; padding: 24px; text-align: center; transition: all 0.2s ease;" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow=''">
-                        <div style="font-size: 32px; font-weight: 700; color: var(--profile-text); margin-bottom: 8px;">0</div>
-                        <div style="font-size: 13px; color: var(--profile-muted); text-transform: uppercase; letter-spacing: 0.5px;">Reviews</div>
-                    </div>
-                </div>
+                <?php endif; ?>
 
-                <div style="background: white; border: 1px solid var(--profile-border); border-radius: 12px; padding: 24px; margin-top: 24px;">
-                    <h3 style="font-size: 16px; font-weight: 600; margin: 0 0 16px 0; color: var(--profile-text);">Quick Actions</h3>
-                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                        <button class="btn btn-primary" onclick="document.querySelector('[data-tab=listings]').click()">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="12" y1="5" x2="12" y2="19"></line>
-                                <line x1="5" y1="12" x2="19" y2="12"></line>
-                            </svg>
-                            Create New Listing
-                        </button>
-                        <button class="btn btn-secondary" onclick="document.querySelector('[data-tab=profile]').click()">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                            </svg>
-                            Edit Profile
-                        </button>
+                <?php if ($success_message): ?>
+                    <div class="alert alert-success">
+                        <?php echo htmlspecialchars($success_message); ?>
                     </div>
-                </div>
-            </div>
-
-            <!-- My Listings Tab -->
-            <div class="tab-panel" id="tab-listings">
-                <h2 class="section-title">Add New Glass Listing</h2>
-                <p style="font-size: 14px; color: var(--profile-muted); margin-bottom: 24px;">List your green, white, or brown glass. Price will be negotiated after listing.</p>
+                <?php endif; ?>
                 
                 <form method="POST" action="" enctype="multipart/form-data">
                     <div class="form-group">
@@ -1163,21 +1030,22 @@ if (isset($_SESSION['listing_success'])) {
                         💡 <strong>Note:</strong> Your listing will be published immediately and visible to all marketplace users.
                     </div>
                     <div style="margin-top:24px;">
-                        <button type="submit" name="add_listing" class="btn btn-primary">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="12" y1="5" x2="12" y2="19"></line>
-                                <line x1="5" y1="12" x2="19" y2="12"></line>
-                            </svg>
-                            Create Listing
-                        </button>
+                        <button type="submit" name="add_listing" class="btn btn-primary">Create Listing</button>
                     </div>
                 </form>
             </div>
 
-            <!-- Edit Profile Tab -->
-            <div class="tab-panel" id="tab-profile">
-                <h2 class="section-title">Edit Profile</h2>
-                                <?php if ($success_message): ?>
+            <!-- Edit Profile -->
+            <div class="profile-section">
+                <div class="section-title">Edit Profile</div>
+                
+                <?php if ($error_message): ?>
+                    <div class="alert alert-danger">
+                        <?php echo htmlspecialchars($error_message); ?>
+                    </div>
+                <?php endif; ?>
+
+                <?php if ($success_message): ?>
                     <div class="alert alert-success">
                         <?php echo htmlspecialchars($success_message); ?>
                     </div>
@@ -1247,35 +1115,14 @@ if (isset($_SESSION['listing_success'])) {
                     </div>
 
                     <div style="display: flex; gap: 12px; margin-top: 24px;">
-                        <button type="submit" name="update_profile" class="btn btn-primary">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-                                <polyline points="17 21 17 13 7 13 7 21"></polyline>
-                                <polyline points="7 3 7 8 15 8"></polyline>
-                            </svg>
-                            Save Changes
-                        </button>
-                        <button type="button" class="btn btn-secondary" onclick="location.reload()">Cancel</button>
+                        <button type="submit" name="update_profile" class="btn btn-primary">Save Changes</button>
+                        <a href="<?php echo PUBLIC_URL; ?>/index.php" class="btn btn-secondary">Cancel</a>
                     </div>
                 </form>
+            </div>
 
-                <!-- Email & Payment divider -->
-                <div style="margin: 48px 0; border-top: 1px solid var(--profile-border);"></div>
-
-                <!-- Email Management (collapsed in profile tab) -->
-                <details style="margin-bottom: 24px;">
-                    <summary style="cursor: pointer; font-weight: 600; font-size: 16px; padding: 16px; background: rgba(47, 109, 245, 0.05); border-radius: 12px; list-style: none; display: flex; align-items: center; gap: 8px;">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                            <polyline points="22,6 12,13 2,6"></polyline>
-                        </svg>
-                        Email Addresses Management
-                    </summary>
-                    <div style="padding: 20px 0;">
-                        <p style="font-size: 14px; color: var(--profile-muted); margin-bottom: 20px;">Manage your email addresses for different purposes (notifications, communications, etc.)</p>
-                        
             <!-- Email Management -->
-            <div style="display: none;">
+            <div class="profile-section">
                 <div class="section-title">Email Addresses</div>
                 <p style="font-size: 13px; color: #666; margin-bottom: 20px;">Manage your email addresses for different purposes (notifications, communications, etc.)</p>
                 
@@ -1694,137 +1541,21 @@ if (isset($_SESSION['listing_success'])) {
                 <?php endif; ?>
             </div>
 
-    </div>
+    </main>
     
     <script>
-        (function() {
-            // Organize sections into collapsible accordions to reduce scrolling
-            const sections = document.querySelectorAll('.profile-section');
-            let isFirstSection = true;
+        function toggleEditEmail(emailId) {
+            const displayDiv = document.querySelector('.email-display-' + emailId);
+            const editDiv = document.querySelector('.email-edit-' + emailId);
             
-            sections.forEach((section, index) => {
-                const title = section.querySelector('.section-title');
-                if (!title) return;
-                
-                const titleText = title.textContent.trim();
-                
-                // Skip first section (Account Overview) - keep it always visible
-                if (isFirstSection) {
-                    isFirstSection = false;
-                    return;
-                }
-                
-                // Create collapsible wrapper
-                const details = document.createElement('details');
-                details.style.marginBottom = '16px';
-                
-                // Create summary
-                const summary = document.createElement('summary');
-                summary.style.cssText = `
-                    cursor: pointer;
-                    font-weight: 600;
-                    font-size: 18px;
-                    padding: 20px 24px;
-                    background: var(--profile-card-bg);
-                    border: 1px solid var(--profile-border);
-                    border-radius: 12px;
-                    list-style: none;
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    transition: all 0.2s ease;
-                    color: var(--profile-text);
-                `;
-                summary.innerHTML = `
-                    <span>${titleText}</span>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transition: transform 0.3s ease;">
-                        <path d="M19 9l-7 7-7-7"/>
-                    </svg>
-                `;
-                
-                summary.addEventListener('mouseenter', function() {
-                    this.style.background = 'rgba(47, 109, 245, 0.04)';
-                    this.style.borderColor = 'rgba(47, 109, 245, 0.2)';
-                });
-                
-                summary.addEventListener('mouseleave', function() {
-                    this.style.background = 'var(--profile-card-bg)';
-                    this.style.borderColor = 'var(--profile-border)';
-                });
-                
-                // Rotate arrow when opened
-                details.addEventListener('toggle', function() {
-                    const arrow = summary.querySelector('svg');
-                    if (details.open) {
-                        arrow.style.transform = 'rotate(180deg)';
-                    } else {
-                        arrow.style.transform = 'rotate(0deg)';
-                    }
-                });
-                
-                // Create content wrapper
-                const contentWrapper = document.createElement('div');
-                contentWrapper.style.cssText = `
-                    padding: 24px;
-                    background: var(--profile-card-bg);
-                    border: 1px solid var(--profile-border);
-                    border-top: none;
-                    border-radius: 0 0 12px 12px;
-                    margin-top: -1px;
-                `;
-                
-                // Move section content into wrapper
-                title.remove(); // Remove the title as it's now in summary
-                contentWrapper.innerHTML = section.innerHTML;
-                
-                // Build the collapsible
-                details.appendChild(summary);
-                details.appendChild(contentWrapper);
-                
-                // Replace the section with details element
-                section.replaceWith(details);
-            });
-
-            // Tab functionality
-            const tabs = document.querySelectorAll('.profile-tab');
-            const tabPanels = document.querySelectorAll('.tab-panel');
-            
-            tabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    const targetTab = tab.getAttribute('data-tab');
-                    
-                    // Remove active class from all tabs and panels
-                    tabs.forEach(t => t.classList.remove('active'));
-                    tabPanels.forEach(p => p.classList.remove('active'));
-                    
-                    // Add active class to clicked tab and corresponding panel
-                    tab.classList.add('active');
-                    const targetPanel = document.getElementById('tab-' + targetTab);
-                    if (targetPanel) {
-                        targetPanel.classList.add('active');
-                    }
-                });
-            });
-
-            // Email toggle function
-            function toggleEditEmail(emailId) {
-                const displayDiv = document.querySelector('.email-display-' + emailId);
-                const editDiv = document.querySelector('.email-edit-' + emailId);
-                
-                if (displayDiv && editDiv) {
-                    if (displayDiv.style.display === 'none') {
-                        displayDiv.style.display = 'block';
-                        editDiv.style.display = 'none';
-                    } else {
-                        displayDiv.style.display = 'none';
-                        editDiv.style.display = 'block';
-                    }
-                }
+            if (displayDiv.style.display === 'none') {
+                displayDiv.style.display = 'block';
+                editDiv.style.display = 'none';
+            } else {
+                displayDiv.style.display = 'none';
+                editDiv.style.display = 'block';
             }
-
-            // Make toggle function global
-            window.toggleEditEmail = toggleEditEmail;
-        })();
+        }
     </script>
 </body>
 </html>
