@@ -584,13 +584,6 @@
         <button class="load-more-btn" id="loadMoreBtn">Load More Sellers</button>
     </div>
     
-    <!-- CTA Section -->
-    <section class="cta-section">
-        <h2>Become a Seller</h2>
-        <p>Join our community of talented glass artists and reach collectors worldwide</p>
-        <a href="<?php echo VIEWS_URL; ?>/pricing.php" class="cta-btn">Start Selling Today</a>
-    </section>
-    
     <?php include __DIR__ . '/../../includes/footer.php'; ?>
     
     <script>
