@@ -571,7 +571,7 @@
                     <span>listings</span>
                 </div>
                 
-                <button class="view-shop-btn" onclick="window.location.href='<?php echo VIEWS_URL; ?>/browse.php?seller=<?php echo $seller['id']; ?>'">
+                <button class="view-shop-btn" onclick="window.location.href='<?php echo VIEWS_URL; ?>/seller-shop.php?seller=<?php echo $seller['id']; ?>'">
                     View Shop
                 </button>
             </div>
