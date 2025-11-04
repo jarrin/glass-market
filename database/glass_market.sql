@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 04, 2025 at 11:18 AM
+-- Generation Time: Nov 04, 2025 at 12:22 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -318,7 +318,8 @@ CREATE TABLE `pages` (
 
 INSERT INTO `pages` (`id`, `slug`, `title`, `is_active`, `created_at`, `updated_at`) VALUES
 (1, 'terms', 'Terms of Service', 1, '2025-11-03 14:10:34', '2025-11-03 14:10:34'),
-(2, 'privacy', 'Privacy Policy', 1, '2025-11-03 15:27:47', '2025-11-03 15:27:47');
+(2, 'privacy', 'Privacy Policy', 1, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(3, 'about-us', 'About Us', 1, '2025-11-04 10:21:36', '2025-11-04 10:21:36');
 
 -- --------------------------------------------------------
 
@@ -462,7 +463,41 @@ INSERT INTO `page_content` (`id`, `section_id`, `content_value`, `updated_by`, `
 (120, 120, 'privacy@glassmarket.com', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
 (121, 121, '1-800-GLASS-123', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
 (122, 122, 'Glass Market, 123 Glass Street, New York, NY 10001', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
-(123, 123, 'dpo@glassmarket.com', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47');
+(123, 123, 'dpo@glassmarket.com', NULL, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(189, 219, 'Start Selling', 4, '2025-11-04 10:21:37', '2025-11-04 10:21:48'),
+(190, 220, '../selling-page.php', 4, '2025-11-04 10:21:37', '2025-11-04 10:21:48'),
+(191, 221, 'Browse Listings', 4, '2025-11-04 10:21:37', '2025-11-04 10:21:48'),
+(192, 222, '../browse.php', 4, '2025-11-04 10:21:37', '2025-11-04 10:21:48'),
+(193, 218, 'Whether you sell, ship, or source cullet, Glass Market is your always-on operations partner. Start trading today and be part of the sustainable glass revolution.', 4, '2025-11-04 10:21:37', '2025-11-04 10:21:48'),
+(194, 217, 'Join the Circular Glass Movement', 4, '2025-11-04 10:21:37', '2025-11-04 10:21:48'),
+(195, 192, 'Glass Market is the leading B2B marketplace for glass cullet trading, connecting recyclers, processors, and manufacturers worldwide.', 4, '2025-11-04 10:21:37', '2025-11-04 10:21:48'),
+(196, 189, 'ABOUT US!', 4, '2025-11-04 10:21:37', '2025-11-04 10:21:48'),
+(197, 193, 'Explore Collection', 4, '2025-11-04 10:21:37', '2025-11-04 10:21:48'),
+(198, 194, '../browse.php', 4, '2025-11-04 10:21:37', '2025-11-04 10:21:48'),
+(199, 195, 'Contact Us', 4, '2025-11-04 10:21:37', '2025-11-04 10:21:48'),
+(200, 196, '../../public/contact.php', 4, '2025-11-04 10:21:37', '2025-11-04 10:21:48'),
+(201, 191, 'Connecting the global glass recycling industry', 4, '2025-11-04 10:21:37', '2025-11-04 10:21:48'),
+(202, 190, 'About Glass Market', 4, '2025-11-04 10:21:37', '2025-11-04 10:21:48'),
+(203, 204, 'To create a sustainable circular economy for glass by connecting recyclers, processors, and manufacturers through our innovative B2B marketplace platform.', 4, '2025-11-04 10:21:37', '2025-11-04 10:21:48'),
+(204, 203, 'Our Mission', 4, '2025-11-04 10:21:37', '2025-11-04 10:21:48'),
+(205, 198, 'Tons Traded', 4, '2025-11-04 10:21:37', '2025-11-04 10:21:48'),
+(206, 197, '10,000+', 4, '2025-11-04 10:21:37', '2025-11-04 10:21:48'),
+(207, 200, 'Active Partners', 4, '2025-11-04 10:21:37', '2025-11-04 10:21:48'),
+(208, 199, '50+', 4, '2025-11-04 10:21:37', '2025-11-04 10:21:48'),
+(209, 202, 'Countries Served', 4, '2025-11-04 10:21:37', '2025-11-04 10:21:48'),
+(210, 201, '25', 4, '2025-11-04 10:21:37', '2025-11-04 10:21:48'),
+(211, 216, 'Glass Market is powered by a passionate team of industry experts, sustainability advocates, and technology innovators dedicated to transforming the glass recycling industry.', 4, '2025-11-04 10:21:37', '2025-11-04 10:21:48'),
+(212, 215, 'Our Team', 4, '2025-11-04 10:21:37', '2025-11-04 10:21:48'),
+(213, 208, 'We are guided by principles that drive sustainable growth and meaningful partnerships.', 4, '2025-11-04 10:21:37', '2025-11-04 10:21:48'),
+(214, 210, 'We prioritize environmental impact in every decision, promoting circular economy principles and reducing glass waste worldwide.', 4, '2025-11-04 10:21:37', '2025-11-04 10:21:48'),
+(215, 209, 'Sustainability First', 4, '2025-11-04 10:21:37', '2025-11-04 10:21:48'),
+(216, 212, 'We build lasting relationships through honest communication, fair practices, and reliable service to all our partners.', 4, '2025-11-04 10:21:37', '2025-11-04 10:21:48'),
+(217, 211, 'Trust & Transparency', 4, '2025-11-04 10:21:37', '2025-11-04 10:21:48'),
+(218, 214, 'We continuously improve our platform and services to provide the best glass trading experience in the industry.', 4, '2025-11-04 10:21:37', '2025-11-04 10:21:48'),
+(219, 213, 'Innovation & Quality', 4, '2025-11-04 10:21:37', '2025-11-04 10:21:48'),
+(220, 207, 'Our Values', 4, '2025-11-04 10:21:37', '2025-11-04 10:21:48'),
+(221, 206, 'A world where every piece of glass is recycled and reused, reducing waste and environmental impact while supporting businesses globally.', 4, '2025-11-04 10:21:37', '2025-11-04 10:21:48'),
+(222, 205, 'Our Vision', 4, '2025-11-04 10:21:37', '2025-11-04 10:21:48');
 
 -- --------------------------------------------------------
 
@@ -609,7 +644,41 @@ INSERT INTO `page_sections` (`id`, `page_id`, `section_key`, `section_label`, `s
 (120, 2, 'contact_email', 'Contact Email', 'text', 'contact', 102, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
 (121, 2, 'contact_phone', 'Contact Phone', 'text', 'contact', 103, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
 (122, 2, 'contact_address', 'Contact Address', 'text', 'contact', 104, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
-(123, 2, 'contact_dpo', 'Data Protection Officer Email', 'text', 'contact', 105, '2025-11-03 15:27:47', '2025-11-03 15:27:47');
+(123, 2, 'contact_dpo', 'Data Protection Officer Email', 'text', 'contact', 105, '2025-11-03 15:27:47', '2025-11-03 15:27:47'),
+(189, 3, 'hero_kicker', 'Hero Kicker Text', 'text', 'hero', 1, '2025-11-04 10:21:37', '2025-11-04 10:21:37'),
+(190, 3, 'hero_title', 'Hero Title', 'text', 'hero', 2, '2025-11-04 10:21:37', '2025-11-04 10:21:37'),
+(191, 3, 'hero_subtitle', 'Hero Subtitle', 'textarea', 'hero', 3, '2025-11-04 10:21:37', '2025-11-04 10:21:37'),
+(192, 3, 'hero_description', 'Hero Description', 'textarea', 'hero', 4, '2025-11-04 10:21:37', '2025-11-04 10:21:37'),
+(193, 3, 'hero_primary_label', 'Primary Button Label', 'text', 'hero', 5, '2025-11-04 10:21:37', '2025-11-04 10:21:37'),
+(194, 3, 'hero_primary_url', 'Primary Button URL', 'text', 'hero', 6, '2025-11-04 10:21:37', '2025-11-04 10:21:37'),
+(195, 3, 'hero_secondary_label', 'Secondary Button Label', 'text', 'hero', 7, '2025-11-04 10:21:37', '2025-11-04 10:21:37'),
+(196, 3, 'hero_secondary_url', 'Secondary Button URL', 'text', 'hero', 8, '2025-11-04 10:21:37', '2025-11-04 10:21:37'),
+(197, 3, 'stats_1_value', 'Stat 1 Value', 'text', 'stats', 10, '2025-11-04 10:21:37', '2025-11-04 10:21:37'),
+(198, 3, 'stats_1_label', 'Stat 1 Label', 'text', 'stats', 11, '2025-11-04 10:21:37', '2025-11-04 10:21:37'),
+(199, 3, 'stats_2_value', 'Stat 2 Value', 'text', 'stats', 12, '2025-11-04 10:21:37', '2025-11-04 10:21:37'),
+(200, 3, 'stats_2_label', 'Stat 2 Label', 'text', 'stats', 13, '2025-11-04 10:21:37', '2025-11-04 10:21:37'),
+(201, 3, 'stats_3_value', 'Stat 3 Value', 'text', 'stats', 14, '2025-11-04 10:21:37', '2025-11-04 10:21:37'),
+(202, 3, 'stats_3_label', 'Stat 3 Label', 'text', 'stats', 15, '2025-11-04 10:21:37', '2025-11-04 10:21:37'),
+(203, 3, 'mission_title', 'Mission Title', 'text', 'mission_vision', 20, '2025-11-04 10:21:37', '2025-11-04 10:21:37'),
+(204, 3, 'mission_text', 'Mission Text', 'textarea', 'mission_vision', 21, '2025-11-04 10:21:37', '2025-11-04 10:21:37'),
+(205, 3, 'vision_title', 'Vision Title', 'text', 'mission_vision', 22, '2025-11-04 10:21:37', '2025-11-04 10:21:37'),
+(206, 3, 'vision_text', 'Vision Text', 'textarea', 'mission_vision', 23, '2025-11-04 10:21:37', '2025-11-04 10:21:37'),
+(207, 3, 'values_title', 'Values Section Title', 'text', 'values', 30, '2025-11-04 10:21:37', '2025-11-04 10:21:37'),
+(208, 3, 'values_intro', 'Values Introduction', 'textarea', 'values', 31, '2025-11-04 10:21:37', '2025-11-04 10:21:37'),
+(209, 3, 'values_item_1_title', 'Value 1 Title', 'text', 'values', 32, '2025-11-04 10:21:37', '2025-11-04 10:21:37'),
+(210, 3, 'values_item_1_text', 'Value 1 Text', 'textarea', 'values', 33, '2025-11-04 10:21:37', '2025-11-04 10:21:37'),
+(211, 3, 'values_item_2_title', 'Value 2 Title', 'text', 'values', 34, '2025-11-04 10:21:37', '2025-11-04 10:21:37'),
+(212, 3, 'values_item_2_text', 'Value 2 Text', 'textarea', 'values', 35, '2025-11-04 10:21:37', '2025-11-04 10:21:37'),
+(213, 3, 'values_item_3_title', 'Value 3 Title', 'text', 'values', 36, '2025-11-04 10:21:37', '2025-11-04 10:21:37'),
+(214, 3, 'values_item_3_text', 'Value 3 Text', 'textarea', 'values', 37, '2025-11-04 10:21:37', '2025-11-04 10:21:37'),
+(215, 3, 'team_title', 'Team Section Title', 'text', 'team', 40, '2025-11-04 10:21:37', '2025-11-04 10:21:37'),
+(216, 3, 'team_text', 'Team Description', 'textarea', 'team', 41, '2025-11-04 10:21:37', '2025-11-04 10:21:37'),
+(217, 3, 'cta_title', 'CTA Title', 'text', 'cta', 50, '2025-11-04 10:21:37', '2025-11-04 10:21:37'),
+(218, 3, 'cta_text', 'CTA Text', 'textarea', 'cta', 51, '2025-11-04 10:21:37', '2025-11-04 10:21:37'),
+(219, 3, 'cta_primary_label', 'CTA Primary Button Label', 'text', 'cta', 52, '2025-11-04 10:21:37', '2025-11-04 10:21:37'),
+(220, 3, 'cta_primary_url', 'CTA Primary Button URL', 'text', 'cta', 53, '2025-11-04 10:21:37', '2025-11-04 10:21:37'),
+(221, 3, 'cta_secondary_label', 'CTA Secondary Button Label', 'text', 'cta', 54, '2025-11-04 10:21:37', '2025-11-04 10:21:37'),
+(222, 3, 'cta_secondary_url', 'CTA Secondary Button URL', 'text', 'cta', 55, '2025-11-04 10:21:37', '2025-11-04 10:21:37');
 
 -- --------------------------------------------------------
 
@@ -1080,13 +1149,13 @@ ALTER TABLE `pages`
 -- AUTO_INCREMENT for table `page_content`
 --
 ALTER TABLE `page_content`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=189;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=252;
 
 --
 -- AUTO_INCREMENT for table `page_sections`
 --
 ALTER TABLE `page_sections`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=189;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=223;
 
 --
 -- AUTO_INCREMENT for table `payment_cards`

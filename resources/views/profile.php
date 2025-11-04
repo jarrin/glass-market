@@ -29,16 +29,24 @@ $user = [
 ];
 
 $user_listings_count = 0;
+$company = null;
 
 if ($user['id']) {
     try {
         $pdo = new PDO("mysql:host=$db_host;dbname=$db_name", $db_user, $db_pass);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $stmt = $pdo->prepare('SELECT id, name, company_name, email, avatar, created_at FROM users WHERE id = :id LIMIT 1');
+        $stmt = $pdo->prepare('SELECT id, name, company_name, email, avatar, created_at, company_id FROM users WHERE id = :id LIMIT 1');
         $stmt->execute(['id' => $user['id']]);
         $dbUser = $stmt->fetch(PDO::FETCH_ASSOC);
         if ($dbUser) {
             $user = array_merge($user, $dbUser);
+            
+            // Get company data if user has a company
+            if (!empty($dbUser['company_id'])) {
+                $stmt = $pdo->prepare('SELECT * FROM companies WHERE id = :company_id LIMIT 1');
+                $stmt->execute(['company_id' => $dbUser['company_id']]);
+                $company = $stmt->fetch(PDO::FETCH_ASSOC);
+            }
         }
         
         // Get user's listings count
@@ -139,6 +147,130 @@ if (isset($_SESSION['profile_success'])) {
         $success_message = $_SESSION['profile_success'];
     }
     unset($_SESSION['profile_success']);
+}
+
+// Handle company update
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_company'])) {
+    $company_name = trim($_POST['company_name'] ?? '');
+    $company_type = trim($_POST['company_type'] ?? '');
+    $company_website = trim($_POST['company_website'] ?? '');
+    $company_phone = trim($_POST['company_phone'] ?? '');
+    $company_description = trim($_POST['company_description'] ?? '');
+    $company_address1 = trim($_POST['company_address1'] ?? '');
+    $company_address2 = trim($_POST['company_address2'] ?? '');
+    $company_postal_code = trim($_POST['company_postal_code'] ?? '');
+    $company_city = trim($_POST['company_city'] ?? '');
+    $company_country = trim($_POST['company_country'] ?? '');
+    
+    if (empty($company_name)) {
+        $error_message = 'Company name is required.';
+    } else {
+        try {
+            $pdo = new PDO("mysql:host=$db_host;dbname=$db_name", $db_user, $db_pass);
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            
+            $company_logo = $company['logo'] ?? null; // Keep existing logo by default
+            
+            // Handle logo upload
+            if (isset($_FILES['company_logo']) && $_FILES['company_logo']['error'] === UPLOAD_ERR_OK) {
+                $upload_dir = __DIR__ . '/../../public/uploads/company_logos/';
+                
+                if (!is_dir($upload_dir)) {
+                    mkdir($upload_dir, 0755, true);
+                }
+                
+                $file_extension = strtolower(pathinfo($_FILES['company_logo']['name'], PATHINFO_EXTENSION));
+                $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
+                
+                if (in_array($file_extension, $allowed_extensions)) {
+                    $new_filename = 'company_' . $user['company_id'] . '_' . time() . '.' . $file_extension;
+                    $upload_path = $upload_dir . $new_filename;
+                    
+                    if (move_uploaded_file($_FILES['company_logo']['tmp_name'], $upload_path)) {
+                        $company_logo = '/glass-market/public/uploads/company_logos/' . $new_filename;
+                    }
+                }
+            }
+            
+            // Check if user has a company
+            if (!empty($user['company_id'])) {
+                // Update existing company
+                $stmt = $pdo->prepare('
+                    UPDATE companies 
+                    SET name = :name, 
+                        company_type = :company_type, 
+                        website = :website, 
+                        phone = :phone,
+                        description = :description,
+                        logo = :logo,
+                        address_line1 = :address1,
+                        address_line2 = :address2,
+                        postal_code = :postal_code,
+                        city = :city,
+                        country = :country
+                    WHERE id = :company_id AND owner_user_id = :user_id
+                ');
+                $stmt->execute([
+                    'name' => $company_name,
+                    'company_type' => $company_type,
+                    'website' => $company_website,
+                    'phone' => $company_phone,
+                    'description' => $company_description,
+                    'logo' => $company_logo,
+                    'address1' => $company_address1,
+                    'address2' => $company_address2,
+                    'postal_code' => $company_postal_code,
+                    'city' => $company_city,
+                    'country' => $company_country,
+                    'company_id' => $user['company_id'],
+                    'user_id' => $user['id']
+                ]);
+            } else {
+                // Create new company
+                $stmt = $pdo->prepare('
+                    INSERT INTO companies (name, company_type, website, phone, description, logo, address_line1, address_line2, postal_code, city, country, owner_user_id, created_at)
+                    VALUES (:name, :company_type, :website, :phone, :description, :logo, :address1, :address2, :postal_code, :city, :country, :user_id, NOW())
+                ');
+                $stmt->execute([
+                    'name' => $company_name,
+                    'company_type' => $company_type,
+                    'website' => $company_website,
+                    'phone' => $company_phone,
+                    'description' => $company_description,
+                    'logo' => $company_logo,
+                    'address1' => $company_address1,
+                    'address2' => $company_address2,
+                    'postal_code' => $company_postal_code,
+                    'city' => $company_city,
+                    'country' => $company_country,
+                    'user_id' => $user['id']
+                ]);
+                
+                $company_id = $pdo->lastInsertId();
+                
+                // Link user to company
+                $stmt = $pdo->prepare('UPDATE users SET company_id = :company_id WHERE id = :user_id');
+                $stmt->execute([
+                    'company_id' => $company_id,
+                    'user_id' => $user['id']
+                ]);
+                
+                $user['company_id'] = $company_id;
+            }
+            
+            // Reload company data
+            $stmt = $pdo->prepare('SELECT * FROM companies WHERE id = :company_id LIMIT 1');
+            $stmt->execute(['company_id' => $user['company_id']]);
+            $company = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            // Update session company_name for backwards compatibility
+            $_SESSION['user_company'] = $company_name;
+            
+            $success_message = 'Company information updated successfully!';
+        } catch (PDOException $e) {
+            $error_message = 'Database error: ' . $e->getMessage();
+        }
+    }
 }
 
 // Handle email management
@@ -942,6 +1074,7 @@ if (isset($_SESSION['listing_success'])) {
         <div class="profile-tabs">
             <button class="profile-tab active" data-tab="overview">Overview</button>
             <button class="profile-tab" data-tab="listings">My Listings</button>
+            <button class="profile-tab" data-tab="company">Company</button>
             <button class="profile-tab" data-tab="profile">Edit Profile</button>
             <button class="profile-tab" data-tab="subscription">Subscription</button>
         </div>
@@ -1171,6 +1304,184 @@ if (isset($_SESSION['listing_success'])) {
                             Create Listing
                         </button>
                     </div>
+                </form>
+            </div>
+
+            <!-- Company Tab -->
+            <div class="tab-panel" id="tab-company">
+                <h2 class="section-title">Company Information</h2>
+                
+                <?php if ($success_message && isset($_POST['update_company'])): ?>
+                    <div class="alert alert-success">
+                        <?php echo htmlspecialchars($success_message); ?>
+                    </div>
+                <?php endif; ?>
+                
+                <?php if ($error_message && isset($_POST['update_company'])): ?>
+                    <div class="alert alert-error">
+                        <?php echo htmlspecialchars($error_message); ?>
+                    </div>
+                <?php endif; ?>
+
+                <form method="POST" action="" enctype="multipart/form-data" class="profile-form">
+                    
+                    <!-- Company Logo -->
+                    <div class="form-group">
+                        <label>Company Logo</label>
+                        <?php if (!empty($company['logo'])): ?>
+                            <div style="margin-bottom: 12px;">
+                                <img src="<?php echo htmlspecialchars($company['logo']); ?>" 
+                                     alt="Company Logo" 
+                                     style="max-width: 200px; max-height: 100px; border-radius: 8px; border: 1px solid var(--profile-border);">
+                            </div>
+                        <?php endif; ?>
+                        <input 
+                            type="file" 
+                            id="company_logo" 
+                            name="company_logo" 
+                            accept="image/*"
+                            style="padding: 10px; font-size: 14px; border: 1.5px solid var(--profile-border); border-radius: 8px; width: 100%;"
+                        >
+                        <small style="color: var(--profile-muted); display: block; margin-top: 6px;">
+                            Recommended: 400x200px, PNG or JPG
+                        </small>
+                    </div>
+
+                    <div class="form-grid">
+                        <!-- Company Name -->
+                        <div class="form-group">
+                            <label for="company_name">Company Name <span style="color: #ef4444;">*</span></label>
+                            <input 
+                                type="text" 
+                                id="company_name" 
+                                name="company_name" 
+                                value="<?php echo htmlspecialchars($company['name'] ?? $user['company_name'] ?? ''); ?>"
+                                required
+                                placeholder="Enter company name"
+                            >
+                        </div>
+
+                        <!-- Company Type -->
+                        <div class="form-group">
+                            <label for="company_type">Company Type</label>
+                            <select id="company_type" name="company_type">
+                                <option value="Glass Recycle Plant" <?php echo ($company['company_type'] ?? '') === 'Glass Recycle Plant' ? 'selected' : ''; ?>>Glass Recycle Plant</option>
+                                <option value="Glass Factory" <?php echo ($company['company_type'] ?? '') === 'Glass Factory' ? 'selected' : ''; ?>>Glass Factory</option>
+                                <option value="Collection Company" <?php echo ($company['company_type'] ?? '') === 'Collection Company' ? 'selected' : ''; ?>>Collection Company</option>
+                                <option value="Trader" <?php echo ($company['company_type'] ?? '') === 'Trader' ? 'selected' : ''; ?>>Trader</option>
+                                <option value="Other" <?php echo ($company['company_type'] ?? 'Other') === 'Other' ? 'selected' : ''; ?>>Other</option>
+                            </select>
+                        </div>
+
+                        <!-- Website -->
+                        <div class="form-group">
+                            <label for="company_website">Website</label>
+                            <input 
+                                type="url" 
+                                id="company_website" 
+                                name="company_website" 
+                                value="<?php echo htmlspecialchars($company['website'] ?? ''); ?>"
+                                placeholder="https://example.com"
+                            >
+                        </div>
+
+                        <!-- Phone -->
+                        <div class="form-group">
+                            <label for="company_phone">Phone Number</label>
+                            <input 
+                                type="tel" 
+                                id="company_phone" 
+                                name="company_phone" 
+                                value="<?php echo htmlspecialchars($company['phone'] ?? ''); ?>"
+                                placeholder="+31 20 123 4567"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Company Description -->
+                    <div class="form-group">
+                        <label for="company_description">Description</label>
+                        <textarea 
+                            id="company_description" 
+                            name="company_description" 
+                            rows="4"
+                            placeholder="Tell us about your company..."
+                            style="resize: vertical;"
+                        ><?php echo htmlspecialchars($company['description'] ?? ''); ?></textarea>
+                    </div>
+
+                    <h3 style="font-size: 18px; font-weight: 600; margin: 32px 0 16px; color: var(--profile-text);">Company Address</h3>
+
+                    <div class="form-grid">
+                        <!-- Address Line 1 -->
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label for="company_address1">Address Line 1</label>
+                            <input 
+                                type="text" 
+                                id="company_address1" 
+                                name="company_address1" 
+                                value="<?php echo htmlspecialchars($company['address_line1'] ?? ''); ?>"
+                                placeholder="Street address"
+                            >
+                        </div>
+
+                        <!-- Address Line 2 -->
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label for="company_address2">Address Line 2</label>
+                            <input 
+                                type="text" 
+                                id="company_address2" 
+                                name="company_address2" 
+                                value="<?php echo htmlspecialchars($company['address_line2'] ?? ''); ?>"
+                                placeholder="Apartment, suite, etc. (optional)"
+                            >
+                        </div>
+
+                        <!-- Postal Code -->
+                        <div class="form-group">
+                            <label for="company_postal_code">Postal Code</label>
+                            <input 
+                                type="text" 
+                                id="company_postal_code" 
+                                name="company_postal_code" 
+                                value="<?php echo htmlspecialchars($company['postal_code'] ?? ''); ?>"
+                                placeholder="1000 AA"
+                            >
+                        </div>
+
+                        <!-- City -->
+                        <div class="form-group">
+                            <label for="company_city">City</label>
+                            <input 
+                                type="text" 
+                                id="company_city" 
+                                name="company_city" 
+                                value="<?php echo htmlspecialchars($company['city'] ?? ''); ?>"
+                                placeholder="Amsterdam"
+                            >
+                        </div>
+
+                        <!-- Country -->
+                        <div class="form-group">
+                            <label for="company_country">Country</label>
+                            <input 
+                                type="text" 
+                                id="company_country" 
+                                name="company_country" 
+                                value="<?php echo htmlspecialchars($company['country'] ?? ''); ?>"
+                                placeholder="Netherlands"
+                            >
+                        </div>
+                    </div>
+
+                    <button type="submit" name="update_company" class="btn btn-primary" style="margin-top: 24px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;">
+                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                            <polyline points="7 3 7 8 15 8"></polyline>
+                        </svg>
+                        Save Company Information
+                    </button>
                 </form>
             </div>
 
@@ -1574,10 +1885,23 @@ if (isset($_SESSION['listing_success'])) {
                 </div>
             </div>
 
-            <!-- Subscription Management -->
-            <div class="profile-section">
-                <div class="section-title">My Subscriptions</div>
-                <p style="font-size: 13px; color: #666; margin-bottom: 20px;">Manage your active subscriptions and payment plans</p>
+            <!-- Subscription Tab -->
+            <div class="tab-panel" id="tab-subscription">
+                <h2 class="section-title">My Subscriptions</h2>
+                
+                <?php if ($success_message && isset($_POST['cancel_subscription'])): ?>
+                    <div class="alert alert-success">
+                        <?php echo htmlspecialchars($success_message); ?>
+                    </div>
+                <?php endif; ?>
+                
+                <?php if ($error_message && isset($_POST['cancel_subscription'])): ?>
+                    <div class="alert alert-error">
+                        <?php echo htmlspecialchars($error_message); ?>
+                    </div>
+                <?php endif; ?>
+
+                <p style="font-size: 14px; color: var(--profile-muted); margin-bottom: 24px;">Manage your active subscriptions and payment plans</p>
                 
                 <?php if (count($user_subscriptions) > 0): ?>
                     <?php foreach ($user_subscriptions as $subscription): ?>
@@ -1590,72 +1914,85 @@ if (isset($_SESSION['listing_success'])) {
                             $days_remaining = $today < $end_date ? $today->diff($end_date)->days : 0;
                             $is_expired = $today > $end_date;
                         ?>
-                        <div style="background: <?php echo $is_active && !$is_expired ? '#f0fdf4' : '#fafafa'; ?>; padding: 24px; border-radius: 8px; border: 1.5px solid <?php echo $is_active && !$is_expired ? '#bbf7d0' : '#e0e0e0'; ?>; margin-bottom: 16px;">
-                            <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 16px;">
+                        <div style="background: <?php echo $is_active && !$is_expired ? '#f0fdf4' : 'white'; ?>; padding: 28px; border-radius: 16px; border: 1.5px solid <?php echo $is_active && !$is_expired ? '#bbf7d0' : 'var(--profile-border)'; ?>; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+                            <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 20px;">
                                 <div style="flex: 1; min-width: 250px;">
-                                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-                                        <h3 style="font-size: 18px; font-weight: 700; margin: 0; color: #000;">
-                                            <?php echo $is_trial ? 'Trial Subscription' : 'Premium Subscription'; ?>
+                                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="<?php echo $is_active && !$is_expired ? '#16a34a' : '#666'; ?>" stroke-width="2">
+                                            <rect x="2" y="5" width="20" height="14" rx="2"/>
+                                            <line x1="2" y1="10" x2="22" y2="10"/>
+                                        </svg>
+                                        <h3 style="font-size: 18px; font-weight: 600; margin: 0; color: var(--profile-text);">
+                                            <?php echo $is_trial ? 'Free Trial' : 'Premium Subscription'; ?>
                                         </h3>
                                         <?php if ($is_active && !$is_expired): ?>
-                                            <span style="background: #16a34a; color: white; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; text-transform: uppercase;">Active</span>
+                                            <span style="background: #16a34a; color: white; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Active</span>
                                         <?php elseif ($is_expired): ?>
-                                            <span style="background: #dc2626; color: white; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; text-transform: uppercase;">Expired</span>
+                                            <span style="background: #dc2626; color: white; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Expired</span>
                                         <?php else: ?>
-                                            <span style="background: #f59e0b; color: white; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; text-transform: uppercase;">Cancelled</span>
+                                            <span style="background: #f59e0b; color: white; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Cancelled</span>
                                         <?php endif; ?>
                                     </div>
                                     
-                                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-bottom: 12px;">
+                                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 20px; margin-bottom: 16px;">
                                         <div>
-                                            <div style="font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 4px;">Start Date</div>
-                                            <div style="font-size: 14px; color: #000; font-weight: 500;"><?php echo $start_date->format('M d, Y'); ?></div>
+                                            <div style="font-size: 11px; color: var(--profile-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px;">Start Date</div>
+                                            <div style="font-size: 15px; color: var(--profile-text); font-weight: 500;"><?php echo $start_date->format('M d, Y'); ?></div>
                                         </div>
                                         <div>
-                                            <div style="font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 4px;">End Date</div>
-                                            <div style="font-size: 14px; color: #000; font-weight: 500;"><?php echo $end_date->format('M d, Y'); ?></div>
+                                            <div style="font-size: 11px; color: var(--profile-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px;">End Date</div>
+                                            <div style="font-size: 15px; color: var(--profile-text); font-weight: 500;"><?php echo $end_date->format('M d, Y'); ?></div>
                                         </div>
                                         <?php if ($is_active && !$is_expired): ?>
                                             <div>
-                                                <div style="font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 4px;">Days Remaining</div>
-                                                <div style="font-size: 14px; color: #16a34a; font-weight: 600;"><?php echo $days_remaining; ?> days</div>
+                                                <div style="font-size: 11px; color: var(--profile-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px;">Days Left</div>
+                                                <div style="font-size: 15px; color: #16a34a; font-weight: 600;"><?php echo $days_remaining; ?> days</div>
                                             </div>
                                         <?php endif; ?>
                                     </div>
                                     
-                                    <div style="font-size: 12px; color: #666;">
+                                    <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--profile-muted);">
                                         <?php if ($is_trial): ?>
-                                            <span style="display: inline-flex; align-items: center; gap: 4px;">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="14" height="14">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
-                                                </svg>
-                                                Free trial period
-                                            </span>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <circle cx="12" cy="12" r="10"/>
+                                                <line x1="12" y1="16" x2="12" y2="12"/>
+                                                <line x1="12" y1="8" x2="12.01" y2="8"/>
+                                            </svg>
+                                            <span>Free trial period - no payment required</span>
                                         <?php else: ?>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <rect x="2" y="5" width="20" height="14" rx="2"/>
+                                                <line x1="2" y1="10" x2="22" y2="10"/>
+                                            </svg>
                                             <span>Monthly subscription • €9.99/month</span>
                                         <?php endif; ?>
                                     </div>
                                 </div>
                                 
-                                <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-end;">
+                                <div style="display: flex; flex-direction: column; gap: 10px; align-items: flex-end;">
                                     <?php if ($is_active && !$is_expired): ?>
                                         <form method="POST" action="" onsubmit="return confirm('Are you sure you want to cancel this subscription? You will still have access until <?php echo $end_date->format('M d, Y'); ?>.');">
                                             <input type="hidden" name="subscription_id" value="<?php echo $subscription['id']; ?>">
-                                            <button type="submit" name="cancel_subscription" class="btn btn-secondary" style="background: #dc2626; color: white; border: none;" onmouseover="this.style.background='#b91c1c'" onmouseout="this.style.background='#dc2626'">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16" style="vertical-align: middle; margin-right: 4px;">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                            <button type="submit" name="cancel_subscription" class="btn btn-secondary" style="background: #dc2626; color: white; border: none; padding: 10px 20px; font-size: 14px;" onmouseover="this.style.background='#b91c1c'" onmouseout="this.style.background='#dc2626'">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 6px;">
+                                                    <path d="M18 6L6 18M6 6l12 12"/>
                                                 </svg>
                                                 Cancel Subscription
                                             </button>
                                         </form>
-                                        <div style="font-size: 11px; color: #666; text-align: right;">
+                                        <div style="font-size: 11px; color: var(--profile-muted); text-align: right;">
                                             Access continues until end date
                                         </div>
                                     <?php elseif (!$is_active && !$is_expired): ?>
-                                        <div style="font-size: 13px; color: #f59e0b; font-weight: 600;">
-                                            ⚠️ Subscription cancelled
+                                        <div style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #f59e0b; font-weight: 600;">
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <circle cx="12" cy="12" r="10"/>
+                                                <line x1="15" y1="9" x2="9" y2="15"/>
+                                                <line x1="9" y1="9" x2="15" y2="15"/>
+                                            </svg>
+                                            Subscription cancelled
                                         </div>
-                                        <div style="font-size: 11px; color: #666;">
+                                        <div style="font-size: 11px; color: var(--profile-muted);">
                                             Access until <?php echo $end_date->format('M d, Y'); ?>
                                         </div>
                                     <?php endif; ?>
@@ -1664,29 +2001,32 @@ if (isset($_SESSION['listing_success'])) {
                         </div>
                     <?php endforeach; ?>
                     
-                    <div style="background: #fffbeb; padding: 16px; border-radius: 8px; border: 1px solid #fde68a; margin-top: 16px;">
-                        <div style="display: flex; align-items: start; gap: 12px;">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#f59e0b" width="20" height="20" style="flex-shrink: 0; margin-top: 2px;">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                    <div style="background: #fffbeb; padding: 20px; border-radius: 12px; border: 1px solid #fde68a; margin-top: 24px;">
+                        <div style="display: flex; align-items: start; gap: 14px;">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" style="flex-shrink: 0; margin-top: 2px;">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="12" y1="16" x2="12" y2="12"/>
+                                <line x1="12" y1="8" x2="12.01" y2="8"/>
                             </svg>
                             <div>
-                                <div style="font-size: 13px; color: #92400e; font-weight: 600; margin-bottom: 4px;">Important Information</div>
-                                <div style="font-size: 12px; color: #92400e; line-height: 1.5;">
-                                    When you cancel a subscription, you'll continue to have access until the end date. No refunds are provided for partial months. To renew, please visit the subscription page.
+                                <div style="font-size: 14px; color: #92400e; font-weight: 600; margin-bottom: 6px;">Important Information</div>
+                                <div style="font-size: 13px; color: #92400e; line-height: 1.6;">
+                                    When you cancel a subscription, you'll continue to have access until the end date. No refunds are provided for partial months. To renew or upgrade, please visit the subscription page.
                                 </div>
                             </div>
                         </div>
                     </div>
                 <?php else: ?>
-                    <div style="background: #fafafa; padding: 40px 20px; border-radius: 8px; border: 1.5px solid #e0e0e0; text-align: center; color: #666;">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="48" height="48" style="margin: 0 auto 16px; color: #999;">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+                    <div style="background: white; padding: 60px 40px; border-radius: 16px; border: 1.5px solid var(--profile-border); text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--profile-muted)" stroke-width="1.5" style="margin: 0 auto 24px;">
+                            <rect x="2" y="5" width="20" height="14" rx="2"/>
+                            <line x1="2" y1="10" x2="22" y2="10"/>
                         </svg>
-                        <h3 style="font-size: 16px; font-weight: 600; margin: 0 0 8px 0; color: #000;">No Active Subscriptions</h3>
-                        <p style="font-size: 14px; margin: 0 0 20px 0;">You don't have any subscriptions yet.</p>
-                        <a href="<?php echo VIEWS_URL; ?>/subscription.php" class="btn btn-primary" style="display: inline-block;">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16" style="vertical-align: middle; margin-right: 6px;">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        <h3 style="font-size: 20px; font-weight: 600; margin: 0 0 12px 0; color: var(--profile-text);">No Active Subscriptions</h3>
+                        <p style="font-size: 15px; margin: 0 0 28px 0; color: var(--profile-muted);">You don't have any subscriptions yet. Subscribe to unlock premium features!</p>
+                        <a href="<?php echo VIEWS_URL; ?>/subscription.php" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 28px; font-size: 15px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 5v14M5 12h14"/>
                             </svg>
                             Subscribe Now
                         </a>
