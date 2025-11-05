@@ -204,3 +204,107 @@ if (isset($_SESSION['listing_success'])) {
     $success_message = $_SESSION['listing_success'];
     unset($_SESSION['listing_success']);
 }
+
+// Handle image deletion via AJAX
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_image'])) {
+    header('Content-Type: application/json');
+    $image_id = $_POST['image_id'] ?? 0;
+    
+    try {
+        // Verify ownership
+        $stmt = $pdo->prepare('
+            SELECT li.* FROM listing_images li
+            JOIN listings l ON li.listing_id = l.id
+            WHERE li.id = :image_id AND l.user_id = :user_id AND l.company_id = :company_id
+        ');
+        $stmt->execute([
+            'image_id' => $image_id,
+            'user_id' => $user_id,
+            'company_id' => $company['id']
+        ]);
+        $image = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($image) {
+            $file_path = __DIR__ . '/../../../public/' . $image['image_path'];
+            if (file_exists($file_path)) {
+                unlink($file_path);
+            }
+            
+            $stmt = $pdo->prepare('DELETE FROM listing_images WHERE id = :id');
+            $stmt->execute(['id' => $image_id]);
+            
+            echo json_encode(['success' => true]);
+        } else {
+            echo json_encode(['success' => false, 'error' => 'Image not found']);
+        }
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+    }
+    exit;
+}
+
+// Handle set main image via AJAX
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['set_main_image'])) {
+    header('Content-Type: application/json');
+    $image_id = $_POST['image_id'] ?? 0;
+    
+    try {
+        // Verify ownership
+        $stmt = $pdo->prepare('
+            SELECT li.listing_id FROM listing_images li
+            JOIN listings l ON li.listing_id = l.id
+            WHERE li.id = :image_id AND l.user_id = :user_id AND l.company_id = :company_id
+        ');
+        $stmt->execute([
+            'image_id' => $image_id,
+            'user_id' => $user_id,
+            'company_id' => $company['id']
+        ]);
+        $image = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($image) {
+            $stmt = $pdo->prepare('UPDATE listing_images SET is_main = 0 WHERE listing_id = :listing_id');
+            $stmt->execute(['listing_id' => $image['listing_id']]);
+            
+            $stmt = $pdo->prepare('UPDATE listing_images SET is_main = 1 WHERE id = :id');
+            $stmt->execute(['id' => $image_id]);
+            
+            echo json_encode(['success' => true]);
+        } else {
+            echo json_encode(['success' => false, 'error' => 'Image not found']);
+        }
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+    }
+    exit;
+}
+
+// Reload images after operations
+try {
+    $stmt = $pdo->prepare('
+        SELECT * FROM listing_images 
+        WHERE listing_id = :listing_id 
+        ORDER BY is_main DESC, display_order ASC
+    ');
+    $stmt->execute(['listing_id' => $listing_id]);
+    $listing_images = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    // Silent fail
+}
+
+// Get glass types for dropdown
+$glass_types = [
+    'Clear/Flint', 'Green', 'Amber/Brown', 'Blue', 'Mixed Cullet',
+    'Float Glass', 'Tempered Glass', 'Laminated Glass', 'Borosilicate'
+];
+
+$current_type = $listing['glass_type'] ?? '';
+$is_other = !in_array($current_type, $glass_types) && !empty($current_type);
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Company Listing - Glass Market</title>
+    <link rel="stylesheet" href="<?php echo CSS_URL; ?>/app.css">
