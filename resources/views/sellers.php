@@ -442,11 +442,15 @@
                         c.company_type,
                         c.phone,
                         c.website,
+                        c.city,
+                        c.country,
                         COUNT(l.id) as listing_count,
-                        GROUP_CONCAT(DISTINCT l.storage_location ORDER BY l.storage_location SEPARATOR ', ') as locations
+                        u.name as owner_name
                     FROM companies c
+                    LEFT JOIN users u ON c.owner_user_id = u.id
                     LEFT JOIN listings l ON c.id = l.company_id AND l.published = 1
-                    GROUP BY c.id, c.name, c.company_type, c.phone, c.website
+                    WHERE c.owner_user_id IS NOT NULL
+                    GROUP BY c.id, c.name, c.company_type, c.phone, c.website, c.city, c.country, u.name
                     HAVING listing_count > 0
                     ORDER BY listing_count DESC
                 ");
@@ -454,26 +458,22 @@
                 $dbSellers = $stmt->fetchAll();
                 
                 foreach ($dbSellers as $index => $seller) {
-                    // Parse location to get city and country
+                    // Build location string
                     $location = 'Global';
-                    if (!empty($seller['locations'])) {
-                        $firstLocation = explode(',', $seller['locations'])[0];
-                        $location = trim($firstLocation);
+                    if (!empty($seller['city']) && !empty($seller['country'])) {
+                        $location = $seller['city'] . ', ' . $seller['country'];
+                    } elseif (!empty($seller['city'])) {
+                        $location = $seller['city'];
+                    } elseif (!empty($seller['country'])) {
+                        $location = $seller['country'];
                     }
                     
                     // Generate avatar image
                     $avatarSeed = $seller['id'];
                     $avatarUrl = "https://picsum.photos/seed/seller{$avatarSeed}/600/600";
                     
-                    // Map company type to specialty
-                    $specialtyMap = [
-                        'Glass Recycle Plant' => 'Hand-Blown Glass',
-                        'Glass Factory' => 'Fine Crystal',
-                        'Collection Company' => 'Vintage & Antique',
-                        'Trader' => 'Traditional Craft',
-                        'Other' => 'Contemporary Art'
-                    ];
-                    $specialty = $specialtyMap[$seller['company_type']] ?? 'Murano Glass';
+                    // Use company_type as specialty
+                    $specialty = $seller['company_type'] ?? 'Glass Trading';
                     
                     // Generate random rating between 4.6 and 4.9
                     $rating = number_format(4.6 + (rand(0, 30) / 100), 1);
@@ -490,7 +490,8 @@
                         'rating' => $rating,
                         'reviews' => $reviews,
                         'listings' => $seller['listing_count'],
-                        'verified' => true
+                        'verified' => true,
+                        'owner' => $seller['owner_name']
                     ];
                 }
                 
