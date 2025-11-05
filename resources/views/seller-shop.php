@@ -696,7 +696,6 @@
         <!-- Filter Tabs -->
         <div class="filter-tabs">
             <button class="filter-tab active" data-filter="all">All Products</button>
-            <button class="filter-tab" data-filter="WTS">For Sale</button>
             <button class="filter-tab" data-filter="WTB">Wanted to Buy</button>
             <button class="filter-tab" data-filter="recycled">Recycled</button>
             <button class="filter-tab" data-filter="tested">Tested</button>
