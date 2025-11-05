@@ -549,6 +549,7 @@
                     c.phone,
                     c.website,
                     c.owner_user_id,
+                    c.cover_image,
                     u.email as seller_email,
                     COUNT(l.id) as listing_count
                 FROM companies c
@@ -605,8 +606,10 @@
             ];
             $specialty = $specialtyMap[$seller['company_type']] ?? 'Glass Products';
             
-            // Generate avatar
-            $avatarUrl = "https://picsum.photos/seed/seller{$seller['id']}/600/600";
+            // Use company cover image or fallback
+            $avatarUrl = !empty($seller['cover_image']) 
+                ? PUBLIC_URL . '/' . $seller['cover_image']
+                : PUBLIC_URL . '/uploads/default/fallback_company.png';
             
             // Extract unique location from listings
             $locations = [];
