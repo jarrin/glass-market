@@ -206,4 +206,6 @@
             Change Password
         </a>
     </div>
+
+    <?php endif; // End subscription check ?>
 </div>
