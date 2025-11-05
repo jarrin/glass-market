@@ -33,10 +33,55 @@
                     ">
                         <span style="color: white; font-size: 18px;">📷</span>
                     </label>
-                    <input type="file" id="avatar" name="avatar" accept="image/*" style="display: none;">
+                    <input type="file" id="avatar" name="avatar" accept="image/*" style="display: none;" onchange="previewAvatar(this)">
                 </div>
                 <p style="margin-top: 12px; font-size: 13px; color: #6b7280;">Click camera icon to upload new photo</p>
+                <p id="avatar-status" style="margin-top: 8px; font-size: 12px; color: #2f6df5; display: none;"></p>
             </div>
+
+            <script>
+            function previewAvatar(input) {
+                const statusEl = document.getElementById('avatar-status');
+                
+                if (input.files && input.files[0]) {
+                    const file = input.files[0];
+                    const fileSize = file.size / 1024 / 1024; // Convert to MB
+                    
+                    if (fileSize > 5) {
+                        alert('File too large! Maximum size is 5MB.');
+                        input.value = '';
+                        return;
+                    }
+                    
+                    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+                    if (!allowedTypes.includes(file.type)) {
+                        alert('Invalid file type! Please upload JPG, PNG, GIF, or WebP.');
+                        input.value = '';
+                        return;
+                    }
+                    
+                    statusEl.textContent = '✓ New photo selected: ' + file.name;
+                    statusEl.style.display = 'block';
+                    statusEl.style.color = '#10b981';
+                    
+                    // Preview the image
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const avatarImg = input.closest('div').querySelector('img');
+                        const avatarPlaceholder = input.closest('div').querySelector('div[style*="border-radius: 50%"]');
+                        
+                        if (avatarImg) {
+                            avatarImg.src = e.target.result;
+                        } else if (avatarPlaceholder) {
+                            avatarPlaceholder.outerHTML = '<img src="' + e.target.result + '" alt="Avatar" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover;">';
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    statusEl.style.display = 'none';
+                }
+            }
+            </script>
 
             <!-- Name -->
             <div style="margin-bottom: 20px;">
