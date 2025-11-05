@@ -1346,7 +1346,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_listing'])) {
         if (clickedButton) {
             clickedButton.classList.add('active');
         }
-    }
+        
         // Scroll to top of tabs
         const tabsContainer = document.querySelector('.tabs-container');
         if (tabsContainer) {
@@ -1370,14 +1370,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_listing'])) {
             input.value = '';
         }
     }
-
-    // Multi-select functions
-    function toggleImageSelection(imgElement) {
-        const card = imgElement.closest('.image-card');
-        const checkbox = card.querySelector('.image-select-cb');
-        
-        if (!checkbox.disabled) {
-            checkbox.checked = !checkbox.checked;
             updateSelection();
         }
     }
