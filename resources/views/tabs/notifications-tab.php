@@ -314,3 +314,5 @@ function requestPushPermission() {
     });
 }
 </script>
+
+<?php endif; // End subscription check ?>
