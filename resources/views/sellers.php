@@ -485,47 +485,11 @@
                 error_log("Error fetching sellers: " . $e->getMessage());
             }
             
-            // If no sellers in database, create demo sellers
-            if (empty($sellers)) {
-                $demoSellers = [
-                    ['name' => 'Crystal Artisan Studio', 'specialty' => 'Murano Glass', 'location' => 'Venice, Italy'],
-                    ['name' => 'Modern Glass Collective', 'specialty' => 'Contemporary Art', 'location' => 'Brooklyn, NY'],
-                    ['name' => 'Vintage Crystal Finds', 'specialty' => 'Vintage & Antique', 'location' => 'Prague, Czech Republic'],
-                    ['name' => 'Bohemian Glass Works', 'specialty' => 'Traditional Craft', 'location' => 'Karlovy Vary, Czech Republic'],
-                    ['name' => 'Studio Lumière', 'specialty' => 'Art Deco', 'location' => 'Paris, France'],
-                    ['name' => 'Nordic Glass Design', 'specialty' => 'Minimalist Design', 'location' => 'Stockholm, Sweden'],
-                    ['name' => 'Artisan Glassblowers', 'specialty' => 'Hand-Blown Glass', 'location' => 'Seattle, WA'],
-                    ['name' => 'Crystal Heritage', 'specialty' => 'Fine Crystal', 'location' => 'Waterford, Ireland']
-                ];
-                
-                foreach ($demoSellers as $index => $demo) {
-                    $sellers[] = [
-                        'id' => $index + 1,
-                        'name' => $demo['name'],
-                        'specialty' => $demo['specialty'],
-                        'location' => $demo['location'],
-                        'avatar' => "https://picsum.photos/seed/seller" . ($index + 1) . "/600/600",
-                        'rating' => number_format(4.6 + (rand(0, 30) / 100), 1),
-                        'reviews' => rand(150, 400),
-                        'listings' => rand(30, 160),
-                        'verified' => true
-                    ];
-                }
-            }
-            
             // Display sellers
             foreach ($sellers as $seller):
         ?>
         <article class="seller-card" data-name="<?php echo htmlspecialchars(strtolower($seller['name']), ENT_QUOTES, 'UTF-8'); ?>" data-location="<?php echo htmlspecialchars(strtolower($seller['location']), ENT_QUOTES, 'UTF-8'); ?>" data-specialty="<?php echo htmlspecialchars(strtolower($seller['specialty']), ENT_QUOTES, 'UTF-8'); ?>">
-            <div class="seller-avatar" style="background-image: url('<?php echo htmlspecialchars($seller['avatar'], ENT_QUOTES, 'UTF-8'); ?>');">
-                <?php if ($seller['verified']): ?>
-                <div class="verified-badge" title="Verified Seller">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                </div>
-                <?php endif; ?>
-            </div>
+            <div class="seller-avatar" style="background-image: url('<?php echo htmlspecialchars($seller['avatar'], ENT_QUOTES, 'UTF-8'); ?>');"></div>
             
             <div class="seller-info">
                 <h2 class="seller-name"><?php echo htmlspecialchars($seller['name'], ENT_QUOTES, 'UTF-8'); ?></h2>
@@ -538,16 +502,6 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                     </svg>
                     <span><?php echo htmlspecialchars($seller['location'], ENT_QUOTES, 'UTF-8'); ?></span>
-                </div>
-                
-                <div class="seller-stats">
-                    <div class="seller-stat">
-                        <svg fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                        </svg>
-                        <span class="seller-stat-value"><?php echo $seller['rating']; ?></span>
-                        <span>(<?php echo number_format($seller['reviews']); ?> reviews)</span>
-                    </div>
                 </div>
                 
                 <div class="seller-stat" style="margin-bottom: 16px;">
