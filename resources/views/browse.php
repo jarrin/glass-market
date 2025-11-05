@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="<?php echo CSS_URL; ?>/app.css">
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <style>
-        body{font-family: Arial, Helvetica, sans-serif; background:#f6f0eb; color:#111; margin:0}
+        body{font-family: Arial, Helvetica, sans-serif; background:#f5f5f7; color:#111; margin:0}
         .container{max-width:1200px;margin:40px auto;padding:0 20px}
         .page-title{font-family: Georgia, 'Times New Roman', serif; font-size:48px; margin-bottom:6px}
         .subtitle{color:#6b6460;margin-bottom:18px}
@@ -360,22 +360,24 @@
             <div class="grid">
                 <?php foreach($products as $p): ?>
                     <article class="card" data-glass-type="<?php echo htmlspecialchars($p['title'], ENT_QUOTES, 'UTF-8'); ?>" data-tons="<?php echo isset($p['tons']) ? (float)$p['tons'] : 0; ?>" data-condition="<?php echo htmlspecialchars($p['condition'], ENT_QUOTES, 'UTF-8'); ?>">
-                        <div class="media" role="img" aria-label="<?php echo htmlspecialchars($p['title'], ENT_QUOTES, 'UTF-8'); ?>">
-                            <img src="<?php echo htmlspecialchars($p['image'], ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($p['title'], ENT_QUOTES, 'UTF-8'); ?>" style="width:100%;height:100%;object-fit:cover;display:block">
-                        </div>
-                        <div class="meta">
-                            <div class="listing-title" style="font-weight:700;font-size:16px;color:#2a2623;margin-bottom:6px">
-                                <?php echo htmlspecialchars($p['listing_title'] ?? $p['title'], ENT_QUOTES, 'UTF-8'); ?>
+                        <a href="listings.php?id=<?php echo (int)$p['id']; ?>" style="display:block;color:inherit;text-decoration:none">
+                            <div class="media" role="img" aria-label="<?php echo htmlspecialchars($p['title'], ENT_QUOTES, 'UTF-8'); ?>">
+                                <img src="<?php echo htmlspecialchars($p['image'], ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($p['title'], ENT_QUOTES, 'UTF-8'); ?>" style="width:100%;height:100%;object-fit:cover;display:block">
                             </div>
-                            <?php if(isset($p['tons'])): ?>
-                            <div class="tons" style="color:#6b6460;font-size:14px;margin-bottom:4px">
-                                <strong>Tonnage:</strong> <?php echo number_format($p['tons'], 2); ?> tons
+                            <div class="meta">
+                                <div class="listing-title" style="font-weight:700;font-size:16px;color:#2a2623;margin-bottom:6px">
+                                    <?php echo htmlspecialchars($p['listing_title'] ?? $p['title'], ENT_QUOTES, 'UTF-8'); ?>
+                                </div>
+                                <?php if(isset($p['tons'])): ?>
+                                <div class="tons" style="color:#6b6460;font-size:14px;margin-bottom:4px">
+                                    <strong>Tonnage:</strong> <?php echo number_format($p['tons'], 2); ?> tons
+                                </div>
+                                <?php endif; ?>
+                                <div class="glass-type" style="color:#6b6460;font-size:14px">
+                                    <strong>Type:</strong> <?php echo htmlspecialchars($p['title'], ENT_QUOTES, 'UTF-8'); ?>
+                                </div>
                             </div>
-                            <?php endif; ?>
-                            <div class="glass-type" style="color:#6b6460;font-size:14px">
-                                <strong>Type:</strong> <?php echo htmlspecialchars($p['title'], ENT_QUOTES, 'UTF-8'); ?>
-                            </div>
-                        </div>
+                        </a>
                     </article>
                 <?php endforeach; ?>
             </div>

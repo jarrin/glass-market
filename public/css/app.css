@@ -205,7 +205,7 @@
 
   .btn-secondary {
     background: transparent;
-    color: var(--ink);
+    color: var(--bg);
     border: 1px solid var(--ink);
   }
 
