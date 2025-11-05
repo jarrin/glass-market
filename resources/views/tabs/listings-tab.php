@@ -19,8 +19,12 @@ try {
     ');
     $stmt->execute(['user_id' => $user['id']]);
     $user_listings = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Debug: Log the query and results
+    error_log("Listings query for user_id: " . $user['id']);
+    error_log("Found " . count($user_listings) . " listings");
 } catch (PDOException $e) {
-    // Silent fail
+    error_log("Listings query error: " . $e->getMessage());
 }
 ?>
 <div class="tab-panel" id="tab-listings">
