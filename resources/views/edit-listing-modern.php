@@ -855,6 +855,20 @@ try {
             transform: scale(0.98);
         }
 
+        .image-card.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            color: white;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            pointer-events: none;
+            z-index: 5;
+            opacity: 0.9;
+        }
+
         .image-card-checkbox {
             position: absolute;
             top: 8px;
