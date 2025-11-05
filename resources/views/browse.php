@@ -408,8 +408,8 @@
                 });
             }
             
-            const glassTypeCheckboxes = Array.from(document.querySelectorAll('.glass-filter'));
-            const conditionCheckboxes = Array.from(document.querySelectorAll('.condition-filter'));
+            const glassTypeCheckboxes = Array.from(document.querySelectorAll('.glass-type-filter'));
+            const recycledCheckboxes = Array.from(document.querySelectorAll('.recycled-filter'));
             const minRange = document.getElementById('minRange');
             const maxRange = document.getElementById('maxRange');
             const minPrice = document.getElementById('minPrice');
@@ -427,19 +427,20 @@
             let currentPage = 1;
             let visibleCards = [];
             let maxTonsValue = <?php echo $maxTons; ?>;
+            let activeRecycled = [];
 
             function applyFilters(){
                 console.log('=== APPLY FILTERS CALLED ===');
 
                 const activeGlassTypes = glassTypeCheckboxes.filter(cb=>cb.checked).map(cb=>cb.value);
-                const activeConditions = conditionCheckboxes.filter(cb=>cb.checked).map(cb=>cb.value);
+                activeRecycled = recycledCheckboxes.filter(cb=>cb.checked).map(cb=>cb.value);
 
                 // FIX: Use minPrice/maxPrice instead of minRange/maxRange
                 const min = parseFloat(minPrice.value) || 0;
                 const max = parseFloat(maxPrice.value) || maxTonsValue;
 
                 console.log('Active Glass Types:', activeGlassTypes);
-                console.log('Active Conditions:', activeConditions);
+                console.log('Active Recycled:', activeRecycled);
                 console.log('Tons range:', min, 'to', max);
                 console.log('Total cards:', cards.length);
 
@@ -449,14 +450,22 @@
                 visibleCards = [];
                 
                 cards.forEach(c=>{
-                    const glassType = (c.getAttribute('data-glass-type') || '').trim();
-                    const condition = (c.getAttribute('data-condition') || '').trim();
-                    const tons = parseFloat(c.getAttribute('data-tons')) || 0;
+                    const glassType = c.getAttribute('data-glass-type');
+                    const isRecycled = c.getAttribute('data-recycled') === '1';
+                    const tons = parseFloat(c.getAttribute('data-tons') || 0);
                     const tonsMatch = tons >= min && tons <= max;
-                    const glassTypeMatch = activeGlassTypes.length ? activeGlassTypes.indexOf(glassType) !== -1 : true;
-                    const conditionMatch = activeConditions.length ? activeConditions.indexOf(condition) !== -1 : true;
+                    const glassTypeMatch = activeGlassTypes.length === 0 || activeGlassTypes.includes(glassType);
+                    let matchesRecycled = true;
                     
-                    if(tonsMatch && conditionMatch){
+                    if (activeRecycled.length > 0) {
+                        matchesRecycled = activeRecycled.some(option => {
+                            if (option === 'Recycled') return isRecycled;
+                            if (option === 'Not Recycled') return !isRecycled;
+                            return false;
+                        });
+                    }
+                    
+                    if(tonsMatch && glassTypeMatch && matchesRecycled){
                         if(!(glassType in glassTypeCounts)) glassTypeCounts[glassType]=0;
                         glassTypeCounts[glassType]++;
                     }
@@ -467,11 +476,20 @@
                 });
 
                 cards.forEach((c, index) => {
-                    const glassType = (c.getAttribute('data-glass-type') || '').trim();
-                    const condition = (c.getAttribute('data-condition') || '').trim();
-                    const tons = parseFloat(c.getAttribute('data-tons')) || 0;
-                    const glassTypeMatch = activeGlassTypes.length ? activeGlassTypes.indexOf(glassType) !== -1 : true;
-                    const conditionMatch = activeConditions.length ? activeConditions.indexOf(condition) !== -1 : true;
+                    const glassType = c.getAttribute('data-glass-type');
+                    const isRecycled = c.getAttribute('data-recycled') === '1';
+                    const tons = parseFloat(c.getAttribute('data-tons') || 0);
+                    const glassTypeMatch = activeGlassTypes.length === 0 || activeGlassTypes.includes(glassType);
+                    let matchesRecycled = true;
+                    
+                    if (activeRecycled.length > 0) {
+                        matchesRecycled = activeRecycled.some(option => {
+                            if (option === 'Recycled') return isRecycled;
+                            if (option === 'Not Recycled') return !isRecycled;
+                            return false;
+                        });
+                    }
+                    
                     const tonsMatch = tons >= min && tons <= max;
 
                     // Log first 3 cards for debugging
@@ -481,15 +499,15 @@
                             activeGlassTypes,
                             indexOfResult: activeGlassTypes.indexOf(glassType),
                             glassTypeMatch,
-                            condition: `"${condition}"`,
-                            conditionMatch,
+                            isRecycled,
+                            matchesRecycled,
                             tons,
                             tonsMatch,
-                            willShow: glassTypeMatch && conditionMatch && tonsMatch
+                            willShow: glassTypeMatch && matchesRecycled && tonsMatch
                         });
                     }
 
-                    if(glassTypeMatch && conditionMatch && tonsMatch){
+                    if(glassTypeMatch && matchesRecycled && tonsMatch){
                         visibleCards.push(c);
                     }
                 });
@@ -503,15 +521,15 @@
                 // update count labels in sidebar
                 document.querySelectorAll('#glass-types-list .count').forEach(el=>{
                     const li = el.closest('li');
-                    const input = li.querySelector('.glass-filter');
+                    const input = li.querySelector('.glass-type-filter');
                     const glassType = input.value;
                     el.textContent = glassTypeCounts[glassType] !== undefined ? glassTypeCounts[glassType] : 0;
                 });
-                document.querySelectorAll('#conditions-list .count').forEach(el=>{
+                document.querySelectorAll('#recycled-filter .count').forEach(el=>{
                     const li = el.closest('li');
-                    const input = li.querySelector('.condition-filter');
-                    const condition = input.value;
-                    el.textContent = conditionCounts[condition] !== undefined ? conditionCounts[condition] : 0;
+                    const input = li.querySelector('.recycled-filter');
+                    const recycled = input.value;
+                    el.textContent = activeRecycled.includes(recycled) ? visibleCards.length : 0;
                 });
 
                 // Reset to page 1 when filters change
@@ -655,7 +673,7 @@
 
             function clearAllFilters(){
                 glassTypeCheckboxes.forEach(cb=>cb.checked = false);
-                conditionCheckboxes.forEach(cb=>cb.checked = false);
+                recycledCheckboxes.forEach(cb=>cb.checked = false);
                 minPrice.value = 0;
                 maxPrice.value = maxTonsValue;
                 minRange.value = 0;
@@ -667,8 +685,8 @@
                 applyFilters();
             }
 
-            glassTypeCheckboxes.forEach(cb=>cb.addEventListener('change', applyFilters));
-            conditionCheckboxes.forEach(cb=>cb.addEventListener('change', applyFilters));
+            glassTypeCheckboxes.forEach(checkbox => checkbox.addEventListener('change', applyFilters));
+            recycledCheckboxes.forEach(checkbox => checkbox.addEventListener('change', applyFilters));
             minPrice.addEventListener('input', syncRanges);
             maxPrice.addEventListener('input', syncRanges);
             minRange.addEventListener('input', syncRanges);
