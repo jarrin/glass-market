@@ -1174,13 +1174,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_listing'])) {
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label" for="glass_tons">
+                            <label class="form-label" for="quantity_tons">
                                 Quantity (in tons) <span class="required">*</span>
                             </label>
                             <input
                                 type="number"
-                                id="glass_tons"
-                                name="glass_tons"
+                                id="quantity_tons"
+                                name="quantity_tons"
                                 class="form-input"
                                 value="<?php echo htmlspecialchars($listing['quantity_tons'] ?? ''); ?>"
                                 placeholder="0.00"
