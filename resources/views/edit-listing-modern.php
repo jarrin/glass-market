@@ -94,6 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_listing'])) {
     $tested = $_POST['tested'] ?? 'unknown';
     $storage_location = trim($_POST['storage_location'] ?? '');
     $currency = $_POST['currency'] ?? 'EUR';
+    $published = isset($_POST['published']) ? 1 : 0;
     
     // Handle "other" glass type
     if ($glass_type === 'other' && !empty($glass_type_other)) {
@@ -170,7 +171,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_listing'])) {
                     recycled = :recycled,
                     tested = :tested,
                     storage_location = :storage_location,
-                    currency = :currency
+                    currency = :currency,
+                    published = :published
                 WHERE id = :id
             ');
             
@@ -185,14 +187,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_listing'])) {
                 'tested' => $tested,
                 'storage_location' => $storage_location,
                 'currency' => $currency,
+                'published' => $published,
                 'id' => $listing_id
             ]);
             
             $pdo->commit();
             
-            $_SESSION['listing_success'] = 'Listing updated successfully!';
-            header('Location: ' . VIEWS_URL . '/edit-listing-modern.php?id=' . $listing_id);
-            exit;
+            // Reload listing data to show updated values
+            $stmt = $pdo->prepare('
+                SELECT l.*, c.name as company_name
+                FROM listings l
+                LEFT JOIN companies c ON l.company_id = c.id
+                WHERE l.id = :listing_id AND l.user_id = :user_id
+            ');
+            $stmt->execute(['listing_id' => $listing_id, 'user_id' => $user_id]);
+            $listing = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            $success_message = 'Listing updated successfully!';
         } catch (Exception $e) {
             $pdo->rollBack();
             $error_message = 'Failed to update listing: ' . $e->getMessage();
@@ -321,7 +332,7 @@ try {
         }
 
         .page-header {
-            margin-bottom: 40px;
+            margin-bottom: 32px;
         }
 
         .page-header-top {
@@ -382,15 +393,90 @@ try {
             margin: 0;
         }
 
+        /* Tab System */
+        .tabs-container {
+            background: var(--profile-card-bg);
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .tabs-header {
+            display: flex;
+            border-bottom: 2px solid var(--profile-border);
+            background: #fafafa;
+            padding: 0 24px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none; /* Firefox */
+        }
+        
+        .tabs-header::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
+        }
+
+        .tab-button {
+            padding: 20px 28px;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--profile-muted);
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            position: relative;
+            top: 2px;
+            flex-shrink: 0;
+        }
+
+        .tab-button:hover {
+            color: var(--profile-text);
+            background: rgba(47, 109, 245, 0.05);
+        }
+
+        .tab-button.active {
+            color: var(--profile-primary);
+            border-bottom-color: var(--profile-primary);
+            background: white;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 32px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         .edit-grid {
             display: grid;
-            grid-template-columns: 1fr 400px;
+            grid-template-columns: 1fr 1fr;
             gap: 32px;
         }
 
         @media (max-width: 968px) {
             .edit-grid {
                 grid-template-columns: 1fr;
+            }
+            
+            .tabs-header {
+                overflow-x: auto;
             }
         }
 
@@ -693,6 +779,257 @@ try {
             grid-template-columns: 1fr auto;
             gap: 12px;
         }
+
+        /* New Image UI Styles */
+        .images-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .images-header {
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 2px solid var(--profile-border);
+        }
+
+        .images-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .image-card {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        .image-card:hover {
+            border-color: #cbd5e1;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .image-card.is-main {
+            border-color: var(--profile-primary);
+            box-shadow: 0 0 0 3px rgba(47, 109, 245, 0.1);
+        }
+
+        .image-card.is-main:hover {
+            box-shadow: 0 0 0 3px rgba(47, 109, 245, 0.15), 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .image-card-img {
+            position: relative;
+            aspect-ratio: 1;
+            overflow: hidden;
+            background: #f9fafb;
+        }
+
+        .image-card-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .main-badge {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: var(--profile-primary);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .image-card-actions {
+            padding: 8px;
+            display: flex;
+            gap: 6px;
+            background: #fafafa;
+        }
+
+        .image-card-btn {
+            flex: 1;
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            background: white;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .image-card-btn:hover {
+            background: #f9fafb;
+            border-color: #9ca3af;
+        }
+
+        .image-card-btn.delete-btn {
+            background: #fef2f2;
+            border-color: #fecaca;
+            color: #dc2626;
+        }
+
+        .image-card-btn.delete-btn:hover {
+            background: #fee2e2;
+            border-color: #fca5a5;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--profile-muted);
+        }
+
+        .empty-state svg {
+            margin-bottom: 16px;
+            opacity: 0.3;
+        }
+
+        .empty-state h4 {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0 0 8px 0;
+            color: var(--profile-text);
+        }
+
+        .empty-state p {
+            margin: 0;
+            font-size: 14px;
+        }
+
+        .upload-section {
+            margin-top: 32px;
+            padding-top: 32px;
+            border-top: 2px solid var(--profile-border);
+        }
+
+        .upload-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 48px 24px;
+            border: 3px dashed #d1d5db;
+            border-radius: 16px;
+            background: #fafafa;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .upload-box:hover {
+            border-color: var(--profile-primary);
+            background: rgba(47, 109, 245, 0.03);
+        }
+
+        .upload-box svg {
+            color: var(--profile-muted);
+        }
+
+        .upload-box strong {
+            font-size: 15px;
+            color: var(--profile-text);
+        }
+
+        .upload-box span {
+            font-size: 13px;
+            color: var(--profile-muted);
+        }
+
+        #preview-container {
+            margin-top: 16px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 16px;
+        }
+
+        /* Status Toggle */
+        .status-toggle {
+            background: #f9fafb;
+            border: 2px solid var(--profile-border);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .status-toggle-label {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .status-toggle-label strong {
+            font-size: 15px;
+            color: var(--profile-text);
+        }
+
+        .status-toggle-label span {
+            font-size: 13px;
+            color: var(--profile-muted);
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 56px;
+            height: 32px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5e1;
+            border-radius: 32px;
+            transition: 0.3s;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 24px;
+            width: 24px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            border-radius: 50%;
+            transition: 0.3s;
+        }
+
+        .toggle-switch input:checked + .toggle-slider {
+            background-color: #22c55e;
+        }
+
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+        }
     </style>
 </head>
 <body>
@@ -733,11 +1070,37 @@ try {
         <?php endif; ?>
 
         <form method="POST" action="" enctype="multipart/form-data">
-            <div class="edit-grid">
-                <!-- Main Form Section -->
-                <div>
-                    <div class="card">
-                        <h2 class="card-title">📝 Listing Details</h2>
+            <!-- Tab System -->
+            <div class="tabs-container">
+                <div class="tabs-header">
+                    <button type="button" class="tab-button active" onclick="switchTab('details')">
+                        📝 Listing Details
+                    </button>
+                    <button type="button" class="tab-button" onclick="switchTab('images')">
+                        📸 Product Images
+                    </button>
+                    <button type="button" class="tab-button" onclick="switchTab('danger')">
+                        �️ Delete Listing
+                    </button>
+                </div>
+
+                <!-- Tab: Listing Details -->
+                <div id="tab-details" class="tab-content active">
+                    <!-- Status Toggle -->
+                    <div class="status-toggle" style="margin-bottom: 32px;">
+                        <div class="status-toggle-label">
+                            <strong>Listing Status</strong>
+                            <span id="status-text"><?php echo $listing['published'] == 1 ? 'Published - Visible to buyers' : 'Draft - Hidden from buyers'; ?></span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="published" value="1" 
+                                   <?php echo $listing['published'] == 1 ? 'checked' : ''; ?>
+                                   onchange="updateStatusText(this)">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="edit-grid">
 
                         <div class="form-group">
                             <label class="form-label" for="side">
@@ -880,77 +1243,81 @@ try {
                         </div>
                     </div>
 
-                    <!-- Delete Section -->
-                    <div class="card danger-zone">
-                        <h3 class="danger-zone-title">🗑️ Danger Zone</h3>
-                        <p class="danger-zone-text">
-                            Once you delete a listing, there is no going back. This action cannot be undone.
-                        </p>
-                        <form method="POST" action="<?php echo VIEWS_URL; ?>/profile.php?tab=listings" 
-                              onsubmit="return confirm('Are you sure you want to delete this listing? This action cannot be undone!');"
-                              style="display: inline;">
-                            <input type="hidden" name="delete_listing" value="1">
-                            <input type="hidden" name="listing_id" value="<?php echo $listing_id; ?>">
-                            <button type="submit" class="btn btn-danger">
-                                Delete Listing Permanently
-                            </button>
-                        </form>
+                    <!-- Save Button -->
+                    <div class="button-group">
+                        <button type="submit" name="update_listing" class="btn btn-primary">
+                            💾 Save Changes
+                        </button>
                     </div>
                 </div>
-
-                <!-- Sidebar - Images -->
-                <div>
-                    <div class="card">
-                        <h2 class="card-title">📸 Product Images</h2>
-                        
-                        <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 13px; color: #1e40af;">
-                            <strong>💡 How it works:</strong><br>
-                            • Upload up to 20 images<br>
-                            • The <strong>Main</strong> image shows first on listings<br>
-                            • Click "Set Main" to change the main display image<br>
-                            • Hover over images to delete or set as main
+                <!-- Tab: Images -->
+                <div id="tab-images" class="tab-content">
+                    <div class="images-container">
+                        <div class="images-header">
+                            <div>
+                                <h3 style="margin: 0 0 8px 0; font-size: 20px; font-weight: 700;">Product Images</h3>
+                                <p style="margin: 0; color: var(--profile-muted); font-size: 14px;">
+                                    <?php echo count($listing_images); ?> of 20 images • Main image appears first in search
+                                </p>
+                            </div>
                         </div>
-                        
-                        <p class="image-count">
-                            <?php echo count($listing_images); ?> / 20 images
-                        </p>
 
                         <!-- Current Images -->
                         <?php if (!empty($listing_images)): ?>
-                            <div class="image-gallery" id="image-gallery">
+                            <div class="images-grid">
                                 <?php foreach ($listing_images as $img): ?>
-                                    <div class="image-item <?php echo $img['is_main'] ? 'main' : ''; ?>" data-image-id="<?php echo $img['id']; ?>">
-                                        <?php if ($img['is_main']): ?>
-                                            <div class="image-item-badge">⭐ Main</div>
-                                        <?php endif; ?>
-                                        <img src="<?php echo PUBLIC_URL . '/' . $img['image_path']; ?>" alt="Product image">
-                                        <div class="image-item-actions">
+                                    <div class="image-card <?php echo $img['is_main'] ? 'is-main' : ''; ?>" data-image-id="<?php echo $img['id']; ?>">
+                                        <div class="image-card-img">
+                                            <img src="<?php echo PUBLIC_URL . '/' . $img['image_path']; ?>" alt="Product image">
+                                            <?php if ($img['is_main']): ?>
+                                                <div class="main-badge">
+                                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                                    </svg>
+                                                    Main
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                        <div class="image-card-actions">
                                             <?php if (!$img['is_main']): ?>
-                                                <button type="button" class="image-action-btn" onclick="setMainImage(<?php echo $img['id']; ?>)">
-                                                    ⭐ Set Main
+                                                <button type="button" class="image-card-btn" onclick="setMainImage(<?php echo $img['id']; ?>)">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                                    </svg>
+                                                    Set Main
                                                 </button>
                                             <?php endif; ?>
-                                            <button type="button" class="image-action-btn delete" onclick="deleteImage(<?php echo $img['id']; ?>)">
-                                                🗑️ Delete
+                                            <button type="button" class="image-card-btn delete-btn" onclick="deleteImage(<?php echo $img['id']; ?>)">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                                                </svg>
+                                                Delete
                                             </button>
                                         </div>
                                     </div>
                                 <?php endforeach; ?>
                             </div>
                         <?php else: ?>
-                            <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 13px; color: #92400e;">
-                                <strong>⚠️ No images yet</strong><br>
-                                Upload at least one image to make your listing more attractive to buyers!
+                            <div class="empty-state">
+                                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                                    <path d="M21 15l-5-5L5 21"/>
+                                </svg>
+                                <h4>No images yet</h4>
+                                <p>Upload at least one image to showcase your product</p>
                             </div>
                         <?php endif; ?>
 
                         <!-- Upload New Images -->
                         <?php if (count($listing_images) < 20): ?>
-                            <div style="margin-top: 24px;">
-                                <label for="product_images" class="upload-zone">
-                                    <div class="upload-zone-icon">📤</div>
-                                    <div class="upload-zone-text">Click to upload images</div>
-                                    <div class="upload-zone-hint">JPG, PNG, WebP (Max 5MB each)</div>
+                            <div class="upload-section">
+                                <label for="product_images" class="upload-box">
+                                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                                    </svg>
+                                    <strong>Click to upload images</strong>
+                                    <span>JPG, PNG, WebP (Max 5MB each)</span>
                                     <input
                                         type="file"
                                         id="product_images"
@@ -961,22 +1328,59 @@ try {
                                         onchange="previewImages(this)"
                                     >
                                 </label>
-                                <div id="preview-container" style="margin-top: 16px;"></div>
+                                <div id="preview-container"></div>
                             </div>
                         <?php else: ?>
-                            <div class="alert alert-danger" style="margin-top: 16px;">
+                            <div class="alert alert-danger">
                                 Maximum 20 images reached. Delete some images to upload new ones.
                             </div>
                         <?php endif; ?>
-                    </div>
 
-                    <!-- Save Button -->
-                    <div class="button-group">
-                        <button type="submit" name="update_listing" class="btn btn-primary" style="width: 100%;">
-                            💾 Save Changes
-                        </button>
+                        <!-- Save Button -->
+                        <div class="button-group">
+                            <button type="submit" name="update_listing" class="btn btn-primary" style="width: 100%;">
+                                💾 Save Changes
+                            </button>
+                        </div>
                     </div>
                 </div>
+
+                <!-- Tab: Danger Zone -->
+                <div id="tab-danger" class="tab-content">
+                    <div style="max-width: 600px; margin: 0 auto;">
+                        <div style="background: #fef2f2; border-left: 4px solid #ef4444; padding: 20px; border-radius: 12px;">
+                            <h3 style="font-size: 24px; font-weight: 700; color: #dc2626; margin: 0 0 16px 0;">
+                                🗑️ Delete Listing
+                            </h3>
+                            <p style="font-size: 15px; color: #7f1d1d; margin-bottom: 20px; line-height: 1.6;">
+                                Deleting this listing will permanently remove it from Glass Market. This action <strong>cannot be undone</strong>.
+                            </p>
+                            <p style="font-size: 14px; color: #991b1b; margin-bottom: 24px;">
+                                <strong>What will be deleted:</strong><br>
+                                • The listing and all its details<br>
+                                • All uploaded product images<br>
+                                • Saved listings from other users<br>
+                                • Any associated data
+                            </p>
+                        </div>
+
+                        <div style="margin-top: 24px; padding: 20px; background: white; border-radius: 12px; border: 2px solid #fecaca;">
+                            <p style="font-size: 14px; color: #6b7280; margin-bottom: 16px;">
+                                Are you absolutely sure? This action is permanent and cannot be reversed.
+                            </p>
+                            <form method="POST" action="<?php echo VIEWS_URL; ?>/profile.php?tab=listings" 
+                                  onsubmit="return confirm('⚠️ FINAL WARNING ⚠️\n\nAre you absolutely sure you want to permanently delete this listing?\n\nThis action CANNOT be undone!\n\nClick OK to delete forever, or Cancel to keep the listing.');"
+                                  style="display: inline;">
+                                <input type="hidden" name="delete_listing" value="1">
+                                <input type="hidden" name="listing_id" value="<?php echo $listing_id; ?>">
+                                <button type="submit" class="btn btn-danger" style="width: 100%; padding: 16px; font-size: 16px;">
+                                    �️ Delete Listing Permanently
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </form>
     </main>
@@ -984,6 +1388,53 @@ try {
     <?php include __DIR__ . '/../../includes/footer.php'; ?>
 
     <script>
+    // Update Status Text
+    function updateStatusText(checkbox) {
+        const statusText = document.getElementById('status-text');
+        if (checkbox.checked) {
+            statusText.textContent = 'Published - Visible to buyers';
+        } else {
+            statusText.textContent = 'Draft - Hidden from buyers';
+        }
+    }
+
+    // Tab Switching Function
+    function switchTab(tabName) {
+        // Hide all tab contents
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.remove('active');
+        });
+        
+        // Remove active class from all tab buttons
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.classList.remove('active');
+        });
+        
+        // Show selected tab content
+        const selectedTab = document.getElementById('tab-' + tabName);
+        if (selectedTab) {
+            selectedTab.classList.add('active');
+        }
+        
+        // Add active class to clicked button
+        const clickedButton = Array.from(document.querySelectorAll('.tab-button')).find(btn => {
+            return btn.textContent.includes(tabName === 'details' ? 'Listing Details' : 
+                   tabName === 'images' ? 'Product Images' : 'Delete Listing');
+        });
+        if (clickedButton) {
+            clickedButton.classList.add('active');
+        }
+        
+        // Scroll to top of tabs
+        const tabsContainer = document.querySelector('.tabs-container');
+        if (tabsContainer) {
+            window.scrollTo({
+                top: tabsContainer.offsetTop - 100,
+                behavior: 'smooth'
+            });
+        }
+    }
+    
     function toggleOtherGlassType(select) {
         const container = document.getElementById('glass_type_other_container');
         const input = document.getElementById('glass_type_other');
