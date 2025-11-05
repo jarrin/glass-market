@@ -47,11 +47,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Block admin from logging in here - must use admin login
                 if ($user['email'] === 'admin@glassmarket.com') {
                     $error_message = 'Admin accounts must use the admin login portal.';
-                } elseif (empty($user['email_verified_at'])) {
-                    // Check if account is verified
-                    $error_message = 'The admin still needs to verify your email';
                 } else {
-                    // Login successful - regular user only
+                    // Login successful - regular users can login without email verification
                     $_SESSION['user_logged_in'] = true;
                     $_SESSION['user_id'] = $user['id'];
                     $_SESSION['user_name'] = $user['name'];

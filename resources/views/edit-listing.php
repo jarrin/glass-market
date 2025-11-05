@@ -491,6 +491,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_listing'])) {
         </div>
     </main>
 
+    <script>
+    function toggleOtherGlassType(select) {
+        const otherContainer = document.getElementById('glass_type_other_container');
+        const otherInput = document.getElementById('glass_type_other');
+        
+        if (select.value === 'other') {
+            otherContainer.style.display = 'block';
+            otherInput.required = true;
+        } else {
+            otherContainer.style.display = 'none';
+            otherInput.required = false;
+            otherInput.value = '';
+        }
+    }
+    </script>
+
     <?php include __DIR__ . '/../../includes/footer.php'; ?>
 </body>
 </html>

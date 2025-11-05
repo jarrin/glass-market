@@ -321,12 +321,14 @@ try {
                                 }
                             ?>
                             <article class="home-listing-card">
-                                <img src="<?php echo htmlspecialchars($imageUrl, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?>" />
-                                <div class="home-listing-body">
-                                    <h3 class="home-listing-title"><?php echo htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?></h3>
-                                    <div class="home-listing-meta"><?php echo htmlspecialchars($glassType, ENT_QUOTES, 'UTF-8'); ?> • <?php echo $tons; ?> tons</div>
-                                    <div class="home-listing-company"><?php echo htmlspecialchars($companyName, ENT_QUOTES, 'UTF-8'); ?></div>
-                                </div>
+                                <a href="../resources/views/listings.php?id=<?php echo (int)$listing['id']; ?>" style="display:block;color:inherit;text-decoration:none">
+                                    <img src="<?php echo htmlspecialchars($imageUrl, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?>" />
+                                    <div class="home-listing-body">
+                                        <h3 class="home-listing-title"><?php echo htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?></h3>
+                                        <div class="home-listing-meta"><?php echo htmlspecialchars($glassType, ENT_QUOTES, 'UTF-8'); ?> • <?php echo $tons; ?> tons</div>
+                                        <div class="home-listing-company"><?php echo htmlspecialchars($companyName, ENT_QUOTES, 'UTF-8'); ?></div>
+                                    </div>
+                                </a>
                             </article>
                         <?php endforeach; ?>
                     <?php else: ?>

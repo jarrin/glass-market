@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Quick Links - Subscription Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .link-box {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        p {
+            color: #666;
+            line-height: 1.6;
+        }
+        .btn {
+            display: inline-block;
+            background: #3b82f6;
+            color: white;
+            padding: 14px 28px;
+            text-decoration: none;
+            border-radius: 8px;
+            margin: 10px 10px 10px 0;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        .btn:hover {
+            background: #2563eb;
+        }
+        .btn-secondary {
+            background: #64748b;
+        }
+        .btn-secondary:hover {
+            background: #475569;
+        }
+        .info {
+            background: #eff6ff;
+            border: 1px solid #3b82f6;
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .info strong {
+            color: #1e40af;
+        }
+    </style>
+</head>
+<body>
+    <div class="link-box">
+        <h1>🎯 Quick Access to Your Subscription</h1>
+        <p>Click the button below to go directly to your subscription page:</p>
+        
+        <a href="resources/views/profile.php?tab=subscription" class="btn">
+            📋 View My Subscription
+        </a>
+        
+        <a href="resources/views/profile.php" class="btn btn-secondary">
+            👤 Go to Profile (Overview)
+        </a>
+        
+        <div class="info">
+            <strong>💡 How it works:</strong><br>
+            The button above will take you directly to the Subscription tab on your profile page.
+            You can also manually click on the "Subscription" tab once you're on the profile page.
+        </div>
+    </div>
+    
+    <div class="link-box">
+        <h2>📑 Other Useful Links</h2>
+        <a href="test_subscription_debug.php" class="btn btn-secondary">🔍 Debug Tool</a>
+        <a href="resources/views/profile.php?tab=overview" class="btn btn-secondary">📊 Overview Tab</a>
+        <a href="resources/views/profile.php?tab=listings" class="btn btn-secondary">📝 My Listings Tab</a>
+        <a href="resources/views/profile.php?tab=company" class="btn btn-secondary">🏢 Company Tab</a>
+        <a href="resources/views/profile.php?tab=profile" class="btn btn-secondary">✏️ Edit Profile Tab</a>
+    </div>
+    
+    <div class="link-box" style="background: #f0fdf4; border: 2px solid #16a34a;">
+        <h2 style="color: #166534;">✅ Your Subscription Status</h2>
+        <p>Based on the debug results:</p>
+        <ul style="color: #166534; font-weight: 500;">
+            <li>User: test_sub (ID: 10)</li>
+            <li>Status: <strong>Active</strong></li>
+            <li>Start Date: October 31, 2025</li>
+            <li>End Date: December 1, 2025</li>
+            <li>Type: Premium (not trial)</li>
+        </ul>
+    </div>
+</body>
+</html>

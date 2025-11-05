@@ -817,3 +817,10 @@ window.addEventListener('scroll', function() {
     });
   })();
 </script>
+
+<?php 
+// Include push notification checker for logged-in users
+if ($is_logged_in) {
+    include __DIR__ . '/push-notification-checker.php';
+}
+?>
