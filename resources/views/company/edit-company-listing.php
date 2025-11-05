@@ -76,3 +76,131 @@ try {
     header('Location: ' . VIEWS_URL . '/profile.php?tab=company');
     exit;
 }
+
+// Handle listing update
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_listing'])) {
+    $title = trim($_POST['glass_title'] ?? '');
+    $glass_type = trim($_POST['glass_type'] ?? '');
+    $glass_type_other = trim($_POST['glass_type_other'] ?? '');
+    $tons = $_POST['glass_tons'] ?? '';
+    $description = trim($_POST['glass_description'] ?? '');
+    $side = $_POST['side'] ?? 'WTS';
+    $price_text = trim($_POST['price_text'] ?? '');
+    $recycled = $_POST['recycled'] ?? 'unknown';
+    $tested = $_POST['tested'] ?? 'unknown';
+    $storage_location = trim($_POST['storage_location'] ?? '');
+    $currency = $_POST['currency'] ?? 'EUR';
+    $published = isset($_POST['published']) ? 1 : 0;
+    
+    // Handle "other" glass type
+    if ($glass_type === 'other' && !empty($glass_type_other)) {
+        $glass_type = $glass_type_other;
+    }
+    
+    if (empty($title) || empty($glass_type) || empty($tons)) {
+        $error_message = 'Title, glass type and tonnage are required.';
+    } elseif (!is_numeric($tons) || $tons <= 0) {
+        $error_message = 'Please enter a valid tonnage.';
+    } else {
+        try {
+            $pdo->beginTransaction();
+            
+            // Handle multiple image uploads
+            if (isset($_FILES['product_images']) && !empty($_FILES['product_images']['name'][0])) {
+                $upload_dir = __DIR__ . '/../../../public/uploads/listings/';
+                
+                if (!is_dir($upload_dir)) {
+                    mkdir($upload_dir, 0755, true);
+                }
+                
+                $total_images = count($_FILES['product_images']['name']);
+                $current_image_count = count($listing_images);
+                
+                if ($current_image_count + $total_images > 20) {
+                    throw new Exception('Maximum 20 images allowed per listing');
+                }
+                
+                foreach ($_FILES['product_images']['name'] as $key => $filename) {
+                    if ($_FILES['product_images']['error'][$key] === UPLOAD_ERR_OK) {
+                        $file_extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+                        $allowed_extensions = ['jpg', 'jpeg', 'png', 'webp'];
+                        
+                        if (!in_array($file_extension, $allowed_extensions)) {
+                            continue;
+                        }
+                        
+                        if ($_FILES['product_images']['size'][$key] > 5 * 1024 * 1024) {
+                            continue;
+                        }
+                        
+                        $new_filename = 'listing_' . $listing_id . '_' . time() . '_' . $key . '.' . $file_extension;
+                        $upload_path = $upload_dir . $new_filename;
+                        
+                        if (move_uploaded_file($_FILES['product_images']['tmp_name'][$key], $upload_path)) {
+                            $image_path = 'uploads/listings/' . $new_filename;
+                            $is_main = ($current_image_count == 0 && $key == 0) ? 1 : 0;
+                            
+                            $stmt = $pdo->prepare('
+                                INSERT INTO listing_images (listing_id, image_path, is_main, display_order)
+                                VALUES (:listing_id, :image_path, :is_main, :display_order)
+                            ');
+                            $stmt->execute([
+                                'listing_id' => $listing_id,
+                                'image_path' => $image_path,
+                                'is_main' => $is_main,
+                                'display_order' => $current_image_count + $key
+                            ]);
+                        }
+                    }
+                }
+            }
+            
+            // Update listing
+            $stmt = $pdo->prepare('
+                UPDATE listings SET
+                    side = :side,
+                    glass_type = :glass_type,
+                    quantity_tons = :quantity_tons,
+                    quantity_note = :quantity_note,
+                    quality_notes = :quality_notes,
+                    price_text = :price_text,
+                    recycled = :recycled,
+                    tested = :tested,
+                    storage_location = :storage_location,
+                    currency = :currency,
+                    published = :published
+                WHERE id = :id
+            ');
+            
+            $stmt->execute([
+                'side' => $side,
+                'glass_type' => $glass_type,
+                'quantity_tons' => $tons,
+                'quantity_note' => $title,
+                'quality_notes' => $description,
+                'price_text' => $price_text,
+                'recycled' => $recycled,
+                'tested' => $tested,
+                'storage_location' => $storage_location,
+                'currency' => $currency,
+                'published' => $published,
+                'id' => $listing_id
+            ]);
+            
+            $pdo->commit();
+            
+            $_SESSION['listing_success'] = 'Company listing updated successfully!';
+            header('Location: ' . VIEWS_URL . '/company/edit-company-listing.php?id=' . $listing_id);
+            exit;
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            $error_message = 'Failed to update listing: ' . $e->getMessage();
+        }
+    }
+}
+
+// Check for session success message
+if (isset($_SESSION['listing_success'])) {
+    $success_message = $_SESSION['listing_success'];
+    unset($_SESSION['listing_success']);
+}
