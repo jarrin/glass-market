@@ -89,6 +89,41 @@
                     <span style="font-size: 13px; color: #6b7280;">Total Listings:</span>
                     <strong style="font-size: 13px; color: #1f2937;"><?php echo $user_listings_count; ?></strong>
                 </div>
+                <?php 
+                // Get published/draft counts
+                try {
+                    $pdo = new PDO("mysql:host=127.0.0.1;dbname=glass_market", 'root', '');
+                    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                    
+                    $stmt = $pdo->prepare('SELECT COUNT(*) as count FROM listings WHERE user_id = :user_id AND published = 1');
+                    $stmt->execute(['user_id' => $user['id']]);
+                    $published_count = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+                    
+                    $stmt = $pdo->prepare('SELECT COUNT(*) as count FROM listings WHERE user_id = :user_id AND published = 0');
+                    $stmt->execute(['user_id' => $user['id']]);
+                    $draft_count = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+                    
+                    $stmt = $pdo->prepare('SELECT COUNT(*) as count FROM saved_listings WHERE user_id = :user_id');
+                    $stmt->execute(['user_id' => $user['id']]);
+                    $saved_count = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+                } catch (PDOException $e) {
+                    $published_count = 0;
+                    $draft_count = 0;
+                    $saved_count = 0;
+                }
+                ?>
+                <div style="display: flex; justify-content: space-between; padding: 8px 12px; background: #f0fdf4; border-radius: 6px;">
+                    <span style="font-size: 13px; color: #166534;">Published:</span>
+                    <strong style="font-size: 13px; color: #166534;"><?php echo $published_count; ?></strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 8px 12px; background: #fef3c7; border-radius: 6px;">
+                    <span style="font-size: 13px; color: #92400e;">Drafts:</span>
+                    <strong style="font-size: 13px; color: #92400e;"><?php echo $draft_count; ?></strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 8px 12px; background: #f9fafb; border-radius: 6px;">
+                    <span style="font-size: 13px; color: #6b7280;">Saved Items:</span>
+                    <strong style="font-size: 13px; color: #1f2937;"><?php echo $saved_count; ?></strong>
+                </div>
                 <?php if ($company): ?>
                 <div style="display: flex; justify-content: space-between; padding: 8px 12px; background: #f9fafb; border-radius: 6px;">
                     <span style="font-size: 13px; color: #6b7280;">Company:</span>
