@@ -19,9 +19,6 @@ echo "========================================\n\n";
 echo "Step 1: Clearing existing test data...\n";
 
 try {
-    // Start transaction
-    $pdo->beginTransaction();
-    
     // Count before deletion
     $listingCount = $pdo->query("SELECT COUNT(*) FROM listings")->fetchColumn();
     $companyCount = $pdo->query("SELECT COUNT(*) FROM companies")->fetchColumn();
@@ -48,11 +45,9 @@ try {
     $pdo->exec("ALTER TABLE companies AUTO_INCREMENT = 1");
     echo "  ✅ Reset auto-increment counters\n";
     
-    $pdo->commit();
     echo "✅ Step 1 Complete: Database cleaned\n\n";
     
 } catch (PDOException $e) {
-    $pdo->rollBack();
     die("❌ Error clearing data: " . $e->getMessage() . "\n");
 }
 
@@ -162,8 +157,8 @@ try {
         $currency = $currencies[array_rand($currencies)];
         $quantity = rand(10, 5000);
         $pricePerTon = rand(50, 500);
-        $recycled = ['yes', 'no', 'unknown'][rand(0, 2)];
-        $tested = ['yes', 'no', 'unknown'][rand(0, 2)];
+        $recycled = ['recycled', 'not_recycled', 'unknown'][rand(0, 2)];
+        $tested = ['tested', 'untested', 'unknown'][rand(0, 2)];
         
         // Generate price text
         $priceText = $currency === 'EUR' ? "€{$pricePerTon}/ton" : 
@@ -195,7 +190,9 @@ try {
     echo "✅ Step 3 Complete\n\n";
     
 } catch (PDOException $e) {
-    $pdo->rollBack();
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
     die("❌ Error injecting listings: " . $e->getMessage() . "\n");
 }
 
@@ -273,7 +270,9 @@ try {
     echo "✅ Step 4 Complete\n\n";
     
 } catch (PDOException $e) {
-    $pdo->rollBack();
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
     die("❌ Error injecting trial accounts: " . $e->getMessage() . "\n");
 }
 
