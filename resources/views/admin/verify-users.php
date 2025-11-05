@@ -69,12 +69,12 @@ try {
                             <p>Best regards,<br>Glass Market Team</p>
                         ';
                         
-                        $emailResult = $rustMailer->sendEmail(
+                        $emailResult = $rustMailer->send(
                             $user['email'],
-                            $user['name'],
                             'Glass Market - Account Approved',
                             $emailBody,
-                            true
+                            true,
+                            $user['name']
                         );
                         
                         if (!$emailResult['success']) {
