@@ -1737,18 +1737,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_listing'])) {
         });
     });
 
-    // Confirm delete function
-    function confirmDelete() {
-        if (confirm('⚠️ FINAL WARNING ⚠️\n\nAre you absolutely sure you want to permanently delete this listing?\n\nThis action CANNOT be undone!\n\nClick OK to delete forever, or Cancel to keep the listing.')) {
-            const form = document.getElementById('delete-form');
-            if (form) {
-                form.submit();
-            } else {
-                console.error('Delete form not found');
-                alert('Error: Could not find delete form. Please refresh the page and try again.');
-            }
-        }
-    }
     </script>
 </body>
 </html>
