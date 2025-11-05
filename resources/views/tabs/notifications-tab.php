@@ -6,7 +6,11 @@
 ?>
 <div class="tab-panel" id="tab-notifications">
     <h2 class="section-title">Notification Preferences</h2>
-    
+
+    <?php if (!$subscription_status['has_access']): ?>
+        <?php include __DIR__ . '/../components/subscription-required-message.php'; ?>
+    <?php else: ?>
+
     <p style="font-size: 14px; color: #6b7280; margin-bottom: 24px;">
         Control what notifications you receive and how you want to be notified.
     </p>
