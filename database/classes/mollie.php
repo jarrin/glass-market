@@ -197,16 +197,18 @@ class MolliePayment
             $amount = $months * 9.99; // €9.99 per month
             $description = "Glass Market Subscription - {$months} month(s)";
 
-            $redirectUrl = 'http://localhost/glass-market/resources/views/admin/mollie-return.php?user_id=' . $userId;
-            // For localhost testing, don't include webhook URL (Mollie can't reach localhost)
-            // In production, set this to a publicly accessible URL
-            $webhookUrl = null;
-
+            // Create payment first to get payment ID
             $metadata = [
                 'user_id' => $userId,
                 'months' => $months,
                 'type' => 'subscription'
             ];
+
+            // Webhook URL - null for localhost
+            $webhookUrl = null;
+
+            // Initial redirect URL (we'll update it with payment ID)
+            $redirectUrl = 'http://localhost/glass-market/resources/views/admin/mollie-return.php?user_id=' . $userId;
 
             $payment = $this->createPayment($amount, $description, $redirectUrl, $webhookUrl, $metadata);
             
