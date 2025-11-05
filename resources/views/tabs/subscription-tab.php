@@ -5,13 +5,13 @@
 <div class="tab-panel" id="tab-subscription">
     <h2 class="section-title">My Subscriptions</h2>
     
-    <?php if ($success_message && isset($_POST['cancel_subscription'])): ?>
+    <?php if ($success_message): ?>
         <div class="alert alert-success">
             <?php echo htmlspecialchars($success_message); ?>
         </div>
     <?php endif; ?>
-    
-    <?php if ($error_message && isset($_POST['cancel_subscription'])): ?>
+
+    <?php if ($error_message): ?>
         <div class="alert alert-error">
             <?php echo htmlspecialchars($error_message); ?>
         </div>
@@ -22,6 +22,49 @@
     </p>
     
     <?php if (!empty($user_subscriptions) && count($user_subscriptions) > 0): ?>
+        <!-- TEST BUTTON: Expire Subscription -->
+        <div style="
+            background: linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%);
+            border: 2px solid #fb923c;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+        ">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px;">
+                <div style="flex: 1;">
+                    <div style="font-weight: 700; font-size: 14px; color: #9a3412; margin-bottom: 4px;">
+                        🧪 Test Mode
+                    </div>
+                    <div style="font-size: 13px; color: #92400e;">
+                        Instantly expire your subscription for testing access control
+                    </div>
+                </div>
+                <form method="POST" action="<?php echo VIEWS_URL; ?>/handlers/expire-subscription-test.php" style="margin: 0;">
+                    <button
+                        type="submit"
+                        name="expire_subscription_test"
+                        onclick="return confirm('⚠️ This will expire your subscription immediately for testing. Continue?')"
+                        style="
+                            padding: 10px 20px;
+                            background: #ea580c;
+                            color: white;
+                            border: none;
+                            border-radius: 8px;
+                            font-weight: 600;
+                            font-size: 13px;
+                            cursor: pointer;
+                            white-space: nowrap;
+                            transition: all 0.2s;
+                        "
+                        onmouseover="this.style.background='#c2410c'"
+                        onmouseout="this.style.background='#ea580c'"
+                    >
+                        Expire Subscription
+                    </button>
+                </form>
+            </div>
+        </div>
+
         <!-- Display subscriptions -->
         <?php foreach ($user_subscriptions as $subscription): ?>
             <?php include __DIR__ . '/../components/subscription-card.php'; ?>
