@@ -42,27 +42,6 @@
             position: relative;
         }
         
-        .seller-avatar-large .verified-badge {
-            position: absolute;
-            bottom: 12px;
-            right: 12px;
-            background: rgba(255,255,255,0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 50%;
-            width: 48px;
-            height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
-        
-        .seller-avatar-large .verified-badge svg {
-            width: 28px;
-            height: 28px;
-            color: #059669;
-        }
-        
         .seller-header-info {
             flex: 1;
         }
