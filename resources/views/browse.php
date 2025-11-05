@@ -538,15 +538,19 @@
                 // update count labels in sidebar
                 document.querySelectorAll('#glass-types-list .count').forEach(el=>{
                     const li = el.closest('li');
-                    const input = li.querySelector('.glass-type-filter');
-                    const glassType = input.value;
-                    el.textContent = glassTypeCounts[glassType] !== undefined ? glassTypeCounts[glassType] : 0;
+                    const input = li.querySelector('.glass-filter');
+                    if (input) {
+                        const glassType = input.value;
+                        el.textContent = glassTypeCounts[glassType] !== undefined ? glassTypeCounts[glassType] : 0;
+                    }
                 });
                 document.querySelectorAll('#recycled-filter .count').forEach(el=>{
                     const li = el.closest('li');
                     const input = li.querySelector('.recycled-filter');
-                    const recycled = input.value;
-                    el.textContent = activeRecycled.includes(recycled) ? visibleCards.length : 0;
+                    if (input) {
+                        const recycled = input.value;
+                        el.textContent = activeRecycled.includes(recycled) ? visibleCards.length : 0;
+                    }
                 });
 
                 // Reset to page 1 when filters change
