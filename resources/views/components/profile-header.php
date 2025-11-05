@@ -5,7 +5,7 @@
 <div class="profile-header">
     <div class="profile-avatar">
         <?php if (!empty($user['avatar'])): ?>
-            <img src="<?php echo htmlspecialchars($user['avatar']); ?>" alt="<?php echo htmlspecialchars($user['name']); ?>">
+            <img src="<?php echo PUBLIC_URL . '/' . htmlspecialchars($user['avatar']); ?>" alt="<?php echo htmlspecialchars($user['name']); ?>">
         <?php else: ?>
             <div class="avatar-placeholder">
                 <?php echo strtoupper(substr($user['name'], 0, 1)); ?>

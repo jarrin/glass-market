@@ -85,10 +85,6 @@
                 </div>
             </div>
             <div style="display: grid; gap: 8px;">
-                <div style="display: flex; justify-content: space-between; padding: 8px 12px; background: #f9fafb; border-radius: 6px;">
-                    <span style="font-size: 13px; color: #6b7280;">Total Listings:</span>
-                    <strong style="font-size: 13px; color: #1f2937;"><?php echo $user_listings_count; ?></strong>
-                </div>
                 <?php 
                 // Get published/draft counts
                 try {
