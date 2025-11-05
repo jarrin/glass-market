@@ -112,15 +112,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 // Create 3-month free trial subscription
                 require_once __DIR__ . '/../../database/classes/subscriptions.php';
-                $subscription_created = Subscription::createTrialSubscription($pdo, $user_id);
+                $subscription_created = Subscription::createTrialSubscription($pdo, $user_id, $notification_email, $name);
 
-                // Send welcome email
+                // Send welcome email using Rust mailer
                 try {
-                    require_once __DIR__ . '/../../app/Services/EmailService.php';
-                    $emailService = new EmailService();
-                    $emailService->sendWelcomeEmail($notification_email, $name);
+                    require_once __DIR__ . '/../../app/Services/RustMailer.php';
+                    $rustMailer = new App\Services\RustMailer();
+                    $welcomeResult = $rustMailer->sendWelcomeEmail($notification_email, $name);
+                    
+                    if (!$welcomeResult['success']) {
+                        error_log("Welcome email failed: " . $welcomeResult['message']);
+                    }
                 } catch (Exception $e) {
-                    error_log("Welcome email failed: " . $e->getMessage());
+                    error_log("Welcome email exception: " . $e->getMessage());
                 }
 
                 if ($subscription_created) {

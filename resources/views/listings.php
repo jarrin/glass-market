@@ -10,18 +10,21 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
 }
 
 $id = (int) $_GET['id'];
+$user_id = $_SESSION['user_id'] ?? null;
 
-// Fetch the specific listing with company information
+// Fetch the specific listing with company information - allow draft viewing if owner
 $stmt = $pdo->prepare("
     SELECT 
         l.*,
         c.name as company_name,
         c.company_type,
         c.phone,
-        c.website
+        c.website,
+        u.id as owner_user_id
     FROM listings l 
     LEFT JOIN companies c ON l.company_id = c.id
-    WHERE l.id = ? AND l.published = 1 
+    LEFT JOIN users u ON c.id = u.company_id
+    WHERE l.id = ? 
     LIMIT 1
 ");
 $stmt->execute([$id]);
@@ -32,13 +35,20 @@ if (!$listing) {
     exit;
 }
 
+// Check if listing is published OR if current user owns it
+$is_owner = ($user_id && $listing['owner_user_id'] == $user_id);
+if ($listing['published'] != 1 && !$is_owner) {
+    header('Location: ' . VIEWS_URL . '/browse.php');
+    exit;
+}
+
 // Determine title and subtitle
 $title = $listing['quantity_note'] ?: ($listing['glass_type_other'] ?: $listing['glass_type']);
 $subtitle = $listing['glass_type_other'] ?: $listing['glass_type'];
 
 // Generate image URL - use actual uploaded image if available
 if (!empty($listing['image_path'])) {
-    $imageUrl = PUBLIC_URL . '/' . $listing['image_path'];
+    $imageUrl = PUBLIC_URL . '/' . ltrim($listing['image_path'], '/');
 } else {
     $imageUrl = "https://picsum.photos/seed/glass{$listing['id']}/800/800";
 }
@@ -47,9 +57,9 @@ if (!empty($listing['image_path'])) {
 // If actual image exists, use it for all three thumbnails, otherwise use placeholders
 if (!empty($listing['image_path'])) {
     $additionalImages = [
-        PUBLIC_URL . '/' . $listing['image_path'],
-        PUBLIC_URL . '/' . $listing['image_path'],
-        PUBLIC_URL . '/' . $listing['image_path']
+        PUBLIC_URL . '/' . ltrim($listing['image_path'], '/'),
+        PUBLIC_URL . '/' . ltrim($listing['image_path'], '/'),
+        PUBLIC_URL . '/' . ltrim($listing['image_path'], '/')
     ];
 } else {
     $additionalImages = [
@@ -99,6 +109,25 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
             color: #2a2623;
             margin: 0;
             line-height: 1.6;
+        }
+
+        /* Draft Banner */
+        .draft-banner {
+            background: #fef2f2;
+            border: 2px solid #dc2626;
+            color: #991b1b;
+            padding: 16px 24px;
+            text-align: center;
+            font-weight: 600;
+            margin: 100px auto 20px;
+            max-width: 1280px;
+            border-radius: 8px;
+        }
+
+        .draft-banner a {
+            color: #dc2626;
+            text-decoration: underline;
+            font-weight: 700;
         }
 
         /* Breadcrumb */
@@ -561,14 +590,22 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
     <?php include __DIR__ . '/../../includes/navbar.php'; ?>
     <?php include __DIR__ . '/../../includes/subscription-notification.php'; ?>
 
+    <?php if ($listing['published'] != 1 && $is_owner): ?>
+    <!-- Draft Banner -->
+    <div class="draft-banner">
+        ⚠️ This listing is in DRAFT mode and not visible to other users. 
+        <a href="<?= VIEWS_URL ?>/edit-listing.php?id=<?= $listing['id'] ?>">Edit and publish it</a> to make it public.
+    </div>
+    <?php endif; ?>
+
     <!-- Breadcrumb -->
     <div class="breadcrumb">
         <nav class="breadcrumb-nav">
-            <a href="<?php echo VIEWS_URL; ?>/index.php">Home</a>
+            <a href="<?php echo PUBLIC_URL; ?>/index.php">Home</a>
             <span>/</span>
             <a href="<?php echo VIEWS_URL; ?>/browse.php">Browse</a>
             <span>/</span>
-            <a href="<?php echo VIEWS_URL; ?>/browse.php?category=<?= urlencode($listing['glass_type']) ?>">Vases & Vessels</a>
+            <a href="<?php echo VIEWS_URL; ?>/browse.php?category=<?= urlencode($listing['glass_type']) ?>"><?= htmlspecialchars($listing['glass_type']) ?></a>
             <span>/</span>
             <span class="current"><?= htmlspecialchars($title) ?></span>
         </nav>
@@ -687,12 +724,14 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
                     </div>
                 </div>
 
+              
                 <!-- Tabs -->
                 <div class="tabs">
                     <ul class="tab-list">
                         <li><button class="tab-button active" onclick="showTab('description')">Description</button></li>
                         <li><button class="tab-button" onclick="showTab('specifications')">Specifications</button></li>
                         <li><button class="tab-button" onclick="showTab('seller')">About Seller</button></li>
+                        <li><button class="tab-button" onclick="showTab('reviews')">Reviews (<?= $reviewCount ?>)</button></li>
                     </ul>
                 </div>
 
@@ -767,6 +806,11 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
                                 View All Products from This Seller
                             </a>
                         </p>
+               
+
+                <div class="tab-content" id="reviews-tab">
+                    <div class="description-text">
+                        <p style="color: #6b6460; font-style: italic;">Customer reviews and ratings will be displayed here. This feature is coming soon!</p>
                     </div>
                 </div>
             </div>

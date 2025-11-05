@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 05, 2025 at 09:16 AM
+-- Generation Time: Nov 05, 2025 at 11:01 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -183,7 +183,7 @@ CREATE TABLE `listings` (
 INSERT INTO `listings` (`id`, `location_id`, `company_id`, `side`, `glass_type`, `glass_type_other`, `quantity_tons`, `quantity_note`, `recycled`, `tested`, `storage_location`, `price_text`, `currency`, `created_at`, `valid_until`, `published`, `quality_notes`, `image_path`, `accepted_by_contract`) VALUES
 (4, NULL, 4, 'WTS', 'Brown Glass', NULL, 432545.00, 'asdfasdf!', 'unknown', 'unknown', NULL, '', 'EUR', '2025-10-31 10:16:48', NULL, 1, 'rtwert', 'uploads/listings/listing_1761905808_69048c908d4b3.jpeg', 0),
 (5, NULL, 5, 'WTS', 'Green Glass', NULL, 324.00, 'ifjbnwjri', 'unknown', 'unknown', NULL, NULL, 'EUR', '2025-11-03 12:45:22', NULL, 1, 'asdf', 'uploads/listings/listing_1762173922_6908a3e2cb7ea.png', 0),
-(6, NULL, 5, 'WTS', 'Green Glass', NULL, 234.00, 'asdfasdf', 'unknown', 'unknown', NULL, NULL, 'EUR', '2025-11-03 12:48:53', NULL, 0, 'erwt', 'uploads/listings/listing_1762174133_6908a4b57b97e.png', 0);
+(6, NULL, 5, 'WTS', 'Other Glass', NULL, 234.00, 'asdfasdf', 'unknown', 'unknown', NULL, '', 'EUR', '2025-11-03 12:48:53', NULL, 0, 'erwt', 'uploads/listings/listing_1762174133_6908a4b57b97e.png', 0);
 
 -- --------------------------------------------------------
 
@@ -698,6 +698,22 @@ CREATE TABLE `payment_errors` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `push_notifications`
+--
+
+CREATE TABLE `push_notifications` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `body` text DEFAULT NULL,
+  `url` varchar(500) DEFAULT NULL,
+  `is_read` tinyint(1) DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `recycled_statuses`
 --
 
@@ -790,22 +806,28 @@ CREATE TABLE `users` (
   `approved_by` bigint(20) DEFAULT NULL,
   `last_login` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp()
+  `updated_at` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp(),
+  `notify_new_listings` tinyint(1) DEFAULT 1 COMMENT 'Email notification for new listings',
+  `notify_account_updates` tinyint(1) DEFAULT 1 COMMENT 'Email notification for account updates',
+  `notify_newsletter` tinyint(1) DEFAULT 0 COMMENT 'Receive newsletter emails',
+  `push_new_listings` tinyint(1) DEFAULT 0 COMMENT 'Push notification for new listings',
+  `push_messages` tinyint(1) DEFAULT 0 COMMENT 'Push notification for messages'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `company_id`, `created_by`, `email`, `avatar`, `email_verified_at`, `password`, `remember_token`, `name`, `company_name`, `phone`, `roles`, `is_admin`, `is_approved`, `approved_at`, `approved_by`, `last_login`, `created_at`, `updated_at`) VALUES
-(4, NULL, NULL, 'admin@glassmarket.com', NULL, '2025-10-27 13:08:53', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', NULL, 'Admin', NULL, NULL, NULL, 1, 0, NULL, NULL, NULL, '2025-10-27 12:29:44', '2025-10-29 14:40:57'),
-(5, 6, NULL, 'colinpoort@hotmail.com', '/glass-market/public/uploads/avatars/avatar_5_1761660214.jpg', '2025-10-27 13:14:36', '$2y$10$3le7iqImsFG85PwGuK60i.KcZpRP0wxk9MoHF3iBFXjpRx3oaJxpq', '30804072962d6ccea488d67d676f56a61fda774d49489c2114982b317eef78c9', 'Cornelis Wim Poort', 'CP Company', NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-10-27 13:13:58', '2025-11-04 11:27:20'),
-(6, NULL, NULL, 'gijs@gmail.com', NULL, '2025-10-27 13:33:45', '$2y$10$qiL225fIXPba/gq8Z/mZwOGOaXBiYU8lmIjQzBMy4vn6mZ4X0fWoa', NULL, 'Gijsje Radijsje', NULL, NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-10-27 13:33:06', '2025-10-27 13:33:45'),
-(7, NULL, NULL, 'Kaj@gmail.com', NULL, '2025-10-27 14:04:47', '$2y$10$e3IsWujghleCxhlVwmlOwOph2Ijlq3gOfOMc8EcTxIUJVkZL6wpdq', NULL, 'Kaj', NULL, NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-10-27 13:56:22', '2025-10-27 14:04:47'),
-(9, NULL, NULL, 'colinpoort12@hotmail.com', NULL, NULL, '$2y$10$5LuxQblwc2OqwTw7tzQU7eDA3g1QV4L/.3rn6XsQSn5301dSLpcQ.', NULL, 'Colin', NULL, NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-10-28 14:15:57', '2025-10-29 13:40:57'),
-(10, 5, NULL, 'test_sub@testsub.com', NULL, '2025-10-29 14:07:18', '$2y$10$qYcQxm8kHYBDjXc2Skh05erADJ5uxwub0DOHWojfcgYLEVfiKHwOi', NULL, 'test_sub', 'test_sub', NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-10-29 14:06:07', '2025-11-03 12:45:22'),
-(11, 4, NULL, 'testaccount@gmail.com', '/glass-market/public/uploads/avatars/avatar_11_1761905779.jpg', '2025-10-31 09:40:18', '$2y$10$9SuQyKcOKfwc5v5Nxep.tOeqwCztfV3ikKI/cQHFRq2Sx.9IHj.h.', NULL, 'testaccount', 'testaccount', NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-10-31 09:39:51', '2025-10-31 10:16:19'),
-(12, NULL, NULL, 'testsa@gmail.com', NULL, '2025-11-04 18:15:36', '$2y$10$d2m/MmsVZILbXCCy5u2Q.euUrb5RwIMDYg6pBhU0c.csJBCNilXka', NULL, 'testsa', NULL, NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-11-04 18:15:36', NULL);
+INSERT INTO `users` (`id`, `company_id`, `created_by`, `email`, `avatar`, `email_verified_at`, `password`, `remember_token`, `name`, `company_name`, `phone`, `roles`, `is_admin`, `is_approved`, `approved_at`, `approved_by`, `last_login`, `created_at`, `updated_at`, `notify_new_listings`, `notify_account_updates`, `notify_newsletter`, `push_new_listings`, `push_messages`) VALUES
+(4, NULL, NULL, 'admin@glassmarket.com', NULL, '2025-10-27 13:08:53', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', NULL, 'Admin', NULL, NULL, NULL, 1, 0, NULL, NULL, NULL, '2025-10-27 12:29:44', '2025-10-29 14:40:57', 1, 1, 0, 0, 0),
+(5, 6, NULL, 'colinpoort@hotmail.com', '/glass-market/public/uploads/avatars/avatar_5_1761660214.jpg', '2025-10-27 13:14:36', '$2y$10$3le7iqImsFG85PwGuK60i.KcZpRP0wxk9MoHF3iBFXjpRx3oaJxpq', '30804072962d6ccea488d67d676f56a61fda774d49489c2114982b317eef78c9', 'Cornelis Wim Poort', 'CP Company', NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-10-27 13:13:58', '2025-11-04 11:27:20', 1, 1, 0, 0, 0),
+(6, NULL, NULL, 'gijs@gmail.com', NULL, '2025-10-27 13:33:45', '$2y$10$qiL225fIXPba/gq8Z/mZwOGOaXBiYU8lmIjQzBMy4vn6mZ4X0fWoa', NULL, 'Gijsje Radijsje', NULL, NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-10-27 13:33:06', '2025-10-27 13:33:45', 1, 1, 0, 0, 0),
+(7, NULL, NULL, 'Kaj@gmail.com', NULL, '2025-10-27 14:04:47', '$2y$10$e3IsWujghleCxhlVwmlOwOph2Ijlq3gOfOMc8EcTxIUJVkZL6wpdq', NULL, 'Kaj', NULL, NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-10-27 13:56:22', '2025-10-27 14:04:47', 1, 1, 0, 0, 0),
+(9, NULL, NULL, 'colinpoort12@hotmail.com', NULL, NULL, '$2y$10$5LuxQblwc2OqwTw7tzQU7eDA3g1QV4L/.3rn6XsQSn5301dSLpcQ.', NULL, 'Colin', NULL, NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-10-28 14:15:57', '2025-10-29 13:40:57', 1, 1, 0, 0, 0),
+(10, 5, NULL, 'test_sub@testsub.com', NULL, '2025-10-29 14:07:18', '$2y$10$qYcQxm8kHYBDjXc2Skh05erADJ5uxwub0DOHWojfcgYLEVfiKHwOi', NULL, 'test_sub!', 'test_sub', NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-10-29 14:06:07', '2025-11-05 08:40:12', 1, 1, 0, 0, 0),
+(11, 4, NULL, 'testaccount@gmail.com', '/glass-market/public/uploads/avatars/avatar_11_1761905779.jpg', '2025-10-31 09:40:18', '$2y$10$9SuQyKcOKfwc5v5Nxep.tOeqwCztfV3ikKI/cQHFRq2Sx.9IHj.h.', NULL, 'testaccount', 'testaccount', NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-10-31 09:39:51', '2025-10-31 10:16:19', 1, 1, 0, 0, 0),
+(12, NULL, NULL, 'testsa@gmail.com', NULL, '2025-11-04 18:15:36', '$2y$10$d2m/MmsVZILbXCCy5u2Q.euUrb5RwIMDYg6pBhU0c.csJBCNilXka', NULL, 'testsa', NULL, NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-11-04 18:15:36', NULL, 1, 1, 0, 0, 0),
+(13, NULL, NULL, 'asdf@gmail.com', NULL, '2025-11-05 09:53:19', '$2y$10$c97289zCDVnWSzwqly7BFug7aQ3rJioiQs4Z0jE4lmXGvqFwl8MUa', NULL, 'asdf', NULL, NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-11-05 09:53:19', NULL, 1, 1, 0, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -868,7 +890,8 @@ INSERT INTO `user_subscriptions` (`id`, `user_id`, `start_date`, `end_date`, `is
 (5, 10, '2025-10-31', '2025-12-01', 0, 1, '2025-10-31 09:22:15', NULL),
 (7, 11, '2025-10-31', '2025-12-01', 0, 1, '2025-10-31 09:42:51', NULL),
 (8, 12, '2025-11-04', '2026-02-04', 1, 1, '2025-11-04 18:15:36', NULL),
-(9, 12, '2025-11-04', '2026-02-04', 1, 1, '2025-11-04 18:20:42', NULL);
+(9, 12, '2025-11-04', '2026-02-04', 1, 1, '2025-11-04 18:20:42', NULL),
+(10, 13, '2025-11-05', '2026-02-05', 1, 1, '2025-11-05 09:53:19', NULL);
 
 -- --------------------------------------------------------
 
@@ -1010,6 +1033,15 @@ ALTER TABLE `payment_errors`
   ADD KEY `created_at` (`created_at`);
 
 --
+-- Indexes for table `push_notifications`
+--
+ALTER TABLE `push_notifications`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_user_id` (`user_id`),
+  ADD KEY `idx_is_read` (`is_read`),
+  ADD KEY `idx_created_at` (`created_at`);
+
+--
 -- Indexes for table `recycled_statuses`
 --
 ALTER TABLE `recycled_statuses`
@@ -1139,6 +1171,12 @@ ALTER TABLE `payment_errors`
   MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `push_notifications`
+--
+ALTER TABLE `push_notifications`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `subscriptions`
 --
 ALTER TABLE `subscriptions`
@@ -1148,7 +1186,7 @@ ALTER TABLE `subscriptions`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `user_emails`
@@ -1160,7 +1198,7 @@ ALTER TABLE `user_emails`
 -- AUTO_INCREMENT for table `user_subscriptions`
 --
 ALTER TABLE `user_subscriptions`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- Constraints for dumped tables
