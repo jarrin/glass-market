@@ -2,10 +2,17 @@
 session_start();
 
 require_once __DIR__ . '/../../config.php';
+require_once __DIR__ . '/../../includes/subscription-check.php';
 
 // Require authentication
 if (!isset($_SESSION['user_logged_in']) || $_SESSION['user_logged_in'] !== true) {
     header('Location: ' . VIEWS_URL . '/login.php');
+    exit;
+}
+
+// Require active subscription
+if (!$subscription_status['has_access']) {
+    header('Location: ' . VIEWS_URL . '/pricing.php');
     exit;
 }
 
