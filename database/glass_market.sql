@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 05, 2025 at 02:35 PM
+-- Generation Time: Nov 05, 2025 at 05:57 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -133,7 +133,8 @@ INSERT INTO `companies` (`id`, `name`, `logo`, `description`, `address_line1`, `
 (48, 'Trial Company 47', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, 'Trader', NULL, NULL, '2025-11-05 10:09:35'),
 (49, 'Trial Company 48', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, 'Trader', NULL, NULL, '2025-11-05 10:09:35'),
 (50, 'Trial Company 49', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, 'Glass Recycle Plant', NULL, NULL, '2025-11-05 10:09:35'),
-(51, 'Trial Company 50', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, 'Glass Factory', NULL, NULL, '2025-11-05 10:09:36');
+(51, 'Trial Company 50', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, 'Glass Factory', NULL, NULL, '2025-11-05 10:09:36'),
+(52, 'Test_Company', NULL, 'Hey', 'van Randwijcklaan 47c', '', '', 'Amersfoort', 'Netherlands', 66, 0, NULL, 'Glass Recycle Plant', '', '', '2025-11-05 13:45:04');
 
 -- --------------------------------------------------------
 
@@ -330,7 +331,10 @@ INSERT INTO `listings` (`id`, `location_id`, `company_id`, `user_id`, `side`, `g
 (98, NULL, 1, 4, 'WTB', 'Green Glass', NULL, 1533.00, 'One-time bulk sale', 'not_recycled', 'unknown', NULL, '£427/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Certified recycled content', 'image.png', 0),
 (99, NULL, 1, 4, 'WTS', 'Brown Glass', NULL, 4403.00, 'Ongoing contract', 'recycled', 'unknown', NULL, '£330/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'High-quality recycled glass', 'image.png', 0),
 (100, NULL, 1, 4, 'WTS', 'Green Glass', NULL, 1276.00, 'Big bags available', 'recycled', 'untested', NULL, '$118/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Premium grade glass material', 'image.png', 0),
-(102, NULL, NULL, 65, 'WTS', 'Green Glass', NULL, 23.00, 'Premium Green Bottle Glass Cullet – Clean and Ready for Melt', 'recycled', 'tested', NULL, '€145/ton', 'EUR', '2025-11-05 13:22:17', NULL, 1, 'ASAP', 'image.png', 0);
+(102, NULL, NULL, 65, 'WTS', 'Green Glass', NULL, 23.00, 'Premium Green Bottle Glass Cullet – Clean and Ready for Melt', 'recycled', 'tested', NULL, '€145/ton', 'EUR', '2025-11-05 13:22:17', NULL, 1, 'ASAP', 'image.png', 0),
+(104, NULL, 52, 66, 'WTS', 'Clear Cullet', NULL, 123.00, 'TEST!', 'not_recycled', 'untested', 'FSDF', '323', 'EUR', '2025-11-05 14:54:20', NULL, 1, '23', 'image.png', 0),
+(105, NULL, 52, 66, 'WTS', 'Green Cullet', '', 23.00, '', 'unknown', 'unknown', '', '', 'EUR', '2025-11-05 15:23:43', NULL, 0, '', 'image.png', 0),
+(107, NULL, NULL, 66, 'WTS', 'Green Cullet', '', 2.00, '', 'unknown', 'unknown', '', '', 'EUR', '2025-11-05 16:28:10', NULL, 1, '', 'image.png', 0);
 
 -- --------------------------------------------------------
 
@@ -352,7 +356,11 @@ CREATE TABLE `listing_images` (
 --
 
 INSERT INTO `listing_images` (`id`, `listing_id`, `image_path`, `is_main`, `display_order`, `created_at`) VALUES
-(20, 102, 'uploads/listings/listing_102_1762348937_0.jpg', 1, 0, '2025-11-05 13:22:17');
+(20, 102, 'uploads/listings/listing_102_1762348937_0.jpg', 1, 0, '2025-11-05 13:22:17'),
+(21, 104, 'uploads/listings/listing_104_1762354460_0.png', 0, 0, '2025-11-05 14:54:20'),
+(22, 104, 'uploads/listings/listing_104_1762354460_1.png', 0, 1, '2025-11-05 14:54:20'),
+(23, 104, 'uploads/listings/listing_104_1762354460_2.png', 1, 2, '2025-11-05 14:54:20'),
+(25, 107, 'uploads/listings/listing_107_1762360090_0.jpg', 1, 0, '2025-11-05 16:28:10');
 
 -- --------------------------------------------------------
 
@@ -921,7 +929,8 @@ CREATE TABLE `saved_listings` (
 --
 
 INSERT INTO `saved_listings` (`id`, `user_id`, `listing_id`, `created_at`) VALUES
-(2, 65, 1, '2025-11-05 13:22:33');
+(2, 65, 1, '2025-11-05 13:22:33'),
+(3, 66, 102, '2025-11-05 14:17:57');
 
 -- --------------------------------------------------------
 
@@ -1072,7 +1081,8 @@ INSERT INTO `users` (`id`, `company_id`, `created_by`, `email`, `avatar`, `email
 (62, 50, NULL, 'trial49@trial.test', NULL, NULL, '$2y$12$XJxjvj/XoUFtaFWhR7JgFuf7JmfgpSSEH9Ii7e6RpF0pmCAfvyfG6', NULL, 'Trial User 49', NULL, NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-11-05 10:09:35', NULL, 1, 1, 0, 0, 0),
 (63, 51, NULL, 'trial50@trial.test', NULL, NULL, '$2y$12$D1gP.NMwUBNAblRnWG/51OPTzma7O4qnZKv5gAcgjG86WA0CvQeoK', NULL, 'Trial User 50', NULL, NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-11-05 10:09:36', NULL, 1, 1, 0, 0, 0),
 (64, NULL, NULL, 'jarrin@dmg.nu', NULL, '2025-11-05 10:25:39', '$2y$10$qBsoQVo5NG2JL6W2V1rNpe06EwLaAR/3WucJrlZshy.Q1lFd09h8C', NULL, 'Zeker', 'Je moeder', NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-11-05 10:25:39', NULL, 1, 1, 0, 0, 0),
-(65, NULL, NULL, 'testjarrin@gmail.com', '/uploads/avatars/avatar_65_1762349169.jpg', '2025-11-05 10:27:20', '$2y$10$BHuXPgqXXYExKh.SyOspKeaY/xOQ0hYp5tnDF6ztQqJc433Kd5gKK', NULL, 'Zeker!', 'Je moeder', NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-11-05 10:27:20', '2025-11-05 13:26:09', 1, 1, 0, 0, 0);
+(65, NULL, NULL, 'testjarrin@gmail.com', '/uploads/avatars/avatar_65_1762349169.jpg', '2025-11-05 10:27:20', '$2y$10$BHuXPgqXXYExKh.SyOspKeaY/xOQ0hYp5tnDF6ztQqJc433Kd5gKK', NULL, 'Zeker!', 'Je moeder', NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-11-05 10:27:20', '2025-11-05 13:26:09', 1, 1, 0, 0, 0),
+(66, 52, NULL, 'Test_Company@gmail.com', '/uploads/avatars/avatar_66_1762350855.jpg', '2025-11-05 13:45:04', '$2y$10$RRXcxWB1uzPGeqhIqtv7Bele8LT9tvt5nbPyFSH8ZBRun2U984a4W', NULL, 'glasmarket', 'Test_Company', NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-11-05 13:45:04', '2025-11-05 13:54:15', 1, 1, 0, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -1188,7 +1198,8 @@ INSERT INTO `user_subscriptions` (`id`, `user_id`, `start_date`, `end_date`, `is
 (59, 62, '2025-11-05', '2025-11-19', 1, 1, '2025-11-05 10:09:35', NULL),
 (60, 63, '2025-11-05', '2025-11-19', 1, 1, '2025-11-05 10:09:36', NULL),
 (61, 64, '2025-11-05', '2026-02-05', 1, 1, '2025-11-05 10:25:39', NULL),
-(62, 65, '2025-11-05', '2026-03-05', 0, 1, '2025-11-05 10:27:20', '2025-11-05 10:32:15');
+(62, 65, '2025-11-05', '2026-03-05', 0, 1, '2025-11-05 10:27:20', '2025-11-05 10:32:15'),
+(63, 66, '2025-11-05', '2026-02-05', 1, 1, '2025-11-05 13:45:04', NULL);
 
 -- --------------------------------------------------------
 
@@ -1423,7 +1434,7 @@ ALTER TABLE `capacities`
 -- AUTO_INCREMENT for table `companies`
 --
 ALTER TABLE `companies`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=53;
 
 --
 -- AUTO_INCREMENT for table `contracts`
@@ -1435,13 +1446,13 @@ ALTER TABLE `contracts`
 -- AUTO_INCREMENT for table `listings`
 --
 ALTER TABLE `listings`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=103;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=108;
 
 --
 -- AUTO_INCREMENT for table `listing_images`
 --
 ALTER TABLE `listing_images`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT for table `locations`
@@ -1501,7 +1512,7 @@ ALTER TABLE `push_notifications`
 -- AUTO_INCREMENT for table `saved_listings`
 --
 ALTER TABLE `saved_listings`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `subscriptions`
@@ -1513,7 +1524,7 @@ ALTER TABLE `subscriptions`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=66;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=67;
 
 --
 -- AUTO_INCREMENT for table `user_emails`
@@ -1525,7 +1536,7 @@ ALTER TABLE `user_emails`
 -- AUTO_INCREMENT for table `user_subscriptions`
 --
 ALTER TABLE `user_subscriptions`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=63;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
 
 --
 -- Constraints for dumped tables
