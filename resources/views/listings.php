@@ -731,7 +731,10 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
                         <li><button class="tab-button active" onclick="showTab('description')">Description</button></li>
                         <li><button class="tab-button" onclick="showTab('specifications')">Specifications</button></li>
                         <li><button class="tab-button" onclick="showTab('seller')">About Seller</button></li>
+<<<<<<< HEAD
                         <li><button class="tab-button" onclick="showTab('reviews')">Reviews (<?= $reviewCount ?>)</button></li>
+=======
+>>>>>>> 074ddcc (fixed listing, added gifs)
                     </ul>
                 </div>
 
@@ -806,11 +809,14 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
                                 View All Products from This Seller
                             </a>
                         </p>
+<<<<<<< HEAD
                
 
                 <div class="tab-content" id="reviews-tab">
                     <div class="description-text">
                         <p style="color: #6b6460; font-style: italic;">Customer reviews and ratings will be displayed here. This feature is coming soon!</p>
+=======
+>>>>>>> 074ddcc (fixed listing, added gifs)
                     </div>
                 </div>
             </div>
