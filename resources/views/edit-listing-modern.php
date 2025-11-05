@@ -879,12 +879,15 @@ try {
             aspect-ratio: 1;
             overflow: hidden;
             background: #f9fafb;
+            cursor: pointer;
+            user-select: none;
         }
 
         .image-card-img img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            pointer-events: none;
         }
 
         .main-badge {
@@ -1315,6 +1318,13 @@ try {
                                 </p>
                             </div>
                             <div id="bulk-actions" style="display: none; gap: 8px;">
+                                <button type="button" class="btn-bulk" onclick="selectAll()" style="background: var(--profile-primary);">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M9 11l3 3L22 4"/>
+                                        <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+                                    </svg>
+                                    Select All
+                                </button>
                                 <button type="button" class="btn-bulk" onclick="bulkDelete()" style="background: #ef4444;">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
@@ -1328,6 +1338,14 @@ try {
                                     Cancel
                                 </button>
                             </div>
+                        </div>
+
+                        <!-- Selection Hint -->
+                        <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 12px 16px; border-radius: 8px; margin-bottom: 24px; font-size: 13px; color: #1e40af;">
+                            💡 <strong>Quick tips:</strong> Click on any image to select it, or use checkboxes. 
+                            Press <kbd style="background: white; padding: 2px 6px; border-radius: 4px; border: 1px solid #cbd5e1;">Ctrl+A</kbd> to select all, 
+                            <kbd style="background: white; padding: 2px 6px; border-radius: 4px; border: 1px solid #cbd5e1;">Delete</kbd> to remove selected, 
+                            <kbd style="background: white; padding: 2px 6px; border-radius: 4px; border: 1px solid #cbd5e1;">Esc</kbd> to deselect.
                         </div>
 
                         <!-- Current Images -->
@@ -1562,6 +1580,13 @@ try {
     function deselectAll() {
         document.querySelectorAll('.image-select-cb:checked').forEach(cb => {
             cb.checked = false;
+        });
+        updateSelection();
+    }
+
+    function selectAll() {
+        document.querySelectorAll('.image-select-cb:not(:disabled)').forEach(cb => {
+            cb.checked = true;
         });
         updateSelection();
     }
@@ -1846,6 +1871,35 @@ try {
                 card.remove();
             } else {
                 seenIds.add(imageId);
+            }
+        });
+
+        // Keyboard shortcuts for image management
+        document.addEventListener('keydown', function(e) {
+            // Only in images tab
+            const imagesTab = document.getElementById('tab-images');
+            if (!imagesTab || !imagesTab.classList.contains('active')) {
+                return;
+            }
+
+            // Ctrl/Cmd + A to select all
+            if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
+                e.preventDefault();
+                selectAll();
+            }
+
+            // Delete key to delete selected
+            if (e.key === 'Delete' || e.key === 'Backspace') {
+                const selected = document.querySelectorAll('.image-select-cb:checked');
+                if (selected.length > 0) {
+                    e.preventDefault();
+                    bulkDelete();
+                }
+            }
+
+            // Escape to deselect all
+            if (e.key === 'Escape') {
+                deselectAll();
             }
         });
     });
