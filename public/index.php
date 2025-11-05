@@ -1,6 +1,7 @@
-<?php 
+<?php
 session_start();
-require_once __DIR__ . '/../config.php'; 
+require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../includes/subscription-check.php';
 
 // Fetch latest listings from database
 require_once __DIR__ . '/../includes/db_connect.php';
