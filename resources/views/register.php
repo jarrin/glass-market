@@ -67,10 +67,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // Column already exists, ignore error
                 }
 
-                // Insert user with email_verified_at set to NOW() (auto-verified for regular users)
+                // Insert user WITHOUT verification (email_verified_at = NULL) - requires admin approval
                 $stmt = $pdo->prepare('
                     INSERT INTO users (name, company_name, email, password, email_verified_at)
-                    VALUES (:name, :company_name, :email, :password, NOW())
+                    VALUES (:name, :company_name, :email, :password, NULL)
                 ');
 
                 $stmt->execute([
@@ -125,32 +125,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                 }
 
-                // Create 3-month free trial subscription
-                require_once __DIR__ . '/../../database/classes/subscriptions.php';
-                $subscription_created = Subscription::createTrialSubscription($pdo, $user_id, $notification_email, $name);
-
-                // Only commit and send email if subscription was created successfully
-                if ($subscription_created) {
-                    $pdo->commit();
+                // Commit the user creation (trial subscription will be created after admin approval)
+                $pdo->commit();
+                
+                // Send registration notification email
+                try {
+                    require_once __DIR__ . '/../../app/Services/RustMailer.php';
+                    $rustMailer = new App\Services\RustMailer();
                     
-                    try {
-                        require_once __DIR__ . '/../../app/Services/RustMailer.php';
-                        $rustMailer = new App\Services\RustMailer();
-                        $welcomeResult = $rustMailer->sendWelcomeEmail($notification_email, $name);
-                        
-                        if (!$welcomeResult['success']) {
-                            error_log("Welcome email failed: " . $welcomeResult['message']);
-                        }
-                    } catch (Exception $e) {
-                        error_log("Welcome email exception: " . $e->getMessage());
+                    $emailBody = '
+                        <h2 style="color: #333;">Registration Received</h2>
+                        <p>Dear ' . htmlspecialchars($name) . ',</p>
+                        <p>Thank you for registering with Glass Market. Your account has been created and is pending admin approval.</p>
+                        <p><strong>What happens next?</strong></p>
+                        <ul>
+                            <li>Our admin team will review your registration</li>
+                            <li>You will receive an email once your account is approved</li>
+                            <li>After approval, you will receive a 3-month free trial</li>
+                        </ul>
+                        <p>This process typically takes 24-48 hours.</p>
+                        <p>Best regards,<br>Glass Market Team</p>
+                    ';
+                    
+                    $emailResult = $rustMailer->sendEmail(
+                        $notification_email,
+                        $name,
+                        'Glass Market - Registration Pending Approval',
+                        $emailBody,
+                        true
+                    );
+                    
+                    if (!$emailResult['success']) {
+                        error_log("Registration notification email failed: " . $emailResult['message']);
                     }
-                    
-                    $success_message = 'Registration successful! You have been granted a 3-month free trial. Check your email for details. You can now log in to your account.';
-                } else {
-                    $pdo->rollBack();
-                    $error_message = 'Registration failed: Unable to create trial subscription. Please try again or contact support.';
-                    error_log("Trial subscription creation failed for user_id: $user_id - rolling back user creation");
+                } catch (Exception $e) {
+                    error_log("Registration notification email exception: " . $e->getMessage());
                 }
+                
+                $success_message = 'Registration successful! Your account is pending admin approval. You will receive an email notification once approved (typically within 24-48 hours).';
             }
         } catch (PDOException $e) {
             if ($pdo && $pdo->inTransaction()) {
