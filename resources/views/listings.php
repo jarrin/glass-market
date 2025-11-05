@@ -113,6 +113,79 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
     <title><?= htmlspecialchars($title) ?> - Glass Market</title>
     <link rel="stylesheet" href="<?php echo CSS_URL; ?>/app.css">
     <style>
+        /* Toast Notification Styles */
+        .toast {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            background: white;
+            color: #1f2937;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 10000;
+            animation: slideInUp 0.3s ease, fadeOut 0.3s ease 2.7s;
+            min-width: 320px;
+            max-width: 500px;
+        }
+        
+        @keyframes slideInUp {
+            from {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+        }
+        
+        .toast.success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+        
+        .toast.error {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+        
+        .toast.info {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+        }
+        
+        .toast-icon {
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+        
+        .toast-content {
+            flex: 1;
+        }
+        
+        .toast-title {
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 2px;
+        }
+        
+        .toast-message {
+            font-size: 13px;
+            opacity: 0.95;
+            line-height: 1.4;
+        }
+        
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: #f9f7f5;
@@ -862,6 +935,38 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
   </main>
   <?php include __DIR__ . '/../../includes/footer.php'; ?>
     <script>
+        // Toast Notification Function
+        function showToast(message, type = 'success', title = '') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const icons = {
+                success: '✓',
+                error: '✕',
+                info: 'ℹ'
+            };
+            
+            const titles = {
+                success: title || 'Success',
+                error: title || 'Error',
+                info: title || 'Info'
+            };
+            
+            toast.innerHTML = `
+                <div class="toast-icon">${icons[type]}</div>
+                <div class="toast-content">
+                    <div class="toast-title">${titles[type]}</div>
+                    <div class="toast-message">${message}</div>
+                </div>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
         function changeImage(src, element) {
             const mainImage = document.querySelector('#mainImage img');
             mainImage.src = src;
@@ -889,17 +994,25 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
 
         function contactSeller() {
             <?php if (!empty($listing['seller_email'])): ?>
-                const subject = encodeURIComponent('Inquiry about: <?= htmlspecialchars($title, ENT_QUOTES, 'UTF-8') ?>');
-                const body = encodeURIComponent('Hello,\n\nI am interested in your listing: <?= htmlspecialchars($title, ENT_QUOTES, 'UTF-8') ?>\n\nListing URL: ' + window.location.href + '\n\nThank you.');
-                window.location.href = 'mailto:<?= htmlspecialchars($listing['seller_email']) ?>?subject=' + subject + '&body=' + body;
+                const listingTitle = <?php echo json_encode($title); ?>;
+                const subject = encodeURIComponent('Inquiry about: ' + listingTitle);
+                const body = encodeURIComponent('Hello,\n\nI am interested in your listing: ' + listingTitle + '\n\nListing URL: ' + window.location.href + '\n\nThank you.');
+                
+                // Show toast notification first
+                showToast('Opening your email client...', 'info', 'Contact Seller');
+                
+                // Small delay to show the toast before opening email
+                setTimeout(() => {
+                    window.location.href = 'mailto:<?= htmlspecialchars($listing['seller_email']) ?>?subject=' + subject + '&body=' + body;
+                }, 500);
             <?php else: ?>
-                alert('Contact information for this seller is not available.');
+                showToast('Contact information for this seller is not available.', 'error', 'Unavailable');
             <?php endif; ?>
         }
 
         function saveListing() {
             <?php if (isset($_SESSION['user_logged_in']) && $_SESSION['user_logged_in']): ?>
-                fetch('<?php echo VIEWS_URL; ?>/../includes/save-listing.php', {
+                fetch('<?php echo BASE_URL; ?>/includes/save-listing.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -908,24 +1021,39 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
                         listing_id: <?php echo $id; ?>
                     })
                 })
-                .then(response => response.json())
-                .then(data => {
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('HTTP error! status: ' + response.status);
+                    }
+                    return response.text();
+                })
+                .then(text => {
+                    let data;
+                    try {
+                        data = JSON.parse(text);
+                    } catch (e) {
+                        console.error('Response was not JSON:', text);
+                        throw new Error('Invalid JSON response from server');
+                    }
+                    
                     if (data.success) {
                         const saveBtn = document.querySelector('.secondary-btn');
                         if (data.saved) {
                             saveBtn.innerHTML = '<svg width="18" height="18" fill="#ef4444" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg> Saved';
                             saveBtn.style.color = '#ef4444';
+                            showToast('Listing saved to your collection', 'success', 'Saved');
                         } else {
                             saveBtn.innerHTML = '<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg> Save';
                             saveBtn.style.color = '';
+                            showToast('Listing removed from your collection', 'info', 'Removed');
                         }
-                        alert(data.message);
                     } else {
-                        alert(data.message);
+                        showToast(data.message || 'Failed to save listing', 'error', 'Failed');
                     }
                 })
                 .catch(error => {
-                    alert('Error saving listing. Please try again.');
+                    console.error('Error:', error);
+                    showToast(error.message, 'error', 'Error');
                 });
             <?php else: ?>
                 window.location.href = '<?php echo VIEWS_URL; ?>/login.php';
@@ -933,17 +1061,53 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
         function shareProduct() {
-            if (navigator.share) {
-                navigator.share({
-                    title: '<?= htmlspecialchars($title, ENT_QUOTES, 'UTF-8') ?>',
-                    text: 'Check out this product on Glass Market',
-                    url: window.location.href
+            const currentUrl = window.location.href;
+            copyToClipboard(currentUrl);
+        }
+        
+        function copyToClipboard(text) {
+            // Try modern clipboard API
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast('Link copied to clipboard', 'success', 'Copied');
+                }).catch(err => {
+                    console.error('Clipboard API failed:', err);
+                    fallbackCopy(text);
                 });
             } else {
-                // Fallback - copy to clipboard
-                navigator.clipboard.writeText(window.location.href);
-                alert('Link copied to clipboard!');
+                // Use fallback method
+                fallbackCopy(text);
             }
+        }
+        
+        function fallbackCopy(text) {
+            // Create temporary textarea
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            textArea.style.top = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showToast('Link copied to clipboard', 'success', 'Copied');
+                } else {
+                    // Show prompt as last resort
+                    const copied = prompt('Copy this link:', text);
+                    if (copied !== null) {
+                        showToast('Please copy the link manually', 'info', 'Copy Link');
+                    }
+                }
+            } catch (err) {
+                console.error('Fallback copy failed:', err);
+                showToast('Failed to copy link', 'error', 'Error');
+            }
+            
+            document.body.removeChild(textArea);
         }
     </script>
 </body>

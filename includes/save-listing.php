@@ -1,8 +1,14 @@
 <?php
-session_start();
-require_once __DIR__ . '/../../config.php';
-
+// Set JSON header first before any output
 header('Content-Type: application/json');
+
+session_start();
+
+// Database credentials
+$db_host = '127.0.0.1';
+$db_name = 'glass_market';
+$db_user = 'root';
+$db_pass = '';
 
 // Check authentication
 if (!isset($_SESSION['user_logged_in']) || $_SESSION['user_logged_in'] !== true) {
@@ -12,12 +18,6 @@ if (!isset($_SESSION['user_logged_in']) || $_SESSION['user_logged_in'] !== true)
 }
 
 $user_id = $_SESSION['user_id'];
-
-// Database credentials
-$db_host = '127.0.0.1';
-$db_name = 'glass_market';
-$db_user = 'root';
-$db_pass = '';
 
 try {
     $pdo = new PDO("mysql:host=$db_host;dbname=$db_name", $db_user, $db_pass);
@@ -61,5 +61,6 @@ try {
     
 } catch (PDOException $e) {
     http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
+    error_log("Save listing error: " . $e->getMessage());
+    echo json_encode(['success' => false, 'message' => 'Database error. Please make sure the saved_listings table exists.', 'error' => $e->getMessage()]);
 }
