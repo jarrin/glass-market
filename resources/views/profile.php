@@ -37,6 +37,7 @@ require_once __DIR__ . '/loaders/user-data-loader.php';
 require_once __DIR__ . '/handlers/profile-update-handler.php';
 require_once __DIR__ . '/handlers/subscription-handler.php';
 require_once __DIR__ . '/handlers/notification-handler.php';
+require_once __DIR__ . '/handlers/company-handler.php';
 
 // Handle listing publish/unpublish toggle from listings tab
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_publish'])) {
