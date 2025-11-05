@@ -28,8 +28,8 @@
                 </a>
             </div>
             <p style="margin-bottom: 16px;">View and manage your company information from the edit page.</p>
-            <a href="<?php echo VIEWS_URL; ?>/create.php" style="display: inline-block; padding: 12px 24px; background: #10b981; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px;">
-                + Create Listing
+            <a href="<?php echo VIEWS_URL; ?>/company/create-company-listing.php" style="display: inline-block; padding: 12px 24px; background: #10b981; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px;">
+                + Create Company Listing
             </a>
         </div>
     <?php else: ?>
