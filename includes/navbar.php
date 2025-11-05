@@ -625,7 +625,7 @@ window.addEventListener('scroll', function() {
       <div class="user-info-display">
         <a href="<?php echo VIEWS_URL; ?>/profile.php" class="icon-circle" title="Profile" style="margin: 0;">
           <?php if (!empty($user_avatar)): ?>
-            <img src="<?php echo htmlspecialchars($user_avatar); ?>" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+            <img src="<?php echo PUBLIC_URL . '/' . htmlspecialchars($user_avatar); ?>" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
           <?php else: ?>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
@@ -680,7 +680,7 @@ window.addEventListener('scroll', function() {
       <div class="mobile-user-info">
         <div class="mobile-user-avatar">
           <?php if (!empty($user_avatar)): ?>
-            <img src="<?php echo htmlspecialchars($user_avatar); ?>" alt="Profile">
+            <img src="<?php echo PUBLIC_URL . '/' . htmlspecialchars($user_avatar); ?>" alt="Profile">
           <?php else: ?>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>

@@ -165,8 +165,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_listing'])) {
 
         .profile-avatar img,
         .avatar-placeholder {
-            width: 120px;
-            height: 120px;
+            width: 75px;
+            height: 75px;
             border-radius: 50%;
             object-fit: cover;
         }
@@ -177,7 +177,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_listing'])) {
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 48px;
+            font-size: 32px;
             font-weight: 700;
         }
 
