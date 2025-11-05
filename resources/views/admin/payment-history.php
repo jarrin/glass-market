@@ -106,45 +106,34 @@ if (isset($_GET['sync']) && $_GET['sync'] === '1') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment History - Admin</title>
-    <link rel="stylesheet" href="<?php echo CSS_URL; ?>/app.css">
+    <title>Payment History - Glass Market Admin</title>
+    <link rel="stylesheet" href="/glass-market/public/css/admin-dashboard.css">
     <style>
         body {
             background: #f5f7fa;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }
 
-        .admin-container {
+        .container {
             max-width: 1400px;
             margin: 0 auto;
             padding: 40px 20px;
         }
 
         .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             margin-bottom: 32px;
         }
 
-        .page-title {
+        .page-header h1 {
             font-size: 32px;
             font-weight: 700;
             color: #1a1a1a;
+            margin: 0 0 8px 0;
+        }
+
+        .page-header p {
+            color: #666;
             margin: 0;
-        }
-
-        .back-link {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .back-link:hover {
-            text-decoration: underline;
         }
 
         .stats-grid {
@@ -463,14 +452,18 @@ if (isset($_GET['sync']) && $_GET['sync'] === '1') {
     </style>
 </head>
 <body>
-    <?php include __DIR__ . '/../../../includes/navbar.php'; ?>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <h1>Payment History - Glass Market</h1>
+            <a href="dashboard.php">← Back to Dashboard</a>
+        </div>
+    </div>
 
-    <div class="admin-container">
+    <div class="container">
         <div class="page-header">
-            <h1 class="page-title">💳 Payment History</h1>
-            <a href="<?php echo VIEWS_URL; ?>/admin/dashboard.php" class="back-link">
-                ← Back to Dashboard
-            </a>
+            <h1>💳 Payment History</h1>
+            <p>View and manage all Mollie payment transactions</p>
         </div>
 
         <!-- Statistics -->
