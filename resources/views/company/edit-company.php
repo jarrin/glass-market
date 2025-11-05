@@ -117,40 +117,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_company'])) {
     <title>Edit Company - Glass Market</title>
     <link rel="stylesheet" href="<?php echo CSS_URL; ?>/app.css">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            background: #f9fafb;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
+            padding-top: 80px;
         }
 
         .container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 40px 20px;
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
         }
 
         .page-header {
-            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
-            color: white;
-            padding: 40px;
-            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 48px;
             margin-bottom: 32px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
             display: flex;
             align-items: center;
-            gap: 24px;
+            gap: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
         }
 
         .company-avatar {
-            width: 100px;
-            height: 100px;
+            width: 120px;
+            height: 120px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 20px;
+            border-radius: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 48px;
+            font-size: 56px;
             color: white;
-            font-weight: 700;
+            font-weight: 800;
             flex-shrink: 0;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
         }
 
         .company-header-info {
@@ -158,162 +169,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_company'])) {
         }
 
         .company-header-info h1 {
-            font-size: 32px;
-            font-weight: 800;
+            font-size: 40px;
+            font-weight: 900;
             margin: 0 0 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .company-header-info p {
-            font-size: 14px;
-            opacity: 0.8;
-            margin: 0;
-        }
-
-        .company-card {
-            background: white;
-            border-radius: 16px;
-            padding: 40px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            margin-bottom: 24px;
-        }
-
-        .form-section {
-            margin-bottom: 36px;
-        }
-
-        .form-section:last-child {
-            margin-bottom: 0;
-        }
-
-        .form-section-title {
-            font-size: 20px;
-            font-weight: 700;
-            color: #1f2937;
-            margin: 0 0 24px;
-            padding-bottom: 12px;
-            border-bottom: 2px solid #e5e7eb;
-        }
-
-        .form-group {
-            margin-bottom: 24px;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 14px;
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: 8px;
-        }
-
-        .form-group label .required {
-            color: #ef4444;
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #d1d5db;
-            border-radius: 10px;
-            font-size: 15px;
-            color: #1f2937;
-            transition: all 0.2s ease;
-            font-family: inherit;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 120px;
-        }
-
-        .form-group small {
-            display: block;
-            font-size: 13px;
+            font-size: 16px;
             color: #6b7280;
-            margin-top: 6px;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        .form-row-triple {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 16px;
-        }
-
-        .alert {
-            padding: 16px 20px;
-            border-radius: 12px;
-            margin-bottom: 24px;
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .alert-error {
-            background: #fee2e2;
-            color: #991b1b;
-            border: 1px solid #fca5a5;
-        }
-
-        .alert-success {
-            background: #d1fae5;
-            color: #065f46;
-            border: 1px solid #6ee7b7;
-        }
-
-        .btn-primary {
-            padding: 14px 28px;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .btn-primary:hover {
-            background: #5568d3;
-            transform: translateY(-1px);
-        }
-
-        .btn-secondary {
-            display: inline-block;
-            padding: 14px 28px;
-            background: #f3f4f6;
-            color: #374151;
-            border: none;
-            border-radius: 10px;
-            font-size: 15px;
-            font-weight: 600;
-            text-decoration: none;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .btn-secondary:hover {
-            background: #e5e7eb;
-        }
-
-        .button-group {
-            display: flex;
-            gap: 12px;
-            margin-top: 32px;
+            margin: 0;
         }
 
         .stats-grid {
@@ -324,33 +192,239 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_company'])) {
         }
 
         .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 24px;
-            border-radius: 12px;
-            color: white;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            padding: 32px;
+            border-radius: 20px;
             text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
         }
 
         .stat-value {
-            font-size: 36px;
-            font-weight: 800;
-            margin: 0 0 4px;
+            font-size: 48px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0 0 8px;
         }
 
         .stat-label {
-            font-size: 13px;
-            opacity: 0.9;
+            font-size: 14px;
+            color: #6b7280;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
             margin: 0;
         }
 
+        .company-card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 48px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            margin-bottom: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .form-section {
+            margin-bottom: 48px;
+        }
+
+        .form-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-section-title {
+            font-size: 24px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0 0 28px;
+            padding-bottom: 16px;
+            border-bottom: 3px solid #f3f4f6;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 15px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+
+        .form-group label .required {
+            color: #ef4444;
+            font-weight: 900;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 15px;
+            color: #1f2937;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            background: white;
+        }
+
+        .form-group input:hover,
+        .form-group select:hover,
+        .form-group textarea:hover {
+            border-color: #d1d5db;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 140px;
+            line-height: 1.6;
+        }
+
+        .form-group small {
+            display: block;
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .form-row-triple {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+        }
+
+        .alert {
+            padding: 18px 24px;
+            border-radius: 16px;
+            margin-bottom: 28px;
+            font-size: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .alert-error {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            color: #991b1b;
+            border: 2px solid #fca5a5;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            color: #065f46;
+            border: 2px solid #6ee7b7;
+        }
+
+        .btn-primary {
+            padding: 16px 36px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            display: inline-block;
+            padding: 16px 36px;
+            background: white;
+            color: #374151;
+            border: 2px solid #e5e7eb;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #f9fafb;
+            border-color: #d1d5db;
+            transform: translateY(-2px);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 16px;
+            margin-top: 40px;
+        }
+
         @media (max-width: 768px) {
-            .company-card {
-                padding: 24px;
+            body {
+                padding-top: 60px;
+            }
+
+            .container {
+                margin: 20px auto;
             }
 
             .page-header {
                 flex-direction: column;
                 text-align: center;
+                padding: 32px 24px;
+            }
+
+            .company-avatar {
+                width: 100px;
+                height: 100px;
+                font-size: 48px;
+            }
+
+            .company-header-info h1 {
+                font-size: 32px;
+            }
+
+            .company-card {
+                padding: 28px 20px;
             }
 
             .form-row,
@@ -360,6 +434,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_company'])) {
 
             .stats-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn-primary,
+            .btn-secondary {
+                width: 100%;
+                text-align: center;
             }
         }
     </style>
