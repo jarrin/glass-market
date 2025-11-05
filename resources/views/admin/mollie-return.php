@@ -32,6 +32,11 @@ try {
 
     $mollie = new MolliePayment();
 
+    // Check if Mollie is configured
+    if (!$mollie->isConfigured()) {
+        throw new Exception('Mollie API is not properly configured. Please check .env settings.');
+    }
+
     if (!$user_id) {
         throw new Exception('No user ID provided in return URL');
     }
@@ -75,6 +80,8 @@ try {
         $payment = $mollie->getPayment($payment_id);
 
         if ($payment) {
+            error_log("Payment retrieved - Status: " . $payment->status . ", Payment ID: " . $payment_id);
+
             if ($payment->isPaid()) {
                 $status = 'success';
 
