@@ -150,7 +150,7 @@ if (isset($_GET['sync']) && $_GET['sync'] === '1') {
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
-        .stat-label {
+        .stat-card .label {
             font-size: 13px;
             color: #666;
             text-transform: uppercase;
@@ -158,13 +158,13 @@ if (isset($_GET['sync']) && $_GET['sync'] === '1') {
             margin-bottom: 8px;
         }
 
-        .stat-value {
+        .stat-card .value {
             font-size: 28px;
             font-weight: 700;
             color: #1a1a1a;
         }
 
-        .stat-card.revenue .stat-value {
+        .stat-card.revenue .value {
             color: #4caf50;
         }
 
@@ -469,28 +469,28 @@ if (isset($_GET['sync']) && $_GET['sync'] === '1') {
         <!-- Statistics -->
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-label">Total Payments</div>
-                <div class="stat-value"><?php echo number_format($stats['total']); ?></div>
+                <div class="label">Total Payments</div>
+                <div class="value"><?php echo number_format($stats['total']); ?></div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Successful</div>
-                <div class="stat-value" style="color: #4caf50;"><?php echo number_format($stats['paid_count']); ?></div>
+                <div class="label">Successful</div>
+                <div class="value" style="color: #4caf50;"><?php echo number_format($stats['paid_count']); ?></div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Open/Pending</div>
-                <div class="stat-value" style="color: #2196f3;"><?php echo number_format($stats['open_count']); ?></div>
+                <div class="label">Open/Pending</div>
+                <div class="value" style="color: #2196f3;"><?php echo number_format($stats['open_count']); ?></div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Failed</div>
-                <div class="stat-value" style="color: #f44336;"><?php echo number_format($stats['failed_count']); ?></div>
+                <div class="label">Failed</div>
+                <div class="value" style="color: #f44336;"><?php echo number_format($stats['failed_count']); ?></div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Canceled</div>
-                <div class="stat-value" style="color: #9e9e9e;"><?php echo number_format($stats['canceled_count']); ?></div>
+                <div class="label">Canceled</div>
+                <div class="value" style="color: #9e9e9e;"><?php echo number_format($stats['canceled_count']); ?></div>
             </div>
             <div class="stat-card revenue">
-                <div class="stat-label">Total Revenue</div>
-                <div class="stat-value">€<?php echo number_format($stats['total_revenue'], 2); ?></div>
+                <div class="label">Total Revenue</div>
+                <div class="value">€<?php echo number_format($stats['total_revenue'], 2); ?></div>
             </div>
         </div>
 
