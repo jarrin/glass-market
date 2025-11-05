@@ -125,7 +125,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_company'])) {
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f5f7fa;
             min-height: 100vh;
             padding-top: 80px;
         }
@@ -137,23 +137,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_company'])) {
         }
 
         .page-header {
-            background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(20px);
-            border-radius: 24px;
-            padding: 48px;
-            margin-bottom: 32px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             display: flex;
             align-items: center;
             gap: 32px;
-            border: 1px solid rgba(255, 255, 255, 0.5);
+            border: 1px solid #e5e7eb;
         }
 
         .company-avatar {
             width: 120px;
             height: 120px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 24px;
+            background: #1f2937;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -161,7 +160,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_company'])) {
             color: white;
             font-weight: 800;
             flex-shrink: 0;
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .company-header-info {
@@ -169,13 +168,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_company'])) {
         }
 
         .company-header-info h1 {
-            font-size: 40px;
-            font-weight: 900;
+            font-size: 36px;
+            font-weight: 700;
             margin: 0 0 8px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: #1f2937;
         }
 
         .company-header-info p {
@@ -187,38 +183,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_company'])) {
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            margin-bottom: 32px;
+            gap: 16px;
+            margin-bottom: 24px;
         }
 
         .stat-card {
-            background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(20px);
-            padding: 32px;
-            border-radius: 20px;
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
             text-align: center;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e5e7eb;
+            transition: all 0.2s ease;
         }
 
         .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
         }
 
         .stat-value {
-            font-size: 48px;
-            font-weight: 900;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-size: 32px;
+            font-weight: 700;
+            color: #1f2937;
             margin: 0 0 8px;
         }
 
         .stat-label {
-            font-size: 14px;
+            font-size: 12px;
             color: #6b7280;
             font-weight: 600;
             text-transform: uppercase;
@@ -227,17 +219,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_company'])) {
         }
 
         .company-card {
-            background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(20px);
-            border-radius: 24px;
-            padding: 48px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             margin-bottom: 24px;
-            border: 1px solid rgba(255, 255, 255, 0.5);
+            border: 1px solid #e5e7eb;
         }
 
         .form-section {
-            margin-bottom: 48px;
+            margin-bottom: 40px;
         }
 
         .form-section:last-child {
@@ -245,44 +236,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_company'])) {
         }
 
         .form-section-title {
-            font-size: 24px;
-            font-weight: 800;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin: 0 0 28px;
-            padding-bottom: 16px;
-            border-bottom: 3px solid #f3f4f6;
+            font-size: 20px;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0 0 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e5e7eb;
         }
 
         .form-group {
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
 
         .form-group label {
             display: block;
-            font-size: 15px;
-            font-weight: 700;
-            color: #1f2937;
-            margin-bottom: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
         }
 
         .form-group label .required {
             color: #ef4444;
-            font-weight: 900;
+            font-weight: 700;
         }
 
         .form-group input,
         .form-group select,
         .form-group textarea {
             width: 100%;
-            padding: 14px 18px;
-            border: 2px solid #e5e7eb;
-            border-radius: 12px;
-            font-size: 15px;
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
             color: #1f2937;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             font-family: inherit;
             background: white;
         }
@@ -290,112 +278,105 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_company'])) {
         .form-group input:hover,
         .form-group select:hover,
         .form-group textarea:hover {
-            border-color: #d1d5db;
+            border-color: #9ca3af;
         }
 
         .form-group input:focus,
         .form-group select:focus,
         .form-group textarea:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
 
         .form-group textarea {
             resize: vertical;
-            min-height: 140px;
+            min-height: 120px;
             line-height: 1.6;
         }
 
         .form-group small {
             display: block;
-            font-size: 13px;
+            font-size: 12px;
             color: #6b7280;
-            margin-top: 8px;
-            font-style: italic;
+            margin-top: 6px;
         }
 
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 24px;
+            gap: 20px;
         }
 
         .form-row-triple {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
-            gap: 20px;
+            gap: 16px;
         }
 
         .alert {
-            padding: 18px 24px;
-            border-radius: 16px;
-            margin-bottom: 28px;
-            font-size: 15px;
-            font-weight: 600;
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            font-weight: 500;
             display: flex;
             align-items: center;
             gap: 12px;
         }
 
         .alert-error {
-            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            background: #fef2f2;
             color: #991b1b;
-            border: 2px solid #fca5a5;
+            border: 1px solid #fecaca;
         }
 
         .alert-success {
-            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-            color: #065f46;
-            border: 2px solid #6ee7b7;
+            background: #f0fdf4;
+            color: #166534;
+            border: 1px solid #bbf7d0;
         }
 
         .btn-primary {
-            padding: 16px 36px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 12px 32px;
+            background: #1f2937;
             color: white;
             border: none;
-            border-radius: 14px;
-            font-size: 16px;
-            font-weight: 700;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+            transition: all 0.2s ease;
         }
 
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-primary:active {
-            transform: translateY(0);
+            background: #111827;
         }
 
         .btn-secondary {
-            display: inline-block;
-            padding: 16px 36px;
+            padding: 12px 32px;
             background: white;
             color: #374151;
-            border: 2px solid #e5e7eb;
-            border-radius: 14px;
-            font-size: 16px;
-            font-weight: 700;
-            text-decoration: none;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
         }
 
         .btn-secondary:hover {
             background: #f9fafb;
-            border-color: #d1d5db;
-            transform: translateY(-2px);
+            border-color: #9ca3af;
         }
 
-        .button-group {
+        .form-actions {
             display: flex;
-            gap: 16px;
-            margin-top: 40px;
+            gap: 12px;
+            padding-top: 24px;
+            border-top: 1px solid #e5e7eb;
         }
 
         @media (max-width: 768px) {
@@ -409,8 +390,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_company'])) {
 
             .page-header {
                 flex-direction: column;
+                padding: 24px;
                 text-align: center;
-                padding: 32px 24px;
             }
 
             .company-avatar {
@@ -420,30 +401,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_company'])) {
             }
 
             .company-header-info h1 {
-                font-size: 32px;
+                font-size: 28px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
             }
 
             .company-card {
-                padding: 28px 20px;
+                padding: 24px;
             }
 
             .form-row,
             .form-row-triple {
                 grid-template-columns: 1fr;
+                gap: 16px;
             }
 
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .button-group {
+            .form-actions {
                 flex-direction: column;
             }
 
             .btn-primary,
             .btn-secondary {
                 width: 100%;
-                text-align: center;
             }
         }
     </style>
@@ -629,12 +611,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_company'])) {
                     </div>
                 </div>
 
-                <div class="button-group">
+                <div class="form-actions">
                     <button type="submit" name="update_company" class="btn-primary">
-                        💾 Save Changes
+                        Save Changes
                     </button>
                     <a href="<?php echo VIEWS_URL; ?>/profile.php?tab=company" class="btn-secondary">
-                        Back to Profile
+                        Cancel
                     </a>
                 </div>
             </form>
