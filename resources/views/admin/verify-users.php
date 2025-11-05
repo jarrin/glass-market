@@ -35,16 +35,63 @@ try {
             $action = $_POST['action'] ?? '';
             
             if ($action === 'approve') {
-                $stmt = $pdo->prepare("UPDATE users SET email_verified_at = NOW() WHERE id = :id");
+                // Get user details for email notification
+                $stmt = $pdo->prepare("SELECT id, name, email FROM users WHERE id = :id");
                 $stmt->execute(['id' => $user_id]);
+                $user = $stmt->fetch(PDO::FETCH_ASSOC);
                 
-                // Ensure user has a trial subscription
-                require_once __DIR__ . '/../../../database/classes/subscriptions.php';
-                if (!Subscription::hasActiveSubscription($pdo, $user_id)) {
-                    Subscription::createTrialSubscription($pdo, $user_id);
+                if ($user) {
+                    // Approve user by setting email_verified_at
+                    $stmt = $pdo->prepare("UPDATE users SET email_verified_at = NOW() WHERE id = :id");
+                    $stmt->execute(['id' => $user_id]);
+                    
+                    // Create trial subscription (only if they've never had one)
+                    require_once __DIR__ . '/../../../database/classes/subscriptions.php';
+                    $trialCreated = Subscription::createTrialSubscription($pdo, $user_id, $user['email'], $user['name']);
+                    
+                    // Send approval email via RustMailer
+                    try {
+                        require_once __DIR__ . '/../../../app/Services/RustMailer.php';
+                        $rustMailer = new App\Services\RustMailer();
+                        
+                        $emailBody = '
+                            <h2 style="color: #16a34a;">Account Approved!</h2>
+                            <p>Dear ' . htmlspecialchars($user['name']) . ',</p>
+                            <p>Great news! Your Glass Market account has been approved by our admin team.</p>
+                            <p><strong>Account Details:</strong></p>
+                            <ul>
+                                <li><strong>Email:</strong> ' . htmlspecialchars($user['email']) . '</li>
+                                <li><strong>Status:</strong> Active</li>
+                                ' . ($trialCreated ? '<li><strong>Free Trial:</strong> 3 months (activated)</li>' : '') . '
+                            </ul>
+                            <p>You can now log in to your account and start using Glass Market.</p>
+                            <p><a href="' . (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/glass-market/resources/views/login.php" style="display: inline-block; padding: 12px 24px; background-color: #16a34a; color: white; text-decoration: none; border-radius: 6px; margin: 16px 0;">Login to Your Account</a></p>
+                            <p>Best regards,<br>Glass Market Team</p>
+                        ';
+                        
+                        $emailResult = $rustMailer->sendEmail(
+                            $user['email'],
+                            $user['name'],
+                            'Glass Market - Account Approved',
+                            $emailBody,
+                            true
+                        );
+                        
+                        if (!$emailResult['success']) {
+                            error_log("Approval email failed for user_id $user_id: " . $emailResult['message']);
+                        }
+                    } catch (Exception $e) {
+                        error_log("Approval email exception for user_id $user_id: " . $e->getMessage());
+                    }
+                    
+                    if ($trialCreated) {
+                        $success_message = 'User has been approved successfully and granted a 3-month free trial! Approval email sent.';
+                    } else {
+                        $success_message = 'User has been approved successfully! Approval email sent. (Note: User has already used their free trial)';
+                    }
+                } else {
+                    $error_message = 'User not found.';
                 }
-                
-                $success_message = 'User has been approved successfully and granted 3-month trial!';
             } elseif ($action === 'reject' || $action === 'delete') {
                 $stmt = $pdo->prepare("DELETE FROM users WHERE id = :id AND email != 'admin@glassmarket.com'");
                 $stmt->execute(['id' => $user_id]);
