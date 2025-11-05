@@ -546,7 +546,6 @@
                     l.tested,
                     l.storage_location,
                     l.quality_notes,
-                    l.image_path,
                     l.created_at
                 FROM listings l
                 WHERE l.company_id = ? AND l.published = 1
@@ -727,14 +726,14 @@
             <?php foreach ($listings as $listing): 
                 $glassType = $listing['glass_type_other'] ?: $listing['glass_type'];
                 $title = $listing['quantity_note'] ?: $glassType;
-                $imageUrl = !empty($listing['image_path']) 
-                    ? PUBLIC_URL . '/' . $listing['image_path'] 
-                    : "https://picsum.photos/seed/glass{$listing['id']}/800/800";
+                // Use placeholder image since image_path doesn't exist in your database yet
+                $imageUrl = "https://picsum.photos/seed/glass{$listing['id']}/800/800";
             ?>
             <article class="product-card" 
                      data-side="<?php echo htmlspecialchars($listing['side'], ENT_QUOTES, 'UTF-8'); ?>"
                      data-recycled="<?php echo htmlspecialchars($listing['recycled'], ENT_QUOTES, 'UTF-8'); ?>"
-                     data-tested="<?php echo htmlspecialchars($listing['tested'], ENT_QUOTES, 'UTF-8'); ?>">
+                     data-tested="<?php echo htmlspecialchars($listing['tested'], ENT_QUOTES, 'UTF-8'); ?>"
+                     onclick="window.location.href='<?php echo VIEWS_URL; ?>/listings.php?id=<?php echo $listing['id']; ?>'">
                 <div class="product-image" style="background-image: url('<?php echo htmlspecialchars($imageUrl, ENT_QUOTES, 'UTF-8'); ?>');">
                     <span class="product-badge <?php echo strtolower($listing['side']); ?>">
                         <?php echo $listing['side'] === 'WTS' ? 'For Sale' : 'Wanted'; ?>
