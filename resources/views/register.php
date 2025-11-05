@@ -21,10 +21,6 @@ $success_message = '';
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim($_POST['name'] ?? '');
-    $company_name = trim($_POST['company_name'] ?? ''); // Optional
-    $address = trim($_POST['address'] ?? ''); // Optional
-    $city = trim($_POST['city'] ?? ''); // Optional
-    $country = trim($_POST['country'] ?? ''); // Optional
     $notification_email = trim($_POST['notification_email'] ?? '');
     $communication_email = trim($_POST['communication_email'] ?? '');
     $password = $_POST['password'] ?? '';
@@ -62,63 +58,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 // Insert user WITHOUT verification (email_verified_at = NULL) - requires admin approval
                 $stmt = $pdo->prepare('
-                    INSERT INTO users (name, company_name, email, password, email_verified_at)
-                    VALUES (:name, :company_name, :email, :password, NULL)
+                    INSERT INTO users (name, email, password, email_verified_at)
+                    VALUES (:name, :email, :password, NULL)
                 ');
 
                 $stmt->execute([
                     'name' => $name,
-                    'company_name' => !empty($company_name) ? $company_name : null,
                     'email' => $notification_email,
                     'password' => $hashed_password,
                 ]);
 
                 // Get the newly created user ID
                 $user_id = $pdo->lastInsertId();
-
-                // If company details provided, create a company record
-                if (!empty($company_name)) {
-                    try {
-                        // Create company with owner_user_id set and default company_type
-                        $stmt = $pdo->prepare('
-                            INSERT INTO companies (
-                                name, 
-                                address_line1, 
-                                city, 
-                                country, 
-                                owner_user_id,
-                                company_type,
-                                created_at
-                            )
-                            VALUES (:name, :address, :city, :country, :owner_user_id, :company_type, NOW())
-                        ');
-                        
-                        $stmt->execute([
-                            'name' => $company_name,
-                            'address' => !empty($address) ? $address : null,
-                            'city' => !empty($city) ? $city : null,
-                            'country' => !empty($country) ? $country : null,
-                            'owner_user_id' => $user_id,
-                            'company_type' => 'Other', // Default type, user can update later
-                        ]);
-                        
-                        $company_id = $pdo->lastInsertId();
-                        
-                        // Link user to company
-                        $stmt = $pdo->prepare('UPDATE users SET company_id = :company_id WHERE id = :user_id');
-                        $stmt->execute([
-                            'company_id' => $company_id,
-                            'user_id' => $user_id
-                        ]);
-                        
-                        error_log("Company created successfully: ID $company_id for user $user_id");
-                    } catch (PDOException $e) {
-                        // Company creation failed - rollback everything
-                        error_log("Company creation failed: " . $e->getMessage());
-                        $pdo->rollBack();
-                        throw new Exception("Failed to create company profile. Please try again.");
-                    }
-                }
 
                 // Send registration notification email BEFORE committing
                 $emailSent = false;
@@ -456,50 +407,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     >
                 </div>
 
-                <div class="form-group">
-                    <label for="company_name">Company name <span style="color: #999; font-size: 11px;">(Optional)</span></label>
-                    <input
-                        type="text"
-                        id="company_name"
-                        name="company_name"
-                        value="<?php echo htmlspecialchars($_POST['company_name'] ?? ''); ?>"
-                        placeholder="Company name (optional)..."
-                    >
-                </div>
-
-                <div class="form-group">
-                    <label for="address">Address <span style="color: #999; font-size: 11px;">(Optional)</span></label>
-                    <input
-                        type="text"
-                        id="address"
-                        name="address"
-                        value="<?php echo htmlspecialchars($_POST['address'] ?? ''); ?>"
-                        placeholder="Address (optional)"
-                    >
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="city">City <span style="color: #999; font-size: 11px;">(Optional)</span></label>
-                        <input
-                            type="text"
-                            id="city"
-                            name="city"
-                            value="<?php echo htmlspecialchars($_POST['city'] ?? ''); ?>"
-                            placeholder="City (optional)"
-                        >
-                    </div>
-                    <div class="form-group">
-                        <label for="country">Country <span style="color: #999; font-size: 11px;">(Optional)</span></label>
-                        <input
-                            type="text"
-                            id="country"
-                            name="country"
-                            value="<?php echo htmlspecialchars($_POST['country'] ?? ''); ?>"
-                            placeholder="Country (optional)"
-                        >
-                    </div>
-                </div>
 
                 <!-- Email Addresses -->
                 <div class="section-title">Email Addresses</div>
