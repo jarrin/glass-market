@@ -15,10 +15,11 @@ try {
             l.glass_type_other,
             l.quantity_tons,
             l.quantity_note,
-            l.image_path,
+            li.image_path,
             c.name as company_name
         FROM listings l
         LEFT JOIN companies c ON l.company_id = c.id
+        LEFT JOIN listing_images li ON l.id = li.listing_id AND li.is_main = 1
         WHERE l.published = 1
         ORDER BY l.created_at DESC
         LIMIT 10
@@ -310,7 +311,8 @@ try {
                                 // Determine image URL
                                 $imageUrl = "https://picsum.photos/seed/glass{$listing['id']}/900/600";
                                 if (!empty($listing['image_path'])) {
-                                    $imageUrl = PUBLIC_URL . '/' . $listing['image_path'];
+                                    // Image path is relative from public folder (e.g., uploads/listings/xxx.jpg)
+                                    $imageUrl = PUBLIC_URL . '/' . ltrim($listing['image_path'], '/');
                                 }
                             ?>
                             <article class="home-listing-card">
