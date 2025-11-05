@@ -789,6 +789,34 @@ try {
             margin-bottom: 32px;
             padding-bottom: 24px;
             border-bottom: 2px solid var(--profile-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .btn-bulk {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-bulk:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .btn-bulk:active {
+            transform: translateY(0);
         }
 
         .images-grid {
@@ -804,6 +832,7 @@ try {
             border-radius: 12px;
             overflow: hidden;
             transition: all 0.2s ease;
+            position: relative;
         }
 
         .image-card:hover {
@@ -818,6 +847,31 @@ try {
 
         .image-card.is-main:hover {
             box-shadow: 0 0 0 3px rgba(47, 109, 245, 0.15), 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .image-card.selected {
+            border-color: var(--profile-primary);
+            box-shadow: 0 0 0 4px rgba(47, 109, 245, 0.2);
+            transform: scale(0.98);
+        }
+
+        .image-card-checkbox {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            z-index: 10;
+        }
+
+        .image-select-cb {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--profile-primary);
+        }
+
+        .image-select-cb:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
         }
 
         .image-card-img {
@@ -1256,8 +1310,23 @@ try {
                             <div>
                                 <h3 style="margin: 0 0 8px 0; font-size: 20px; font-weight: 700;">Product Images</h3>
                                 <p style="margin: 0; color: var(--profile-muted); font-size: 14px;">
-                                    <?php echo count($listing_images); ?> of 20 images • Main image appears first in search
+                                    <span id="image-count-text"><?php echo count($listing_images); ?> of 20 images</span>
+                                    <span id="selection-count" style="display: none; color: var(--profile-primary); font-weight: 600;"></span>
                                 </p>
+                            </div>
+                            <div id="bulk-actions" style="display: none; gap: 8px;">
+                                <button type="button" class="btn-bulk" onclick="bulkDelete()" style="background: #ef4444;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                                    </svg>
+                                    Delete Selected
+                                </button>
+                                <button type="button" class="btn-bulk" onclick="deselectAll()" style="background: #6b7280;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                    Cancel
+                                </button>
                             </div>
                         </div>
 
@@ -1266,7 +1335,11 @@ try {
                             <div class="images-grid">
                                 <?php foreach ($listing_images as $img): ?>
                                     <div class="image-card <?php echo $img['is_main'] ? 'is-main' : ''; ?>" data-image-id="<?php echo $img['id']; ?>">
-                                        <div class="image-card-img">
+                                        <div class="image-card-checkbox">
+                                            <input type="checkbox" class="image-select-cb" value="<?php echo $img['id']; ?>" 
+                                                   onchange="updateSelection()" <?php echo $img['is_main'] ? 'disabled title="Cannot select main image"' : ''; ?>>
+                                        </div>
+                                        <div class="image-card-img" onclick="toggleImageSelection(this)">
                                             <img src="<?php echo PUBLIC_URL . '/' . $img['image_path']; ?>" alt="Product image">
                                             <?php if ($img['is_main']): ?>
                                                 <div class="main-badge">
@@ -1445,6 +1518,101 @@ try {
             container.style.display = 'none';
             input.required = false;
             input.value = '';
+        }
+    }
+
+    // Multi-select functions
+    function toggleImageSelection(imgElement) {
+        const card = imgElement.closest('.image-card');
+        const checkbox = card.querySelector('.image-select-cb');
+        
+        if (!checkbox.disabled) {
+            checkbox.checked = !checkbox.checked;
+            updateSelection();
+        }
+    }
+
+    function updateSelection() {
+        const checkboxes = document.querySelectorAll('.image-select-cb:checked');
+        const count = checkboxes.length;
+        const bulkActions = document.getElementById('bulk-actions');
+        const selectionCount = document.getElementById('selection-count');
+        const imageCountText = document.getElementById('image-count-text');
+
+        if (count > 0) {
+            bulkActions.style.display = 'flex';
+            selectionCount.style.display = 'inline';
+            selectionCount.textContent = `• ${count} selected`;
+            
+            // Add selected class to cards
+            checkboxes.forEach(cb => {
+                cb.closest('.image-card').classList.add('selected');
+            });
+        } else {
+            bulkActions.style.display = 'none';
+            selectionCount.style.display = 'none';
+        }
+
+        // Remove selected class from unchecked cards
+        document.querySelectorAll('.image-select-cb:not(:checked)').forEach(cb => {
+            cb.closest('.image-card').classList.remove('selected');
+        });
+    }
+
+    function deselectAll() {
+        document.querySelectorAll('.image-select-cb:checked').forEach(cb => {
+            cb.checked = false;
+        });
+        updateSelection();
+    }
+
+    async function bulkDelete() {
+        const checkboxes = document.querySelectorAll('.image-select-cb:checked');
+        const count = checkboxes.length;
+        
+        if (count === 0) return;
+
+        if (!confirm(`Are you sure you want to delete ${count} image${count > 1 ? 's' : ''}?\n\nThis action cannot be undone.`)) {
+            return;
+        }
+
+        const imageIds = Array.from(checkboxes).map(cb => cb.value);
+        let successCount = 0;
+        let failCount = 0;
+
+        // Show progress
+        showToast(`Deleting ${count} images...`, 'info');
+
+        for (const imageId of imageIds) {
+            try {
+                const formData = new FormData();
+                formData.append('delete_image', '1');
+                formData.append('image_id', imageId);
+                
+                const response = await fetch(window.location.href, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    successCount++;
+                } else {
+                    failCount++;
+                }
+            } catch (error) {
+                failCount++;
+            }
+        }
+
+        if (successCount > 0) {
+            showToast(`Successfully deleted ${successCount} image${successCount > 1 ? 's' : ''}!`, 'success');
+            setTimeout(() => {
+                window.location.replace(window.location.pathname + '?id=<?php echo $listing_id; ?>&tab=images');
+            }, 800);
+        } else {
+            showToast('Failed to delete images', 'error');
         }
     }
 
