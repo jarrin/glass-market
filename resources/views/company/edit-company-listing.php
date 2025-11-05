@@ -1137,8 +1137,8 @@ try {
     </style>
 </head>
 <body>
-    <?php include __DIR__ . '/../../includes/navbar.php'; ?>
-    <?php include __DIR__ . '/../../includes/subscription-notification.php'; ?>
+    <?php include __DIR__ . '/../../../includes/navbar.php'; ?>
+    <?php include __DIR__ . '/../../../includes/subscription-notification.php'; ?>
 
     <!-- Toast Container -->
     <div id="toast-container" style="position: fixed; top: 100px; right: 20px; z-index: 99999;"></div>
@@ -1523,7 +1523,7 @@ try {
         </form>
     </main>
 
-    <?php include __DIR__ . '/../../includes/footer.php'; ?>
+    <?php include __DIR__ . '/../../../includes/footer.php'; ?>
 
     <script>
     // Update Status Text
