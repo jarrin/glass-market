@@ -46,18 +46,28 @@ if ($listing['published'] != 1 && !$is_owner) {
 $title = $listing['quantity_note'] ?: ($listing['glass_type_other'] ?: $listing['glass_type']);
 $subtitle = $listing['glass_type_other'] ?: $listing['glass_type'];
 
-// Generate image URL
-$imageUrl = "https://picsum.photos/seed/glass{$listing['id']}/800/800";
+// Generate image URL - use actual uploaded image if available
 if (!empty($listing['image_path'])) {
     $imageUrl = PUBLIC_URL . '/' . ltrim($listing['image_path'], '/');
+} else {
+    $imageUrl = "https://picsum.photos/seed/glass{$listing['id']}/800/800";
 }
 
 // Generate additional product images for gallery
-$additionalImages = [
-    $imageUrl,
-    "https://picsum.photos/seed/glass" . ($listing['id'] + 100) . "/800/800",
-    "https://picsum.photos/seed/glass" . ($listing['id'] + 200) . "/800/800"
-];
+// If actual image exists, use it for all three thumbnails, otherwise use placeholders
+if (!empty($listing['image_path'])) {
+    $additionalImages = [
+        PUBLIC_URL . '/' . ltrim($listing['image_path'], '/'),
+        PUBLIC_URL . '/' . ltrim($listing['image_path'], '/'),
+        PUBLIC_URL . '/' . ltrim($listing['image_path'], '/')
+    ];
+} else {
+    $additionalImages = [
+        "https://picsum.photos/seed/glass{$listing['id']}/800/800",
+        "https://picsum.photos/seed/glass" . ($listing['id'] + 100) . "/800/800",
+        "https://picsum.photos/seed/glass" . ($listing['id'] + 200) . "/800/800"
+    ];
+}
 
 // Format price
 $priceDisplay = !empty($listing['price_text']) ? $listing['price_text'] : 'Contact for Price';
@@ -76,7 +86,7 @@ $reviewCount = rand(50, 200);
 
 // Related products (fetch similar items)
 $relatedStmt = $pdo->prepare("
-    SELECT l.id, l.quantity_note, l.glass_type, l.glass_type_other, l.price_text, l.quantity_tons
+    SELECT l.id, l.quantity_note, l.glass_type, l.glass_type_other, l.price_text, l.quantity_tons, l.image_path
     FROM listings l
     WHERE l.glass_type = ? AND l.id != ? AND l.published = 1
     ORDER BY RAND()
@@ -800,7 +810,12 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
             <div class="related-grid">
                 <?php foreach ($relatedProducts as $related): 
                     $relatedTitle = $related['quantity_note'] ?: ($related['glass_type_other'] ?: $related['glass_type']);
-                    $relatedImage = "https://picsum.photos/seed/glass{$related['id']}/800/800";
+                    // Use actual uploaded image if available, otherwise use placeholder
+                    if (!empty($related['image_path'])) {
+                        $relatedImage = PUBLIC_URL . '/' . $related['image_path'];
+                    } else {
+                        $relatedImage = "https://picsum.photos/seed/glass{$related['id']}/800/800";
+                    }
                     $relatedPrice = !empty($related['price_text']) ? $related['price_text'] : 'Contact for Price';
                 ?>
                 <a href="listings.php?id=<?= $related['id'] ?>" class="related-card">

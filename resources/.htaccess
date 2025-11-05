@@ -1,0 +1,8 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Redirect all .php files to views/ subdirectory if they don't exist in resources/
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.+\.php)$ views/$1 [L]
+</IfModule>
