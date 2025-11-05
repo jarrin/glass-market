@@ -241,14 +241,6 @@ require_once __DIR__ . '/../../config.php';
       overflow: hidden;
     }
 
-    .about-value-card::before {
-      content: '';
-      position: absolute;
-      inset: -40% 50% 60% -40%;
-      background: radial-gradient(circle at top right, rgba(47, 109, 245, 0.18), transparent 60%);
-      opacity: 0.8;
-    }
-
     .about-value-title {
       font-size: 22px;
       font-weight: 600;
@@ -421,10 +413,11 @@ require_once __DIR__ . '/../../config.php';
       <?php endif; ?>
 
       <?php
-        $primary_label = trim($page_content['hero_primary_label'] ?? '');
-        $primary_url = trim($page_content['hero_primary_url'] ?? '');
-        $secondary_label = trim($page_content['hero_secondary_label'] ?? '');
-        $secondary_url = trim($page_content['hero_secondary_url'] ?? '');
+        // Default button links if not set in database
+        $primary_label = trim($page_content['hero_primary_label'] ?? 'Explore Collection');
+        $primary_url = trim($page_content['hero_primary_url'] ?? '/glass-market/resources/views/browse.php');
+        $secondary_label = trim($page_content['hero_secondary_label'] ?? 'Contact Us');
+        $secondary_url = trim($page_content['hero_secondary_url'] ?? '/glass-market/resources/views/contact.php');
       ?>
       <?php if ($primary_label || $secondary_label): ?>
         <div class="about-hero-actions">
@@ -495,23 +488,31 @@ require_once __DIR__ . '/../../config.php';
 
     <section class="about-cta">
       <h2 class="about-cta-title"><?php echo htmlspecialchars($page_content['cta_title'] ?? 'Join the Circular Glass Movement'); ?></h2>
-      <p class="about-cta-text"><?php echo nl2br(htmlspecialchars($page_content['cta_text'] ?? 'Whether you sell, ship, or source cullet, Glass Market is your always-on operations partner.')); ?></p>
+      <p class="about-cta-text"><?php echo nl2br(htmlspecialchars($page_content['cta_text'] ?? 'Whether you sell, ship, or source cullet, Glass Market is your always-on operations partner. Start trading today and be part of the sustainable glass revolution.')); ?></p>
       <?php
+        // Check if user is logged in
+        $isLoggedIn = isset($_SESSION['user_id']) && !empty($_SESSION['user_id']);
+        
+        // Default CTA button links
         $cta_primary_label = trim($page_content['cta_primary_label'] ?? '');
         $cta_primary_url = trim($page_content['cta_primary_url'] ?? '');
-        $cta_secondary_label = trim($page_content['cta_secondary_label'] ?? '');
-        $cta_secondary_url = trim($page_content['cta_secondary_url'] ?? '');
+        $cta_secondary_label = trim($page_content['cta_secondary_label'] ?? 'Browse Listings');
+        $cta_secondary_url = trim($page_content['cta_secondary_url'] ?? '/glass-market/resources/views/browse.php');
+        
+        // If not logged in, show "Start Selling" button, otherwise don't show it
+        if (!$isLoggedIn && empty($cta_primary_label)) {
+          $cta_primary_label = 'Start Selling';
+          $cta_primary_url = '/glass-market/resources/views/register.php';
+        }
       ?>
-      <?php if ($cta_primary_label || $cta_secondary_label): ?>
-        <div class="about-cta-actions">
-          <?php if ($cta_primary_label && $cta_primary_url): ?>
-            <a class="about-cta-primary" href="<?php echo htmlspecialchars($cta_primary_url); ?>"><?php echo htmlspecialchars($cta_primary_label); ?></a>
-          <?php endif; ?>
-          <?php if ($cta_secondary_label && $cta_secondary_url): ?>
-            <a class="about-cta-secondary" href="<?php echo htmlspecialchars($cta_secondary_url); ?>"><?php echo htmlspecialchars($cta_secondary_label); ?></a>
-          <?php endif; ?>
-        </div>
-      <?php endif; ?>
+      <div class="about-cta-actions">
+        <?php if (!$isLoggedIn && $cta_primary_label && $cta_primary_url): ?>
+          <a class="about-cta-primary" href="<?php echo htmlspecialchars($cta_primary_url); ?>"><?php echo htmlspecialchars($cta_primary_label); ?></a>
+        <?php endif; ?>
+        <?php if ($cta_secondary_label && $cta_secondary_url): ?>
+          <a class="about-cta-secondary" href="<?php echo htmlspecialchars($cta_secondary_url); ?>"><?php echo htmlspecialchars($cta_secondary_label); ?></a>
+        <?php endif; ?>
+      </div>
     </section>
   </div>
 </main>
