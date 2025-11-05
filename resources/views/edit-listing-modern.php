@@ -193,22 +193,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_listing'])) {
             
             $pdo->commit();
             
-            // Reload listing data to show updated values
-            $stmt = $pdo->prepare('
-                SELECT l.*, c.name as company_name
-                FROM listings l
-                LEFT JOIN companies c ON l.company_id = c.id
-                WHERE l.id = :listing_id AND l.user_id = :user_id
-            ');
-            $stmt->execute(['listing_id' => $listing_id, 'user_id' => $user_id]);
-            $listing = $stmt->fetch(PDO::FETCH_ASSOC);
-            
-            $success_message = 'Listing updated successfully!';
+            // Use Post/Redirect/Get pattern to prevent form resubmission
+            $_SESSION['listing_success'] = 'Listing updated successfully!';
+            header('Location: ' . VIEWS_URL . '/edit-listing-modern.php?id=' . $listing_id);
+            exit;
         } catch (Exception $e) {
             $pdo->rollBack();
             $error_message = 'Failed to update listing: ' . $e->getMessage();
         }
     }
+}
+
+// Check for session success message
+if (isset($_SESSION['listing_success'])) {
+    $success_message = $_SESSION['listing_success'];
+    unset($_SESSION['listing_success']);
 }
 
 // Handle image deletion via AJAX
@@ -1507,7 +1506,10 @@ try {
             
             if (result.success) {
                 showToast('Image deleted successfully!', 'success');
-                setTimeout(() => location.reload(), 500);
+                // Use replace to prevent form resubmission
+                setTimeout(() => {
+                    window.location.replace(window.location.pathname + '?id=<?php echo $listing_id; ?>&tab=images');
+                }, 500);
             } else {
                 showToast('Error: ' + (result.error || 'Failed to delete image'), 'error');
                 if (imageItem) {
@@ -1546,7 +1548,10 @@ try {
             
             if (result.success) {
                 showToast('Main image updated!', 'success');
-                setTimeout(() => location.reload(), 500);
+                // Use replace to prevent form resubmission
+                setTimeout(() => {
+                    window.location.replace(window.location.pathname + '?id=<?php echo $listing_id; ?>&tab=images');
+                }, 500);
             } else {
                 showToast('Error: ' + (result.error || 'Failed to set main image'), 'error');
                 allItems.forEach(item => {
@@ -1645,6 +1650,37 @@ try {
         }
     `;
     document.head.appendChild(style);
+
+    // Check URL for tab parameter and switch to it
+    window.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const tab = urlParams.get('tab');
+        if (tab) {
+            switchTab(tab);
+        }
+
+        // Clear file input to prevent accidental resubmission
+        const fileInput = document.getElementById('product_images');
+        if (fileInput) {
+            fileInput.value = '';
+        }
+        const previewContainer = document.getElementById('preview-container');
+        if (previewContainer) {
+            previewContainer.innerHTML = '';
+        }
+
+        // Remove duplicate image cards (safety measure)
+        const imageCards = document.querySelectorAll('.image-card');
+        const seenIds = new Set();
+        imageCards.forEach(card => {
+            const imageId = card.getAttribute('data-image-id');
+            if (seenIds.has(imageId)) {
+                card.remove();
+            } else {
+                seenIds.add(imageId);
+            }
+        });
+    });
     </script>
 </body>
 </html>
