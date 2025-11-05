@@ -568,10 +568,6 @@
             // Generate avatar
             $avatarUrl = "https://picsum.photos/seed/seller{$seller['id']}/600/600";
             
-            // Generate random rating and reviews for demo
-            $rating = number_format(4.6 + (rand(0, 30) / 100), 1);
-            $reviewCount = rand(100, 400);
-            
             // Extract unique location from listings
             $locations = [];
             foreach ($listings as $listing) {
@@ -596,13 +592,7 @@
     <!-- Seller Header -->
     <section class="seller-header">
         <div class="seller-header-content">
-            <div class="seller-avatar-large" style="background-image: url('<?php echo htmlspecialchars($avatarUrl, ENT_QUOTES, 'UTF-8'); ?>');">
-                <div class="verified-badge" title="Verified Seller">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                </div>
-            </div>
+            <div class="seller-avatar-large" style="background-image: url('<?php echo htmlspecialchars($avatarUrl, ENT_QUOTES, 'UTF-8'); ?>');"></div>
             
             <div class="seller-header-info">
                 <h1 class="seller-name-large"><?php echo htmlspecialchars($seller['name'], ENT_QUOTES, 'UTF-8'); ?></h1>
