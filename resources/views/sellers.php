@@ -364,10 +364,9 @@
             require_once __DIR__ . '/../../includes/db_connect.php';
             
             $stats = [
-                'active_sellers' => 500,
-                'countries' => 50,
-                'avg_rating' => 4.8,
-                'products_listed' => 10000
+                'active_sellers' => 0,
+                'countries' => 0,
+                'products_listed' => 0
             ];
             
             try {
@@ -418,10 +417,7 @@
             <div class="stat-number"><?php echo $stats['countries']; ?>+</div>
             <div class="stat-label">Countries</div>
         </div>
-        <div class="stat">
-            <div class="stat-number"><?php echo number_format($stats['avg_rating'], 1); ?></div>
-            <div class="stat-label">Average Rating</div>
-        </div>
+
         <div class="stat">
             <div class="stat-number"><?php echo number_format($stats['products_listed'] / 1000, 0); ?>K+</div>
             <div class="stat-label">Products Listed</div>
@@ -474,22 +470,13 @@
                     // Use company_type as specialty
                     $specialty = $seller['company_type'] ?? 'Glass Trading';
                     
-                    // Generate random rating between 4.6 and 4.9
-                    $rating = number_format(4.6 + (rand(0, 30) / 100), 1);
-                    
-                    // Generate random review count
-                    $reviews = rand(100, 400);
-                    
                     $sellers[] = [
                         'id' => $seller['id'],
                         'name' => $seller['name'],
                         'specialty' => $specialty,
                         'location' => $location,
                         'avatar' => $avatarUrl,
-                        'rating' => $rating,
-                        'reviews' => $reviews,
                         'listings' => $seller['listing_count'],
-                        'verified' => true,
                         'owner' => $seller['owner_name']
                     ];
                 }
