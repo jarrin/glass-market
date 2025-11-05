@@ -585,8 +585,9 @@
                     l.storage_location,
                     l.quality_notes,
                     l.created_at,
-                    l.image_path
+                    COALESCE(li.image_path, l.image_path) as image_path
                 FROM listings l
+                LEFT JOIN listing_images li ON l.id = li.listing_id AND li.is_main = 1
                 WHERE l.company_id = ? AND l.published = 1
                 ORDER BY l.created_at DESC
             ");
