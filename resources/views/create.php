@@ -1479,25 +1479,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_listing'])) {
         
         if (input.files) {
             const fileCount = input.files.length;
-            const currentCount = document.querySelectorAll('.image-item').length;
             
-            if (currentCount + fileCount > 20) {
-                alert(`You can only upload ${20 - currentCount} more images. Maximum is 20 images per listing.`);
-                input.value = '';
-                return;
+            if (fileCount > 20) {
+                alert('Maximum 20 images allowed. Only the first 20 will be used.');
+                // Don't return, just limit to 20
             }
             
-            Array.from(input.files).forEach((file, index) => {
+            Array.from(input.files).slice(0, 20).forEach((file, index) => {
                 if (file.size > 5 * 1024 * 1024) {
-                    alert(`File "${file.name}" is too large. Maximum size is 5MB.`);
+                    const errorDiv = document.createElement('div');
+                    errorDiv.style.cssText = 'margin-top: 8px; padding: 12px; background: #fee2e2; border-radius: 8px; font-size: 13px; color: #991b1b;';
+                    errorDiv.textContent = `✗ ${file.name} is too large (max 5MB)`;
+                    container.appendChild(errorDiv);
                     return;
                 }
                 
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const preview = document.createElement('div');
-                    preview.style.cssText = 'margin-top: 8px; padding: 12px; background: #f0fdf4; border-radius: 8px; font-size: 13px; color: #166534;';
-                    preview.textContent = `✓ ${file.name} ready to upload`;
+                    preview.style.cssText = 'margin-top: 8px; padding: 12px; background: #f0fdf4; border-radius: 8px; font-size: 13px; color: #166534; display: flex; align-items: center; gap: 8px;';
+                    preview.innerHTML = `
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M5 13l4 4L19 7"/>
+                        </svg>
+                        <span>${index === 0 ? '⭐ ' : ''}${file.name}${index === 0 ? ' (Will be main image)' : ''}</span>
+                    `;
                     container.appendChild(preview);
                 };
                 reader.readAsDataURL(file);
@@ -1505,97 +1511,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_listing'])) {
         }
     }
 
-    async function deleteImage(imageId) {
-        if (!confirm('Are you sure you want to delete this image?\n\nThis action cannot be undone.')) {
-            return;
-        }
-        
-        // Show loading state
-        const imageItem = document.querySelector(`[data-image-id="${imageId}"]`);
-        if (imageItem) {
-            imageItem.style.opacity = '0.5';
-            imageItem.style.pointerEvents = 'none';
-        }
-        
-        try {
-            const formData = new FormData();
-            formData.append('delete_image', '1');
-            formData.append('image_id', imageId);
-            
-            const response = await fetch(window.location.href, {
-                method: 'POST',
-                body: formData
-            });
-            
-            const result = await response.json();
-            
-            if (result.success) {
-                showToast('Image deleted successfully!', 'success');
-                // Use replace to prevent form resubmission
-                setTimeout(() => {
-                    window.location.replace(window.location.pathname + '?id=<?php echo $listing_id; ?>&tab=images');
-                }, 500);
-            } else {
-                showToast('Error: ' + (result.error || 'Failed to delete image'), 'error');
-                if (imageItem) {
-                    imageItem.style.opacity = '1';
-                    imageItem.style.pointerEvents = 'auto';
-                }
-            }
-        } catch (error) {
-            showToast('Error deleting image: ' + error.message, 'error');
-            if (imageItem) {
-                imageItem.style.opacity = '1';
-                imageItem.style.pointerEvents = 'auto';
-            }
-        }
-    }
-
-    async function setMainImage(imageId) {
-        // Show loading state
-        const allItems = document.querySelectorAll('.image-item');
-        allItems.forEach(item => {
-            item.style.pointerEvents = 'none';
-            item.style.opacity = '0.6';
-        });
-        
-        try {
-            const formData = new FormData();
-            formData.append('set_main_image', '1');
-            formData.append('image_id', imageId);
-            
-            const response = await fetch(window.location.href, {
-                method: 'POST',
-                body: formData
-            });
-            
-            const result = await response.json();
-            
-            if (result.success) {
-                showToast('Main image updated!', 'success');
-                // Use replace to prevent form resubmission
-                setTimeout(() => {
-                    window.location.replace(window.location.pathname + '?id=<?php echo $listing_id; ?>&tab=images');
-                }, 500);
-            } else {
-                showToast('Error: ' + (result.error || 'Failed to set main image'), 'error');
-                allItems.forEach(item => {
-                    item.style.pointerEvents = 'auto';
-                    item.style.opacity = '1';
-                });
-            }
-        } catch (error) {
-            showToast('Error setting main image: ' + error.message, 'error');
-            allItems.forEach(item => {
-                item.style.pointerEvents = 'auto';
-                item.style.opacity = '1';
-            });
-        }
-    }
-    
     // Toast Notification System
     function showToast(message, type = 'success') {
         const container = document.getElementById('toast-container');
+        if (!container) return;
+        
         const toast = document.createElement('div');
         
         const icons = {
@@ -1675,67 +1595,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_listing'])) {
         }
     `;
     document.head.appendChild(style);
-
-    // Check URL for tab parameter and switch to it
-    window.addEventListener('DOMContentLoaded', function() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const tab = urlParams.get('tab');
-        if (tab) {
-            switchTab(tab);
-        }
-
-        // Clear file input to prevent accidental resubmission
-        const fileInput = document.getElementById('product_images');
-        if (fileInput) {
-            fileInput.value = '';
-        }
-        const previewContainer = document.getElementById('preview-container');
-        if (previewContainer) {
-            previewContainer.innerHTML = '';
-        }
-
-        // Remove duplicate image cards (safety measure)
-        const imageCards = document.querySelectorAll('.image-card');
-        const seenIds = new Set();
-        imageCards.forEach(card => {
-            const imageId = card.getAttribute('data-image-id');
-            if (seenIds.has(imageId)) {
-                card.remove();
-            } else {
-                seenIds.add(imageId);
-            }
-        });
-
-        // Keyboard shortcuts for image management
-        document.addEventListener('keydown', function(e) {
-            // Only in images tab
-            const imagesTab = document.getElementById('tab-images');
-            if (!imagesTab || !imagesTab.classList.contains('active')) {
-                return;
-            }
-
-            // Ctrl/Cmd + A to select all
-            if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
-                e.preventDefault();
-                selectAll();
-            }
-
-            // Delete key to delete selected
-            if (e.key === 'Delete' || e.key === 'Backspace') {
-                const selected = document.querySelectorAll('.image-select-cb:checked');
-                if (selected.length > 0) {
-                    e.preventDefault();
-                    bulkDelete();
-                }
-            }
-
-            // Escape to deselect all
-            if (e.key === 'Escape') {
-                deselectAll();
-            }
-        });
-    });
-
     </script>
 </body>
 </html>
