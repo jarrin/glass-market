@@ -1489,12 +1489,10 @@ try {
                             <p style="font-size: 14px; color: #6b7280; margin-bottom: 16px;">
                                 Are you absolutely sure? This action is permanent and cannot be reversed.
                             </p>
-                            <form method="POST" action="<?php echo VIEWS_URL; ?>/profile.php?tab=listings" 
-                                  onsubmit="return confirm('⚠️ FINAL WARNING ⚠️\n\nAre you absolutely sure you want to permanently delete this listing?\n\nThis action CANNOT be undone!\n\nClick OK to delete forever, or Cancel to keep the listing.');"
-                                  style="display: inline;">
+                            <form id="delete-form" method="POST" action="<?php echo VIEWS_URL; ?>/profile.php?tab=listings" style="display: inline;">
                                 <input type="hidden" name="delete_listing" value="1">
                                 <input type="hidden" name="listing_id" value="<?php echo $listing_id; ?>">
-                                <button type="submit" class="btn btn-danger" style="width: 100%; padding: 16px; font-size: 16px;">
+                                <button type="button" onclick="confirmDelete()" class="btn btn-danger" style="width: 100%; padding: 16px; font-size: 16px;">
                                     �️ Delete Listing Permanently
                                 </button>
                             </form>
@@ -1934,6 +1932,13 @@ try {
             }
         });
     });
+
+    // Confirm delete function
+    function confirmDelete() {
+        if (confirm('⚠️ FINAL WARNING ⚠️\n\nAre you absolutely sure you want to permanently delete this listing?\n\nThis action CANNOT be undone!\n\nClick OK to delete forever, or Cancel to keep the listing.')) {
+            document.getElementById('delete-form').submit();
+        }
+    }
     </script>
 </body>
 </html>
