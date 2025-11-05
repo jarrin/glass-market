@@ -211,19 +211,6 @@ if (isset($_SESSION['listing_success'])) {
 if (isset($_SESSION['listing_error'])) {
     $error_message = $_SESSION['listing_error'];
     unset($_SESSION['listing_error']);
-    exit;
-}
-
-// Handle listing update
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_listing'])) {
-    $title = trim($_POST['glass_title'] ?? '');
-    $glass_type = trim($_POST['glass_type'] ?? '');
-    $glass_type_other = trim($_POST['glass_type_other'] ?? '');
-    $tons = $_POST['glass_tons'] ?? '';
-    $description = trim($_POST['glass_description'] ?? '');
-    $side = $_POST['side'] ?? 'WTS';
-    $price_text = trim($_POST['price_text'] ?? '');
-    $recycled = $_POST['recycled'] ?? 'unknown';
 }
 ?>
 <!DOCTYPE html>
