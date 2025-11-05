@@ -491,11 +491,11 @@
                     c.company_type,
                     c.phone,
                     c.website,
-                    c.user_id,
+                    c.owner_user_id,
                     u.email as seller_email,
                     COUNT(l.id) as listing_count
                 FROM companies c
-                LEFT JOIN users u ON c.user_id = u.id
+                LEFT JOIN users u ON c.owner_user_id = u.id
                 LEFT JOIN listings l ON c.id = l.company_id AND l.published = 1
                 WHERE c.id = ?
                 GROUP BY c.id
