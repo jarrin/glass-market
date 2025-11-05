@@ -186,6 +186,7 @@ $total_pages = ceil($total_saved / $per_page);
                 Browse Listings
             </a>
         </div>
+    <?php endif; // End empty check ?>
 
     <?php endif; // End subscription check ?>
 </div>
