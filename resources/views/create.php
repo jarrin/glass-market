@@ -1341,13 +1341,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_listing'])) {
         
         // Add active class to clicked button
         const clickedButton = Array.from(document.querySelectorAll('.tab-button')).find(btn => {
-            return btn.textContent.includes(tabName === 'details' ? 'Listing Details' : 
-                   tabName === 'images' ? 'Product Images' : 'Delete Listing');
+            return btn.textContent.includes(tabName === 'details' ? 'Listing Details' : 'Product Images');
         });
         if (clickedButton) {
             clickedButton.classList.add('active');
         }
-        
+    }
         // Scroll to top of tabs
         const tabsContainer = document.querySelector('.tabs-container');
         if (tabsContainer) {
