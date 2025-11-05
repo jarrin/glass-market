@@ -578,12 +578,6 @@
                 
                 <span class="seller-specialty-large"><?php echo htmlspecialchars($specialty, ENT_QUOTES, 'UTF-8'); ?></span>
                 
-                <p class="seller-description">
-                    Welcome to our shop! We specialize in high-quality glass products and materials. 
-                    Browse through our collection of carefully curated items, from recycled glass cullet 
-                    to premium glass products. All our listings meet industry standards and quality requirements.
-                </p>
-                
                 <div class="seller-location-large">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
