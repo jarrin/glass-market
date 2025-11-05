@@ -96,6 +96,19 @@
 <body>
     <?php include __DIR__ . '/../../includes/navbar.php'; ?>
     <?php include __DIR__ . '/../../includes/subscription-notification.php'; ?>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" style="position: fixed; top: 80px; right: 20px; z-index: 99999;"></div>
+
+    <?php if (isset($_SESSION['browse_error'])): ?>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                showToast('<?php echo addslashes($_SESSION['browse_error']); ?>', 'error');
+            });
+        </script>
+        <?php unset($_SESSION['browse_error']); ?>
+    <?php endif; ?>
+
 <main class="container" style="padding-top: 70px;">
     <h1 class="page-title">Browse Collection</h1>
 
@@ -408,8 +421,8 @@
                 });
             }
             
-            const glassTypeCheckboxes = Array.from(document.querySelectorAll('.glass-filter'));
-            const conditionCheckboxes = Array.from(document.querySelectorAll('.condition-filter'));
+            const glassTypeCheckboxes = Array.from(document.querySelectorAll('.glass-type-filter'));
+            const recycledCheckboxes = Array.from(document.querySelectorAll('.recycled-filter'));
             const minRange = document.getElementById('minRange');
             const maxRange = document.getElementById('maxRange');
             const minPrice = document.getElementById('minPrice');
@@ -427,19 +440,20 @@
             let currentPage = 1;
             let visibleCards = [];
             let maxTonsValue = <?php echo $maxTons; ?>;
+            let activeRecycled = [];
 
             function applyFilters(){
                 console.log('=== APPLY FILTERS CALLED ===');
 
                 const activeGlassTypes = glassTypeCheckboxes.filter(cb=>cb.checked).map(cb=>cb.value);
-                const activeConditions = conditionCheckboxes.filter(cb=>cb.checked).map(cb=>cb.value);
+                activeRecycled = recycledCheckboxes.filter(cb=>cb.checked).map(cb=>cb.value);
 
                 // FIX: Use minPrice/maxPrice instead of minRange/maxRange
                 const min = parseFloat(minPrice.value) || 0;
                 const max = parseFloat(maxPrice.value) || maxTonsValue;
 
                 console.log('Active Glass Types:', activeGlassTypes);
-                console.log('Active Conditions:', activeConditions);
+                console.log('Active Recycled:', activeRecycled);
                 console.log('Tons range:', min, 'to', max);
                 console.log('Total cards:', cards.length);
 
@@ -449,14 +463,22 @@
                 visibleCards = [];
                 
                 cards.forEach(c=>{
-                    const glassType = (c.getAttribute('data-glass-type') || '').trim();
-                    const condition = (c.getAttribute('data-condition') || '').trim();
-                    const tons = parseFloat(c.getAttribute('data-tons')) || 0;
+                    const glassType = c.getAttribute('data-glass-type');
+                    const isRecycled = c.getAttribute('data-recycled') === '1';
+                    const tons = parseFloat(c.getAttribute('data-tons') || 0);
                     const tonsMatch = tons >= min && tons <= max;
-                    const glassTypeMatch = activeGlassTypes.length ? activeGlassTypes.indexOf(glassType) !== -1 : true;
-                    const conditionMatch = activeConditions.length ? activeConditions.indexOf(condition) !== -1 : true;
+                    const glassTypeMatch = activeGlassTypes.length === 0 || activeGlassTypes.includes(glassType);
+                    let matchesRecycled = true;
                     
-                    if(tonsMatch && conditionMatch){
+                    if (activeRecycled.length > 0) {
+                        matchesRecycled = activeRecycled.some(option => {
+                            if (option === 'Recycled') return isRecycled;
+                            if (option === 'Not Recycled') return !isRecycled;
+                            return false;
+                        });
+                    }
+                    
+                    if(tonsMatch && glassTypeMatch && matchesRecycled){
                         if(!(glassType in glassTypeCounts)) glassTypeCounts[glassType]=0;
                         glassTypeCounts[glassType]++;
                     }
@@ -467,11 +489,20 @@
                 });
 
                 cards.forEach((c, index) => {
-                    const glassType = (c.getAttribute('data-glass-type') || '').trim();
-                    const condition = (c.getAttribute('data-condition') || '').trim();
-                    const tons = parseFloat(c.getAttribute('data-tons')) || 0;
-                    const glassTypeMatch = activeGlassTypes.length ? activeGlassTypes.indexOf(glassType) !== -1 : true;
-                    const conditionMatch = activeConditions.length ? activeConditions.indexOf(condition) !== -1 : true;
+                    const glassType = c.getAttribute('data-glass-type');
+                    const isRecycled = c.getAttribute('data-recycled') === '1';
+                    const tons = parseFloat(c.getAttribute('data-tons') || 0);
+                    const glassTypeMatch = activeGlassTypes.length === 0 || activeGlassTypes.includes(glassType);
+                    let matchesRecycled = true;
+                    
+                    if (activeRecycled.length > 0) {
+                        matchesRecycled = activeRecycled.some(option => {
+                            if (option === 'Recycled') return isRecycled;
+                            if (option === 'Not Recycled') return !isRecycled;
+                            return false;
+                        });
+                    }
+                    
                     const tonsMatch = tons >= min && tons <= max;
 
                     // Log first 3 cards for debugging
@@ -481,15 +512,15 @@
                             activeGlassTypes,
                             indexOfResult: activeGlassTypes.indexOf(glassType),
                             glassTypeMatch,
-                            condition: `"${condition}"`,
-                            conditionMatch,
+                            isRecycled,
+                            matchesRecycled,
                             tons,
                             tonsMatch,
-                            willShow: glassTypeMatch && conditionMatch && tonsMatch
+                            willShow: glassTypeMatch && matchesRecycled && tonsMatch
                         });
                     }
 
-                    if(glassTypeMatch && conditionMatch && tonsMatch){
+                    if(glassTypeMatch && matchesRecycled && tonsMatch){
                         visibleCards.push(c);
                     }
                 });
@@ -503,15 +534,15 @@
                 // update count labels in sidebar
                 document.querySelectorAll('#glass-types-list .count').forEach(el=>{
                     const li = el.closest('li');
-                    const input = li.querySelector('.glass-filter');
+                    const input = li.querySelector('.glass-type-filter');
                     const glassType = input.value;
                     el.textContent = glassTypeCounts[glassType] !== undefined ? glassTypeCounts[glassType] : 0;
                 });
-                document.querySelectorAll('#conditions-list .count').forEach(el=>{
+                document.querySelectorAll('#recycled-filter .count').forEach(el=>{
                     const li = el.closest('li');
-                    const input = li.querySelector('.condition-filter');
-                    const condition = input.value;
-                    el.textContent = conditionCounts[condition] !== undefined ? conditionCounts[condition] : 0;
+                    const input = li.querySelector('.recycled-filter');
+                    const recycled = input.value;
+                    el.textContent = activeRecycled.includes(recycled) ? visibleCards.length : 0;
                 });
 
                 // Reset to page 1 when filters change
@@ -655,7 +686,7 @@
 
             function clearAllFilters(){
                 glassTypeCheckboxes.forEach(cb=>cb.checked = false);
-                conditionCheckboxes.forEach(cb=>cb.checked = false);
+                recycledCheckboxes.forEach(cb=>cb.checked = false);
                 minPrice.value = 0;
                 maxPrice.value = maxTonsValue;
                 minRange.value = 0;
@@ -667,8 +698,8 @@
                 applyFilters();
             }
 
-            glassTypeCheckboxes.forEach(cb=>cb.addEventListener('change', applyFilters));
-            conditionCheckboxes.forEach(cb=>cb.addEventListener('change', applyFilters));
+            glassTypeCheckboxes.forEach(checkbox => checkbox.addEventListener('change', applyFilters));
+            recycledCheckboxes.forEach(checkbox => checkbox.addEventListener('change', applyFilters));
             minPrice.addEventListener('input', syncRanges);
             maxPrice.addEventListener('input', syncRanges);
             minRange.addEventListener('input', syncRanges);
@@ -753,6 +784,88 @@
             syncRanges();
             applyFilters();
         })();
+
+        // Toast Notification System
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const icons = {
+                success: '✓',
+                error: '✕',
+                info: 'ℹ'
+            };
+            
+            const colors = {
+                success: '#10b981',
+                error: '#ef4444',
+                info: '#3b82f6'
+            };
+            
+            toast.style.cssText = `
+                background: white;
+                border-left: 4px solid ${colors[type] || colors.info};
+                padding: 16px 20px;
+                margin-bottom: 10px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                min-width: 300px;
+                max-width: 400px;
+                animation: slideIn 0.3s ease-out;
+            `;
+            
+            toast.innerHTML = `
+                <span style="
+                    background: ${colors[type] || colors.info};
+                    color: white;
+                    width: 24px;
+                    height: 24px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: bold;
+                    flex-shrink: 0;
+                ">${icons[type] || icons.info}</span>
+                <span style="flex: 1; color: #1f2937; font-size: 14px;">${message}</span>
+            `;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease-in';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+        
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from {
+                    transform: translateX(400px);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            
+            @keyframes slideOut {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(400px);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 
 </main>

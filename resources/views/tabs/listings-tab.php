@@ -12,8 +12,7 @@ try {
         SELECT l.*, c.name as company_name
         FROM listings l
         LEFT JOIN companies c ON l.company_id = c.id
-        LEFT JOIN users u ON c.id = u.company_id
-        WHERE u.id = :user_id
+        WHERE l.user_id = :user_id
         ORDER BY l.created_at DESC
     ');
     $stmt->execute(['user_id' => $user['id']]);
@@ -27,10 +26,10 @@ try {
     
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
         <p style="margin: 0; font-size: 14px; color: #6b7280;">
-            You have <strong style="color: #2f6df5;"><?php echo count($user_listings); ?></strong> listing(s)
+            You have <strong style="color: #2f6df5;"><?php echo count($user_listings); ?></strong> personal listing(s)
         </p>
         <a 
-            href="<?php echo VIEWS_URL; ?>/my-listings.php" 
+            href="<?php echo VIEWS_URL; ?>/create.php" 
             style="
                 padding: 10px 20px;
                 background: #2f6df5;
@@ -44,7 +43,7 @@ try {
                 gap: 8px;
             "
         >
-            <span>📦</span> View All Listings
+            <span>➕</span> Create New Listing
         </a>
     </div>
 
@@ -105,7 +104,7 @@ try {
                                 👁 View
                             </a>
                             <a 
-                                href="<?php echo VIEWS_URL; ?>/edit-listing.php?id=<?php echo $listing['id']; ?>" 
+                                href="<?php echo VIEWS_URL; ?>/edit-listing-modern.php?id=<?php echo $listing['id']; ?>" 
                                 style="padding: 6px 12px; background: #2f6df5; color: white; text-decoration: none; border-radius: 6px; font-size: 12px; font-weight: 600;"
                             >
                                 ✏️ Edit
@@ -135,23 +134,11 @@ try {
             <?php endforeach; ?>
         </div>
         
-        <?php if (count($user_listings) > 3): ?>
+        <?php if (count($user_listings) > 5): ?>
         <div style="text-align: center; margin-top: 24px;">
-            <a 
-                href="<?php echo VIEWS_URL; ?>/my-listings.php" 
-                style="
-                    display: inline-block;
-                    padding: 10px 24px;
-                    background: #f3f4f6;
-                    color: #1f2937;
-                    text-decoration: none;
-                    border-radius: 8px;
-                    font-weight: 600;
-                    font-size: 14px;
-                "
-            >
-                View All <?php echo count($user_listings); ?> Listings →
-            </a>
+            <p style="font-size: 14px; color: #6b7280; margin: 0;">
+                Showing first 5 listings. Total: <?php echo count($user_listings); ?>
+            </p>
         </div>
         <?php endif; ?>
     <?php else: ?>
@@ -162,10 +149,10 @@ try {
                 No Listings Yet
             </h3>
             <p style="margin: 0 0 24px; font-size: 14px; color: #6b7280;">
-                Start selling by creating your first glass listing.
+                Start selling by creating your first personal glass listing.
             </p>
             <a 
-                href="<?php echo VIEWS_URL; ?>/my-listings.php" 
+                href="<?php echo VIEWS_URL; ?>/create.php" 
                 style="
                     display: inline-block;
                     padding: 12px 24px;
@@ -177,7 +164,7 @@ try {
                     font-size: 14px;
                 "
             >
-                Go to My Listings
+                ➕ Create Your First Listing
             </a>
         </div>
     <?php endif; ?>

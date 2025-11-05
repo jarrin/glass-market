@@ -18,6 +18,18 @@ $db_pass = '';
 $error_message = '';
 $success_message = '';
 
+// Check for session error messages (from redirects)
+if (isset($_SESSION['profile_error'])) {
+    $error_message = $_SESSION['profile_error'];
+    unset($_SESSION['profile_error']);
+}
+
+// Check for session success messages (from redirects)
+if (isset($_SESSION['profile_success'])) {
+    $success_message = $_SESSION['profile_success'];
+    unset($_SESSION['profile_success']);
+}
+
 // Load user data (sets: $user, $company, $user_listings_count, $user_subscriptions, $user_cards)
 require_once __DIR__ . '/loaders/user-data-loader.php';
 
@@ -35,12 +47,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_publish'])) {
         $pdo = new PDO("mysql:host=$db_host;dbname=$db_name", $db_user, $db_pass);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         
-        // Verify the listing belongs to the user's company
+        // Verify the listing belongs to the user
         $stmt = $pdo->prepare('
-            SELECT l.id FROM listings l
-            LEFT JOIN companies c ON l.company_id = c.id
-            LEFT JOIN users u ON c.id = u.company_id
-            WHERE l.id = :listing_id AND u.id = :user_id
+            SELECT id FROM listings 
+            WHERE id = :listing_id AND user_id = :user_id
         ');
         $stmt->execute(['listing_id' => $listing_id, 'user_id' => $user['id']]);
         
@@ -49,12 +59,58 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_publish'])) {
             $stmt->execute(['status' => $new_status, 'id' => $listing_id]);
             
             $status_text = $new_status == 1 ? 'published' : 'unpublished';
-            $success_message = "Listing {$status_text} successfully!";
+            $_SESSION['profile_success'] = "Listing {$status_text} successfully!";
         } else {
-            $error_message = 'You do not have permission to modify this listing.';
+            $_SESSION['profile_error'] = 'You do not have permission to modify this listing.';
         }
     } catch (PDOException $e) {
-        $error_message = 'Failed to update listing: ' . $e->getMessage();
+        $_SESSION['profile_error'] = 'Failed to update listing: ' . $e->getMessage();
+    }
+    
+    // Redirect to prevent form resubmission
+    header('Location: ' . VIEWS_URL . '/profile.php?tab=listings');
+    exit;
+}
+
+// Handle listing deletion from edit page
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_listing'])) {
+    $listing_id = $_POST['listing_id'] ?? 0;
+    
+    try {
+        $pdo = new PDO("mysql:host=$db_host;dbname=$db_name", $db_user, $db_pass);
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        
+        // Verify the listing belongs to the user and get image path
+        $stmt = $pdo->prepare('
+            SELECT id, image_path FROM listings 
+            WHERE id = :listing_id AND user_id = :user_id
+        ');
+        $stmt->execute(['listing_id' => $listing_id, 'user_id' => $user['id']]);
+        $listing_to_delete = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($listing_to_delete) {
+            // Delete the listing
+            $stmt = $pdo->prepare('DELETE FROM listings WHERE id = :id');
+            $stmt->execute(['id' => $listing_id]);
+            
+            // Delete associated image file if it exists
+            if (!empty($listing_to_delete['image_path'])) {
+                $image_file = __DIR__ . '/../../public/' . $listing_to_delete['image_path'];
+                if (file_exists($image_file)) {
+                    unlink($image_file);
+                }
+            }
+            
+            // Delete from saved listings
+            $stmt = $pdo->prepare('DELETE FROM saved_listings WHERE listing_id = :id');
+            $stmt->execute(['id' => $listing_id]);
+            
+            $_SESSION['profile_success'] = 'Listing deleted successfully!';
+        } else {
+            $_SESSION['profile_error'] = 'You do not have permission to delete this listing.';
+        }
+    } catch (PDOException $e) {
+        $_SESSION['profile_error'] = 'Failed to delete listing: ' . $e->getMessage();
     }
     
     // Redirect to prevent form resubmission
@@ -271,6 +327,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_publish'])) {
         <div class="profile-tabs">
             <button class="tab-button active" data-tab="overview">Overview</button>
             <button class="tab-button" data-tab="listings">My Listings</button>
+            <button class="tab-button" data-tab="saved">Saved</button>
             <button class="tab-button" data-tab="company">Company</button>
             <button class="tab-button" data-tab="edit">Edit Profile</button>
             <button class="tab-button" data-tab="subscription">Subscriptions</button>
@@ -284,6 +341,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_publish'])) {
 
         <!-- Listings Tab -->
         <?php include __DIR__ . '/tabs/listings-tab.php'; ?>
+
+        <!-- Saved Tab -->
+        <?php include __DIR__ . '/tabs/saved-tab.php'; ?>
 
         <!-- Company Tab -->
         <?php include __DIR__ . '/tabs/company-tab.php'; ?>
@@ -304,25 +364,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_publish'])) {
             const tabButtons = document.querySelectorAll('.tab-button');
             const tabPanels = document.querySelectorAll('.tab-panel');
 
+            // Check for tab parameter in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const tabParam = urlParams.get('tab');
+            
+            // Function to switch tabs
+            function switchToTab(targetTab) {
+                // Remove active class from all buttons and panels
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                tabPanels.forEach(panel => panel.classList.remove('active'));
+
+                // Add active class to target button and panel
+                const targetButton = document.querySelector(`[data-tab="${targetTab}"]`);
+                const targetPanel = document.getElementById('tab-' + targetTab);
+                
+                if (targetButton && targetPanel) {
+                    targetButton.classList.add('active');
+                    targetPanel.classList.add('active');
+                    targetPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }
+
+            // If tab parameter exists in URL, switch to that tab
+            if (tabParam) {
+                switchToTab(tabParam);
+            }
+
             tabButtons.forEach(button => {
                 button.addEventListener('click', function(e) {
                     e.preventDefault();
                     const targetTab = button.getAttribute('data-tab');
-
-                    // Remove active class from all buttons and panels
-                    tabButtons.forEach(btn => btn.classList.remove('active'));
-                    tabPanels.forEach(panel => panel.classList.remove('active'));
-
-                    // Add active class to clicked button and corresponding panel
-                    button.classList.add('active');
-                    const targetPanel = document.getElementById('tab-' + targetTab);
-                    if (targetPanel) {
-                        targetPanel.classList.add('active');
-                        console.log('Successfully switched to tab:', targetTab);
-                        
-                        // Scroll to top of content
-                        targetPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                    }
+                    switchToTab(targetTab);
                 });
             });
         });

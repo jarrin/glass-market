@@ -20,17 +20,21 @@ $stmt = $pdo->prepare("
         c.company_type,
         c.phone,
         c.website,
-        u.id as owner_user_id
+        u.id as owner_user_id,
+        u.email as seller_email,
+        u.name as seller_name
     FROM listings l 
     LEFT JOIN companies c ON l.company_id = c.id
-    LEFT JOIN users u ON c.id = u.company_id
+    LEFT JOIN users u ON l.user_id = u.id
     WHERE l.id = ? 
     LIMIT 1
 ");
 $stmt->execute([$id]);
 $listing = $stmt->fetch(PDO::FETCH_ASSOC);
 
+// Check if listing exists
 if (!$listing) {
+    $_SESSION['browse_error'] = 'Listing not found. It may have been removed or never existed.';
     header('Location: ' . VIEWS_URL . '/browse.php');
     exit;
 }
@@ -38,51 +42,68 @@ if (!$listing) {
 // Check if listing is published OR if current user owns it
 $is_owner = ($user_id && $listing['owner_user_id'] == $user_id);
 if ($listing['published'] != 1 && !$is_owner) {
+    $_SESSION['browse_error'] = 'This listing is not currently available for viewing.';
     header('Location: ' . VIEWS_URL . '/browse.php');
     exit;
+}
+
+// Check if user has saved this listing
+$is_saved = false;
+if ($user_id) {
+    $stmt = $pdo->prepare("SELECT id FROM saved_listings WHERE user_id = ? AND listing_id = ?");
+    $stmt->execute([$user_id, $id]);
+    $is_saved = (bool)$stmt->fetch();
+}
+
+// Load all images for this listing
+$listing_images = [];
+$stmt = $pdo->prepare("
+    SELECT * FROM listing_images 
+    WHERE listing_id = ? 
+    ORDER BY is_main DESC, display_order ASC
+");
+$stmt->execute([$id]);
+$listing_images = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Determine main image and additional images
+if (!empty($listing_images)) {
+    $main_image = null;
+    $additional_images = [];
+    
+    foreach ($listing_images as $img) {
+        if ($img['is_main']) {
+            $main_image = PUBLIC_URL . '/' . $img['image_path'];
+        }
+        $additional_images[] = PUBLIC_URL . '/' . $img['image_path'];
+    }
+    
+    // If no main image is set, use the first one
+    if (!$main_image && !empty($additional_images)) {
+        $main_image = $additional_images[0];
+    }
+    
+    $imageUrl = $main_image ?: "https://picsum.photos/seed/glass{$listing['id']}/800/800";
+} else {
+    // Fallback to old image_path or placeholder
+    if (!empty($listing['image_path'])) {
+        $imageUrl = PUBLIC_URL . '/' . ltrim($listing['image_path'], '/');
+        $additional_images = [$imageUrl];
+    } else {
+        $imageUrl = "https://picsum.photos/seed/glass{$listing['id']}/800/800";
+        $additional_images = [
+            $imageUrl,
+            "https://picsum.photos/seed/glass" . ($listing['id'] + 100) . "/800/800",
+            "https://picsum.photos/seed/glass" . ($listing['id'] + 200) . "/800/800"
+        ];
+    }
 }
 
 // Determine title and subtitle
 $title = $listing['quantity_note'] ?: ($listing['glass_type_other'] ?: $listing['glass_type']);
 $subtitle = $listing['glass_type_other'] ?: $listing['glass_type'];
 
-// Generate image URL - use actual uploaded image if available
-if (!empty($listing['image_path'])) {
-    $imageUrl = PUBLIC_URL . '/' . ltrim($listing['image_path'], '/');
-} else {
-    $imageUrl = "https://picsum.photos/seed/glass{$listing['id']}/800/800";
-}
-
-// Generate additional product images for gallery
-// If actual image exists, use it for all three thumbnails, otherwise use placeholders
-if (!empty($listing['image_path'])) {
-    $additionalImages = [
-        PUBLIC_URL . '/' . ltrim($listing['image_path'], '/'),
-        PUBLIC_URL . '/' . ltrim($listing['image_path'], '/'),
-        PUBLIC_URL . '/' . ltrim($listing['image_path'], '/')
-    ];
-} else {
-    $additionalImages = [
-        "https://picsum.photos/seed/glass{$listing['id']}/800/800",
-        "https://picsum.photos/seed/glass" . ($listing['id'] + 100) . "/800/800",
-        "https://picsum.photos/seed/glass" . ($listing['id'] + 200) . "/800/800"
-    ];
-}
-
 // Format price
 $priceDisplay = !empty($listing['price_text']) ? $listing['price_text'] : 'Contact for Price';
-
-// Calculate original price (for demo - 30% markup)
-if (!empty($listing['price_text']) && preg_match('/[\d,]+/', $listing['price_text'], $matches)) {
-    $currentPrice = (float)str_replace(',', '', $matches[0]);
-    $originalPrice = number_format($currentPrice * 1.3, 2);
-} else {
-    $originalPrice = null;
-}
-
-// Generate random rating for demo
-$rating = number_format(4.5 + (rand(0, 4) / 10), 1);
-$reviewCount = rand(50, 200);
 
 // Related products (fetch similar items)
 $relatedStmt = $pdo->prepare("
@@ -103,6 +124,79 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
     <title><?= htmlspecialchars($title) ?> - Glass Market</title>
     <link rel="stylesheet" href="<?php echo CSS_URL; ?>/app.css">
     <style>
+        /* Toast Notification Styles */
+        .toast {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            background: white;
+            color: #1f2937;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 10000;
+            animation: slideInUp 0.3s ease, fadeOut 0.3s ease 2.7s;
+            min-width: 320px;
+            max-width: 500px;
+        }
+        
+        @keyframes slideInUp {
+            from {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+        }
+        
+        .toast.success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+        
+        .toast.error {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+        
+        .toast.info {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+        }
+        
+        .toast-icon {
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+        
+        .toast-content {
+            flex: 1;
+        }
+        
+        .toast-title {
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 2px;
+        }
+        
+        .toast-message {
+            font-size: 13px;
+            opacity: 0.95;
+            line-height: 1.4;
+        }
+        
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: #f9f7f5;
@@ -167,8 +261,8 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
         /* Product Container */
         .product-container {
             max-width: 1280px;
-            margin: 0 auto 80px;
-            padding: 0 20px;
+            margin: 0 auto 120px;
+            padding: 0 20px 60px;
         }
 
         .product-layout {
@@ -180,8 +274,6 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
 
         /* Image Gallery */
         .image-gallery {
-            position: sticky;
-            top: 100px;
             height: fit-content;
         }
 
@@ -193,6 +285,7 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
             overflow: hidden;
             margin-bottom: 16px;
             box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            position: relative;
         }
 
         .main-image img {
@@ -202,10 +295,59 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
             display: block;
         }
 
+        .gallery-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            border: none;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            font-size: 32px;
+            font-weight: 300;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            z-index: 10;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+            color: #1d1d1f;
+        }
+
+        .gallery-nav:hover {
+            background: white;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .gallery-nav-prev {
+            left: 16px;
+        }
+
+        .gallery-nav-next {
+            right: 16px;
+        }
+
+        .gallery-counter {
+            position: absolute;
+            bottom: 16px;
+            right: 16px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
         .thumbnail-gallery {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
             gap: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
         }
 
         .thumbnail {
@@ -499,7 +641,7 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
 
         /* Related Products */
         .related-section {
-            padding-top: 40px;
+            padding: 40px 0 60px 0;
             border-top: 2px solid #e8e3dd;
         }
 
@@ -586,7 +728,7 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
     </style>
 </head>
 <body>
-
+    <main>
     <?php include __DIR__ . '/../../includes/navbar.php'; ?>
     <?php include __DIR__ . '/../../includes/subscription-notification.php'; ?>
 
@@ -617,18 +759,30 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
             <!-- Image Gallery -->
             <div class="image-gallery">
                 <div class="main-image" id="mainImage">
+                    <?php if (count($additional_images) > 1): ?>
+                    <button class="gallery-nav gallery-nav-prev" onclick="changeImageNav(-1)">‹</button>
+                    <button class="gallery-nav gallery-nav-next" onclick="changeImageNav(1)">›</button>
+                    <?php endif; ?>
                     <img src="<?= htmlspecialchars($imageUrl, ENT_QUOTES, 'UTF-8') ?>" 
-                         alt="<?= htmlspecialchars($title, ENT_QUOTES, 'UTF-8') ?>">
+                         alt="<?= htmlspecialchars($title, ENT_QUOTES, 'UTF-8') ?>"
+                         id="mainImageEl">
+                    <?php if (count($additional_images) > 1): ?>
+                    <div class="gallery-counter">
+                        <span id="currentImageIndex">1</span> / <?= count($additional_images) ?>
+                    </div>
+                    <?php endif; ?>
                 </div>
+                <?php if (!empty($additional_images) && count($additional_images) > 1): ?>
                 <div class="thumbnail-gallery">
-                    <?php foreach ($additionalImages as $index => $img): ?>
+                    <?php foreach ($additional_images as $index => $img): ?>
                     <div class="thumbnail <?= $index === 0 ? 'active' : '' ?>" 
-                         onclick="changeImage('<?= htmlspecialchars($img, ENT_QUOTES, 'UTF-8') ?>', this)">
+                         onclick="changeImage('<?= htmlspecialchars($img, ENT_QUOTES, 'UTF-8') ?>', this, <?= $index ?>)">
                         <img src="<?= htmlspecialchars($img, ENT_QUOTES, 'UTF-8') ?>" 
                              alt="Product view <?= $index + 1 ?>">
                     </div>
                     <?php endforeach; ?>
                 </div>
+                <?php endif; ?>
             </div>
 
             <!-- Product Info -->
@@ -647,17 +801,11 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
                     <a href="<?php echo VIEWS_URL; ?>/seller-shop.php?seller=<?= $listing['company_id'] ?>" class="seller-link">
                         <?= htmlspecialchars($listing['company_name']) ?>
                     </a>
+                    <?php elseif (!empty($listing['seller_name'])): ?>
+                    <span class="seller-link" style="cursor: default;">
+                        Sold by <?= htmlspecialchars($listing['seller_name']) ?>
+                    </span>
                     <?php endif; ?>
-                </div>
-
-                <div class="rating-section">
-                    <div class="rating-stars">
-                        <?php for($i = 0; $i < 5; $i++): ?>
-                            <span class="star">★</span>
-                        <?php endfor; ?>
-                    </div>
-                    <span class="rating-text"><?= $rating ?></span>
-                    <span class="review-count">(<?= number_format($reviewCount) ?> sales)</span>
                 </div>
 
                 <div class="price-section">
@@ -669,45 +817,81 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
                                 Contact for Price
                             <?php endif; ?>
                         </span>
-                        <?php if ($originalPrice): ?>
-                            <span class="original-price">$<?= $originalPrice ?></span>
-                        <?php endif; ?>
                     </div>
                 </div>
 
                 <!-- Action Buttons -->
-                <div class="action-section">
-                    <button class="contact-btn" onclick="contactSeller()">
-                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                        </svg>
-                        Contact Seller
-                    </button>
-                    <div class="secondary-actions">
-                        <button class="secondary-btn" onclick="saveListing()">
-                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                <?php if ($is_owner): ?>
+                    <!-- Owner Actions -->
+                    <div class="action-section">
+                        <a href="<?php echo VIEWS_URL; ?>/edit-listing.php?id=<?= $listing['id'] ?>" class="contact-btn" style="text-decoration: none; text-align: center;">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                             </svg>
-                            Save
-                        </button>
-                        <button class="secondary-btn" onclick="shareProduct()">
-                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
-                            </svg>
-                            Share
-                        </button>
+                            Edit Listing
+                        </a>
+                        <div class="secondary-actions">
+                            <button class="secondary-btn" onclick="window.location.href='<?php echo VIEWS_URL; ?>/profile.php?tab=listings'">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                                </svg>
+                                My Listings
+                            </button>
+                            <button class="secondary-btn" onclick="shareProduct()">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                                </svg>
+                                Share
+                            </button>
+                        </div>
                     </div>
-                </div>
+                <?php else: ?>
+                    <!-- Visitor Actions -->
+                    <div class="action-section">
+                        <button class="contact-btn" onclick="contactSeller()">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                            </svg>
+                            Contact Seller
+                        </button>
+                        <div class="secondary-actions">
+                            <button class="secondary-btn" onclick="saveListing()" <?php echo $is_saved ? 'style="color: #ef4444;"' : ''; ?>>
+                                <?php if ($is_saved): ?>
+                                    <svg width="18" height="18" fill="#ef4444" viewBox="0 0 24 24">
+                                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                    </svg>
+                                    Saved
+                                <?php else: ?>
+                                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                                    </svg>
+                                    Save
+                                <?php endif; ?>
+                            </button>
+                            <button class="secondary-btn" onclick="shareProduct()">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                                </svg>
+                                Share
+                            </button>
+                        </div>
+                    </div>
+                <?php endif; ?>
 
-                <!-- Features -->
+                <!-- Features - Only show if company exists and is verified -->
+                <?php if (!empty($listing['company_id'])): ?>
                 <div class="features-grid">
+                    <?php if (!empty($listing['company_name'])): ?>
                     <div class="feature-item">
                         <svg class="feature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                         </svg>
-                        <div class="feature-title">Company Verified</div>
-                        <div class="feature-desc">Trusted seller</div>
+                        <div class="feature-title">Company Listing</div>
+                        <div class="feature-desc"><?= htmlspecialchars($listing['company_name']) ?></div>
                     </div>
+                    <?php endif; ?>
+                    
+                    <?php if ($listing['tested'] === 'tested'): ?>
                     <div class="feature-item">
                         <svg class="feature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
@@ -715,14 +899,17 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
                         <div class="feature-title">Quality Tested</div>
                         <div class="feature-desc">Certified glass</div>
                     </div>
+                    <?php endif; ?>
+                    
                     <div class="feature-item">
                         <svg class="feature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                         </svg>
-                        <div class="feature-title">Fast Response</div>
-                        <div class="feature-desc">Quick communication</div>
+                        <div class="feature-title">Direct Contact</div>
+                        <div class="feature-desc">Quick response</div>
                     </div>
                 </div>
+                <?php endif; ?>
 
               
                 <!-- Tabs -->
@@ -731,10 +918,6 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
                         <li><button class="tab-button active" onclick="showTab('description')">Description</button></li>
                         <li><button class="tab-button" onclick="showTab('specifications')">Specifications</button></li>
                         <li><button class="tab-button" onclick="showTab('seller')">About Seller</button></li>
-<<<<<<< HEAD
-                        <li><button class="tab-button" onclick="showTab('reviews')">Reviews (<?= $reviewCount ?>)</button></li>
-=======
->>>>>>> 074ddcc (fixed listing, added gifs)
                     </ul>
                 </div>
 
@@ -744,9 +927,7 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
                         <?php if (!empty($listing['quality_notes'])): ?>
                             <?= nl2br(htmlspecialchars($listing['quality_notes'])) ?>
                         <?php else: ?>
-                            <p>This exquisite <?= htmlspecialchars($subtitle) ?> is a masterpiece of traditional glassmaking. Hand-crafted by skilled artisans using centuries-old techniques, each piece features intricate details and exceptional clarity. The elegant design makes it perfect for displaying fresh flowers or as a standalone decorative piece.</p>
-                            
-                            <p>Crafted with meticulous attention to detail, this vase showcases the finest quality glass materials. The recycled and tested glass ensures both environmental sustainability and lasting durability. Each piece undergoes rigorous quality control to meet industry standards and quality requirements.</p>
+                            <p>No description provided for this listing.</p>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -788,35 +969,47 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
 
                 <div class="tab-content" id="seller-tab">
                     <div class="description-text">
-                        <h3 style="margin-top:0">About <?= htmlspecialchars($listing['company_name']) ?></h3>
-                        <p><strong>Company Type:</strong> <?= htmlspecialchars($listing['company_type']) ?></p>
-                        
-                        <?php if (!empty($listing['phone'])): ?>
-                        <p><strong>Phone:</strong> <?= htmlspecialchars($listing['phone']) ?></p>
+                        <?php if (!empty($listing['company_name'])): ?>
+                            <!-- Company Seller -->
+                            <h3 style="margin-top:0">About <?= htmlspecialchars($listing['company_name']) ?></h3>
+                            
+                            <?php if (!empty($listing['company_type'])): ?>
+                            <p><strong>Company Type:</strong> <?= htmlspecialchars($listing['company_type']) ?></p>
+                            <?php endif; ?>
+                            
+                            <?php if (!empty($listing['phone'])): ?>
+                            <p><strong>Phone:</strong> <?= htmlspecialchars($listing['phone']) ?></p>
+                            <?php endif; ?>
+                            
+                            <?php if (!empty($listing['website'])): ?>
+                            <p><strong>Website:</strong> <a href="<?= htmlspecialchars($listing['website']) ?>" target="_blank" style="color: #2f6df5;"><?= htmlspecialchars($listing['website']) ?></a></p>
+                            <?php endif; ?>
+                            
+                            <?php if (!empty($listing['seller_email'])): ?>
+                            <p><strong>Email:</strong> <a href="mailto:<?= htmlspecialchars($listing['seller_email']) ?>" style="color: #2f6df5;"><?= htmlspecialchars($listing['seller_email']) ?></a></p>
+                            <?php endif; ?>
+                            
+                            <p style="margin-top: 16px;">
+                                <a href="<?php echo VIEWS_URL; ?>/seller-shop.php?company_id=<?= $listing['company_id'] ?>" style="display: inline-block; padding: 12px 24px; background: #2f6df5; color: white; text-decoration: none; border-radius: 8px; font-weight: 600;">
+                                    View All Products from This Seller
+                                </a>
+                            </p>
+                        <?php else: ?>
+                            <!-- Individual Seller -->
+                            <h3 style="margin-top:0">About the Seller</h3>
+                            
+                            <?php if (!empty($listing['seller_name'])): ?>
+                            <p><strong>Seller:</strong> <?= htmlspecialchars($listing['seller_name']) ?></p>
+                            <?php endif; ?>
+                            
+                            <?php if (!empty($listing['seller_email'])): ?>
+                            <p><strong>Email:</strong> <a href="mailto:<?= htmlspecialchars($listing['seller_email']) ?>" style="color: #2f6df5;"><?= htmlspecialchars($listing['seller_email']) ?></a></p>
+                            <?php endif; ?>
+                            
+                            <p style="margin-top: 24px; color: #6b6460;">
+                                This is a personal listing. Contact the seller directly for inquiries about this product.
+                            </p>
                         <?php endif; ?>
-                        
-                        <?php if (!empty($listing['website'])): ?>
-                        <p><strong>Website:</strong> <a href="<?= htmlspecialchars($listing['website']) ?>" target="_blank" style="color: #2f6df5;"><?= htmlspecialchars($listing['website']) ?></a></p>
-                        <?php endif; ?>
-                        
-                        <p style="margin-top: 24px;">
-                            <?= htmlspecialchars($listing['company_name']) ?> is a professional glass supplier specializing in quality glass materials. 
-                            We maintain high standards for all our products and ensure timely delivery to our customers.
-                        </p>
-                        
-                        <p style="margin-top: 16px;">
-                            <a href="seller-shop.php?company_id=<?= $listing['company_id'] ?>" style="display: inline-block; padding: 12px 24px; background: #2f6df5; color: white; text-decoration: none; border-radius: 8px; font-weight: 600;">
-                                View All Products from This Seller
-                            </a>
-                        </p>
-<<<<<<< HEAD
-               
-
-                <div class="tab-content" id="reviews-tab">
-                    <div class="description-text">
-                        <p style="color: #6b6460; font-style: italic;">Customer reviews and ratings will be displayed here. This feature is coming soon!</p>
-=======
->>>>>>> 074ddcc (fixed listing, added gifs)
                     </div>
                 </div>
             </div>
@@ -849,20 +1042,105 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
         <?php endif; ?>
     </div>
-
-    <?php include __DIR__ . '/../../includes/footer.php'; ?>
-
+    
+  </main>
+  <?php include __DIR__ . '/../../includes/footer.php'; ?>
     <script>
-        function changeImage(src, element) {
+        // Toast Notification Function
+        function showToast(message, type = 'success', title = '') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const icons = {
+                success: '✓',
+                error: '✕',
+                info: 'ℹ'
+            };
+            
+            const titles = {
+                success: title || 'Success',
+                error: title || 'Error',
+                info: title || 'Info'
+            };
+            
+            toast.innerHTML = `
+                <div class="toast-icon">${icons[type]}</div>
+                <div class="toast-content">
+                    <div class="toast-title">${titles[type]}</div>
+                    <div class="toast-message">${message}</div>
+                </div>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // Modern Image Gallery with Navigation
+        let currentImageIndex = 0;
+        const galleryImages = <?= json_encode($additional_images) ?>;
+
+        function changeImage(src, element, index) {
             const mainImage = document.querySelector('#mainImage img');
             mainImage.src = src;
+            currentImageIndex = index;
+            
+            // Update counter
+            const counter = document.getElementById('currentImageIndex');
+            if (counter) {
+                counter.textContent = index + 1;
+            }
             
             // Update active thumbnail
             document.querySelectorAll('.thumbnail').forEach(thumb => {
                 thumb.classList.remove('active');
             });
-            element.classList.add('active');
+            if (element) {
+                element.classList.add('active');
+            }
         }
+
+        function changeImageNav(direction) {
+            currentImageIndex += direction;
+            
+            // Loop around
+            if (currentImageIndex < 0) {
+                currentImageIndex = galleryImages.length - 1;
+            } else if (currentImageIndex >= galleryImages.length) {
+                currentImageIndex = 0;
+            }
+            
+            const mainImage = document.querySelector('#mainImage img');
+            mainImage.src = galleryImages[currentImageIndex];
+            
+            // Update counter
+            const counter = document.getElementById('currentImageIndex');
+            if (counter) {
+                counter.textContent = currentImageIndex + 1;
+            }
+            
+            // Update active thumbnail
+            const thumbnails = document.querySelectorAll('.thumbnail');
+            thumbnails.forEach((thumb, index) => {
+                if (index === currentImageIndex) {
+                    thumb.classList.add('active');
+                    thumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                } else {
+                    thumb.classList.remove('active');
+                }
+            });
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') {
+                changeImageNav(-1);
+            } else if (e.key === 'ArrowRight') {
+                changeImageNav(1);
+            }
+        });
 
         function showTab(tabName) {
             // Hide all tabs
@@ -879,29 +1157,121 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
         function contactSeller() {
-            <?php if (!empty($listing['company_name'])): ?>
-                window.location.href = '<?php echo VIEWS_URL; ?>/seller-shop.php?seller=<?= $listing['company_id'] ?>';
+            <?php if (!empty($listing['seller_email'])): ?>
+                const listingTitle = <?php echo json_encode($title); ?>;
+                const subject = encodeURIComponent('Inquiry about: ' + listingTitle);
+                const body = encodeURIComponent('Hello,\n\nI am interested in your listing: ' + listingTitle + '\n\nListing URL: ' + window.location.href + '\n\nThank you.');
+                
+                // Show toast notification first
+                showToast('Opening your email client...', 'info', 'Contact Seller');
+                
+                // Small delay to show the toast before opening email
+                setTimeout(() => {
+                    window.location.href = 'mailto:<?= htmlspecialchars($listing['seller_email']) ?>?subject=' + subject + '&body=' + body;
+                }, 500);
             <?php else: ?>
-                alert('Contact information for this seller is not available.');
+                showToast('Contact information for this seller is not available.', 'error', 'Unavailable');
             <?php endif; ?>
         }
 
         function saveListing() {
-            alert('Save functionality coming soon!');
+            <?php if (isset($_SESSION['user_logged_in']) && $_SESSION['user_logged_in']): ?>
+                fetch('<?php echo BASE_URL; ?>/includes/save-listing.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        listing_id: <?php echo $id; ?>
+                    })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('HTTP error! status: ' + response.status);
+                    }
+                    return response.text();
+                })
+                .then(text => {
+                    let data;
+                    try {
+                        data = JSON.parse(text);
+                    } catch (e) {
+                        console.error('Response was not JSON:', text);
+                        throw new Error('Invalid JSON response from server');
+                    }
+                    
+                    if (data.success) {
+                        const saveBtn = document.querySelector('.secondary-btn');
+                        if (data.saved) {
+                            saveBtn.innerHTML = '<svg width="18" height="18" fill="#ef4444" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg> Saved';
+                            saveBtn.style.color = '#ef4444';
+                            showToast('Listing saved to your collection', 'success', 'Saved');
+                        } else {
+                            saveBtn.innerHTML = '<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg> Save';
+                            saveBtn.style.color = '';
+                            showToast('Listing removed from your collection', 'info', 'Removed');
+                        }
+                    } else {
+                        showToast(data.message || 'Failed to save listing', 'error', 'Failed');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast(error.message, 'error', 'Error');
+                });
+            <?php else: ?>
+                window.location.href = '<?php echo VIEWS_URL; ?>/login.php';
+            <?php endif; ?>
         }
 
         function shareProduct() {
-            if (navigator.share) {
-                navigator.share({
-                    title: '<?= htmlspecialchars($title, ENT_QUOTES, 'UTF-8') ?>',
-                    text: 'Check out this product on Glass Market',
-                    url: window.location.href
+            const currentUrl = window.location.href;
+            copyToClipboard(currentUrl);
+        }
+        
+        function copyToClipboard(text) {
+            // Try modern clipboard API
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast('Link copied to clipboard', 'success', 'Copied');
+                }).catch(err => {
+                    console.error('Clipboard API failed:', err);
+                    fallbackCopy(text);
                 });
             } else {
-                // Fallback - copy to clipboard
-                navigator.clipboard.writeText(window.location.href);
-                alert('Link copied to clipboard!');
+                // Use fallback method
+                fallbackCopy(text);
             }
+        }
+        
+        function fallbackCopy(text) {
+            // Create temporary textarea
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            textArea.style.top = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showToast('Link copied to clipboard', 'success', 'Copied');
+                } else {
+                    // Show prompt as last resort
+                    const copied = prompt('Copy this link:', text);
+                    if (copied !== null) {
+                        showToast('Please copy the link manually', 'info', 'Copy Link');
+                    }
+                }
+            } catch (err) {
+                console.error('Fallback copy failed:', err);
+                showToast('Failed to copy link', 'error', 'Error');
+            }
+            
+            document.body.removeChild(textArea);
         }
     </script>
 </body>
