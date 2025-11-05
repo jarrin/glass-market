@@ -1392,42 +1392,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_listing'])) {
                 </div>
 
                 <!-- Tab: Danger Zone -->
-                <div id="tab-danger" class="tab-content">
-                    <div style="max-width: 600px; margin: 0 auto;">
-                        <div style="background: #fef2f2; border-left: 4px solid #ef4444; padding: 20px; border-radius: 12px;">
-                            <h3 style="font-size: 24px; font-weight: 700; color: #dc2626; margin: 0 0 16px 0;">
-                                🗑️ Delete Listing
-                            </h3>
-                            <p style="font-size: 15px; color: #7f1d1d; margin-bottom: 20px; line-height: 1.6;">
-                                Deleting this listing will permanently remove it from Glass Market. This action <strong>cannot be undone</strong>.
-                            </p>
-                            <p style="font-size: 14px; color: #991b1b; margin-bottom: 24px;">
-                                <strong>What will be deleted:</strong><br>
-                                • The listing and all its details<br>
-                                • All uploaded product images<br>
-                                • Saved listings from other users<br>
-                                • Any associated data
-                            </p>
-                        </div>
-
-                        <div style="margin-top: 24px; padding: 20px; background: white; border-radius: 12px; border: 2px solid #fecaca;">
-                            <p style="font-size: 14px; color: #6b7280; margin-bottom: 16px;">
-                                Are you absolutely sure? This action is permanent and cannot be reversed.
-                            </p>
-                            <button type="button" onclick="confirmDelete()" class="btn btn-danger" style="width: 100%; padding: 16px; font-size: 16px;">
-                                🗑️ Delete Listing Permanently
-                            </button>
-                        </div>
-                    </div>
-                </div>
 
             </div>
-        </form>
-
-        <!-- Delete Form (Outside main form to avoid nesting) -->
-        <form id="delete-form" method="POST" action="<?php echo VIEWS_URL; ?>/profile.php?tab=listings" style="display: none;">
-            <input type="hidden" name="delete_listing" value="1">
-            <input type="hidden" name="listing_id" value="<?php echo $listing_id; ?>">
         </form>
     </main>
 
