@@ -564,6 +564,7 @@
             echo '<div style="padding: 100px 20px; text-align: center;">';
             echo '<h1>Error</h1>';
             echo '<p>An error occurred while loading the seller information.</p>';
+            echo '<p style="color: #ef4444; font-family: monospace; font-size: 12px;">' . htmlspecialchars($e->getMessage()) . '</p>';
             echo '<a href="' . VIEWS_URL . '/sellers.php" style="color: #2a2623;">← Back to Sellers</a>';
             echo '</div>';
             include __DIR__ . '/../../includes/footer.php';
