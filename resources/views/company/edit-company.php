@@ -48,6 +48,67 @@ try {
     $company_types = ['Glass Recycle Plant', 'Glass Factory', 'Collection Company', 'Trader', 'Other'];
 }
 
+// Handle cover image upload
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_cover_image'])) {
+    if (isset($_FILES['cover_image']) && $_FILES['cover_image']['error'] === UPLOAD_ERR_OK) {
+        $allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+        $max_size = 5 * 1024 * 1024; // 5MB
+        
+        $file_type = $_FILES['cover_image']['type'];
+        $file_size = $_FILES['cover_image']['size'];
+        
+        if (!in_array($file_type, $allowed_types)) {
+            $error_message = 'Invalid file type. Please upload JPG, PNG, GIF, or WebP images only.';
+        } elseif ($file_size > $max_size) {
+            $error_message = 'File too large. Maximum size is 5MB.';
+        } else {
+            // Create upload directory if it doesn't exist
+            $upload_dir = __DIR__ . '/../../../public/uploads/companies';
+            if (!is_dir($upload_dir)) {
+                mkdir($upload_dir, 0755, true);
+            }
+            
+            // Generate unique filename
+            $file_extension = pathinfo($_FILES['cover_image']['name'], PATHINFO_EXTENSION);
+            $filename = 'company_' . $company['id'] . '_cover_' . time() . '.' . $file_extension;
+            $upload_path = $upload_dir . '/' . $filename;
+            $db_path = 'uploads/companies/' . $filename;
+            
+            if (move_uploaded_file($_FILES['cover_image']['tmp_name'], $upload_path)) {
+                // Delete old cover image if it exists and is not fallback
+                if (!empty($company['cover_image']) && $company['cover_image'] !== 'uploads/default/fallback_company.png') {
+                    $old_image = __DIR__ . '/../../../public/' . $company['cover_image'];
+                    if (file_exists($old_image)) {
+                        unlink($old_image);
+                    }
+                }
+                
+                // Update database
+                try {
+                    $stmt = $pdo->prepare('UPDATE companies SET cover_image = :cover_image WHERE owner_user_id = :owner_user_id');
+                    $stmt->execute([
+                        'cover_image' => $db_path,
+                        'owner_user_id' => $user_id
+                    ]);
+                    
+                    $success_message = 'Cover image uploaded successfully!';
+                    
+                    // Reload company data
+                    $stmt = $pdo->prepare('SELECT * FROM companies WHERE owner_user_id = :user_id');
+                    $stmt->execute(['user_id' => $user_id]);
+                    $company = $stmt->fetch(PDO::FETCH_ASSOC);
+                } catch (PDOException $e) {
+                    $error_message = 'Failed to update cover image: ' . $e->getMessage();
+                }
+            } else {
+                $error_message = 'Failed to upload image. Please try again.';
+            }
+        }
+    } else {
+        $error_message = 'Please select an image to upload.';
+    }
+}
+
 // Handle company update
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_company'])) {
     $company_name = trim($_POST['company_name'] ?? '');
@@ -530,6 +591,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_company'])) {
                         ><?php echo htmlspecialchars($company['description'] ?? ''); ?></textarea>
                         <small>Help buyers understand what makes your company unique</small>
                     </div>
+                </div>
+
+                <!-- Company Cover Image -->
+                <div class="form-section">
+                    <h2 class="form-section-title">Company Cover Image</h2>
+                    
+                    <?php 
+                    // Get cover image or use fallback
+                    $coverImage = !empty($company['cover_image']) 
+                        ? PUBLIC_URL . '/' . $company['cover_image']
+                        : PUBLIC_URL . '/uploads/default/fallback_company.png';
+                    ?>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 12px; font-size: 14px; font-weight: 600; color: #374151;">Current Cover Image</label>
+                        <div style="width: 100%; max-width: 600px; height: 200px; border-radius: 12px; overflow: hidden; border: 2px solid #e5e7eb; background: #f9fafb;">
+                            <img src="<?php echo htmlspecialchars($coverImage); ?>" alt="Company Cover" style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                    </div>
+                    
+                    <form method="POST" enctype="multipart/form-data" style="margin-top: 20px;">
+                        <div class="form-group">
+                            <label>Upload New Cover Image</label>
+                            <input 
+                                type="file" 
+                                name="cover_image" 
+                                accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                                style="padding: 10px; border: 2px dashed #d1d5db; background: #f9fafb;"
+                            >
+                            <small>Recommended size: 1200x400px. Max 5MB. JPG, PNG, GIF, or WebP</small>
+                        </div>
+                        <button type="submit" name="upload_cover_image" class="btn-primary">
+                            📤 Upload Cover Image
+                        </button>
+                    </form>
                 </div>
 
                 <!-- Contact & Location -->
