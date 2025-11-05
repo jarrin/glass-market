@@ -11,9 +11,42 @@ if (!isset($_SESSION['user_logged_in']) || $_SESSION['user_logged_in'] !== true)
 // Get plan from URL
 $plan = $_GET['plan'] ?? 'monthly';
 $user_id = $_SESSION['user_id'] ?? 0;
+$upgrade_from_trial = isset($_GET['upgrade_from_trial']) && $_GET['upgrade_from_trial'] == '1';
 
 if (!$user_id) {
     die('Error: User ID not found in session');
+}
+
+// Database connection
+$db_host = '127.0.0.1';
+$db_name = 'glass_market';
+$db_user = 'root';
+$db_pass = '';
+
+$pdo = new PDO("mysql:host=$db_host;dbname=$db_name", $db_user, $db_pass);
+$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+// Check if user already has an active paid subscription
+$stmt = $pdo->prepare("
+    SELECT * FROM user_subscriptions 
+    WHERE user_id = :user_id 
+    AND is_active = 1 
+    AND end_date > NOW()
+    LIMIT 1
+");
+$stmt->execute(['user_id' => $user_id]);
+$existing_subscription = $stmt->fetch(PDO::FETCH_ASSOC);
+
+// If user has an active PAID subscription (not trial), don't allow new subscription
+if ($existing_subscription && !$existing_subscription['is_trial']) {
+    die('
+        <h2>You already have an active subscription</h2>
+        <p>You are currently subscribed until ' . date('F d, Y', strtotime($existing_subscription['end_date'])) . '</p>
+        <p>
+            <a href="/glass-market/resources/views/profile.php?tab=subscription">Manage Subscription</a> |
+            <a href="/glass-market/public/index.php">Go Home</a>
+        </p>
+    ');
 }
 
 // Determine months and amount based on plan
@@ -89,6 +122,23 @@ if ($amount == 0) {
 // For paid plans, create Mollie payment
 require_once __DIR__ . '/../../vendor/autoload.php';
 require_once __DIR__ . '/../../database/classes/mollie.php';
+
+// If upgrading from trial, cancel the trial subscription
+if ($upgrade_from_trial && $existing_subscription && $existing_subscription['is_trial']) {
+    try {
+        $stmt = $pdo->prepare("
+            UPDATE user_subscriptions 
+            SET is_active = 0, 
+                end_date = NOW(),
+                updated_at = NOW()
+            WHERE user_id = :user_id AND is_trial = 1
+        ");
+        $stmt->execute(['user_id' => $user_id]);
+        error_log("Trial subscription cancelled for user_id: $user_id - upgrading to paid plan");
+    } catch (PDOException $e) {
+        error_log("Error cancelling trial: " . $e->getMessage());
+    }
+}
 
 /**
  * Log payment error to database

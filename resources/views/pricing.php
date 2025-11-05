@@ -26,6 +26,42 @@ require_once __DIR__ . '/../../config.php';
 // Get user info if logged in
 $user_name = isset($_SESSION['user_name']) ? $_SESSION['user_name'] : null;
 $is_logged_in = isset($_SESSION['user_logged_in']) && $_SESSION['user_logged_in'] === true;
+$user_id = $_SESSION['user_id'] ?? null;
+
+// Check current subscription status
+$current_subscription = null;
+$has_active_subscription = false;
+$is_trial = false;
+
+if ($is_logged_in && $user_id) {
+    try {
+        $db_host = '127.0.0.1';
+        $db_name = 'glass_market';
+        $db_user = 'root';
+        $db_pass = '';
+        
+        $pdo = new PDO("mysql:host=$db_host;dbname=$db_name", $db_user, $db_pass);
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        
+        // Check for active subscription
+        $stmt = $pdo->prepare("
+            SELECT * FROM user_subscriptions 
+            WHERE user_id = :user_id 
+            AND is_active = 1 
+            AND end_date > NOW()
+            LIMIT 1
+        ");
+        $stmt->execute(['user_id' => $user_id]);
+        $current_subscription = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($current_subscription) {
+            $has_active_subscription = true;
+            $is_trial = (bool)$current_subscription['is_trial'];
+        }
+    } catch (PDOException $e) {
+        error_log("Error checking subscription: " . $e->getMessage());
+    }
+}
 
 // Handle plan selection
 if (isset($_GET['plan'])) {
@@ -300,6 +336,25 @@ $selected_plan = $_SESSION['selected_plan'] ?? null;
 <body>
     <?php include __DIR__ . '/../../includes/navbar.php'; ?>
 
+    <?php if ($has_active_subscription): ?>
+    <!-- Current Subscription Status Banner -->
+    <div style="background: <?php echo $is_trial ? '#fef3c7' : '#d1fae5'; ?>; border-bottom: 1px solid <?php echo $is_trial ? '#fbbf24' : '#6ee7b7'; ?>; padding: 16px 0; text-align: center;">
+        <div class="container">
+            <?php if ($is_trial): ?>
+                <p style="margin: 0; font-size: 15px; color: #92400e;">
+                    ⏰ <strong>You're on a Free Trial</strong> - Active until <?php echo date('F d, Y', strtotime($current_subscription['end_date'])); ?>
+                    <a href="<?php echo VIEWS_URL; ?>/profile.php?tab=subscription" style="color: #92400e; text-decoration: underline; margin-left: 12px;">View Details</a>
+                </p>
+            <?php else: ?>
+                <p style="margin: 0; font-size: 15px; color: #065f46;">
+                    ✓ <strong>You have an active subscription</strong> - Renews on <?php echo date('F d, Y', strtotime($current_subscription['end_date'])); ?>
+                    <a href="<?php echo VIEWS_URL; ?>/profile.php?tab=subscription" style="color: #065f46; text-decoration: underline; margin-left: 12px;">Manage Subscription</a>
+                </p>
+            <?php endif; ?>
+        </div>
+    </div>
+    <?php endif; ?>
+
     <!-- Pricing Header -->
     <div class="pricing-header">
         <div class="container">
@@ -325,10 +380,19 @@ $selected_plan = $_SESSION['selected_plan'] ?? null;
                     <li>Full platform access</li>
                     <li>Browse all listings</li>
                     <li>Connect with sellers</li>
-                    <li>Basic analytics</li>
                     <li>Email support</li>
                 </ul>
-                <?php if ($is_logged_in): ?>
+                <?php if ($has_active_subscription && !$is_trial): ?>
+                    <!-- Already has paid subscription -->
+                    <button class="plan-button plan-button-secondary" disabled style="opacity: 0.5; cursor: not-allowed;">
+                        Already Subscribed
+                    </button>
+                <?php elseif ($has_active_subscription && $is_trial): ?>
+                    <!-- Has trial, can't get another trial -->
+                    <button class="plan-button plan-button-secondary" disabled style="opacity: 0.5; cursor: not-allowed;">
+                        Already on Trial
+                    </button>
+                <?php elseif ($is_logged_in): ?>
                     <a href="/glass-market/resources/views/create-payment.php?plan=trial" class="plan-button plan-button-secondary">
                         Start Free Trial
                     </a>
@@ -353,14 +417,24 @@ $selected_plan = $_SESSION['selected_plan'] ?? null;
                     <li>Everything in Trial</li>
                     <li>Unlimited listings</li>
                     <li>Priority support</li>
-                    <li>Advanced analytics</li>
                     <li>Featured placement</li>
                     <li>No commitment</li>
                 </ul>
-                <?php if ($is_logged_in): ?>
-                    <a href="/glass-market/resources/views/create-payment.php?plan=monthly" class="plan-button plan-button-primary">
-                        Subscribe Now
+                <?php if ($has_active_subscription && !$is_trial): ?>
+                    <!-- Already has paid subscription -->
+                    <a href="<?php echo VIEWS_URL; ?>/profile.php?tab=subscription" class="plan-button plan-button-secondary">
+                        Manage Subscription
                     </a>
+                <?php elseif ($is_logged_in): ?>
+                    <?php if ($is_trial): ?>
+                        <a href="/glass-market/resources/views/create-payment.php?plan=monthly&upgrade_from_trial=1" class="plan-button plan-button-primary">
+                            Upgrade from Trial
+                        </a>
+                    <?php else: ?>
+                        <a href="/glass-market/resources/views/create-payment.php?plan=monthly" class="plan-button plan-button-primary">
+                            Subscribe Now
+                        </a>
+                    <?php endif; ?>
                 <?php else: ?>
                     <a href="/glass-market/resources/views/register.php?plan=monthly" class="plan-button plan-button-primary">
                         Get Started
@@ -380,16 +454,24 @@ $selected_plan = $_SESSION['selected_plan'] ?? null;
                 </div>
                 <ul class="plan-features">
                     <li>Everything in Monthly</li>
-                    <li>2 months free</li>
-                    <li>Premium badge</li>
                     <li>Custom branding</li>
                     <li>Dedicated support</li>
-                    <li>Early feature access</li>
                 </ul>
-                <?php if ($is_logged_in): ?>
-                    <a href="/glass-market/resources/views/create-payment.php?plan=annual" class="plan-button plan-button-secondary">
-                        Subscribe Now
+                <?php if ($has_active_subscription && !$is_trial): ?>
+                    <!-- Already has paid subscription -->
+                    <a href="<?php echo VIEWS_URL; ?>/profile.php?tab=subscription" class="plan-button plan-button-secondary">
+                        Manage Subscription
                     </a>
+                <?php elseif ($is_logged_in): ?>
+                    <?php if ($is_trial): ?>
+                        <a href="/glass-market/resources/views/create-payment.php?plan=annual&upgrade_from_trial=1" class="plan-button plan-button-secondary">
+                            Upgrade from Trial
+                        </a>
+                    <?php else: ?>
+                        <a href="/glass-market/resources/views/create-payment.php?plan=annual" class="plan-button plan-button-secondary">
+                            Subscribe Now
+                        </a>
+                    <?php endif; ?>
                 <?php else: ?>
                     <a href="/glass-market/resources/views/register.php?plan=annual" class="plan-button plan-button-secondary">
                         Get Started

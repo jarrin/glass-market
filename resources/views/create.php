@@ -186,6 +186,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_listing'])) {
             
             $pdo->commit();
             
+            // Send notifications to users who want to know about new listings
+            require_once __DIR__ . '/../../includes/notify-new-listing.php';
+            notifyUsersOfNewListing($listing_id);
+            
             $_SESSION['listing_success'] = 'Listing created successfully!';
             header('Location: ' . VIEWS_URL . '/profile.php?tab=listings');
             exit;

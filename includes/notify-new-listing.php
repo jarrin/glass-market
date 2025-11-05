@@ -5,7 +5,9 @@
  */
 
 require_once __DIR__ . '/../../config.php';
-require_once __DIR__ . '/../../app/Services/EmailService.php';
+require_once __DIR__ . '/../../app/Services/RustMailer.php';
+
+use App\Services\RustMailer;
 
 function notifyUsersOfNewListing($listing_id) {
     // Database connection
@@ -41,18 +43,21 @@ function notifyUsersOfNewListing($listing_id) {
         $stmt->execute(['listing_owner_id' => $listing_owner_id]);
         $users_to_notify = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
-        // Send email notifications
-        $emailService = new EmailService();
+        // Send email notifications using Rust Mailer
+        $mailer = new RustMailer();
         $sent_count = 0;
         
         foreach ($users_to_notify as $user) {
-            $result = $emailService->sendNewListingNotification(
+            $listingTitle = ($listing['glass_type'] ?? 'Glass') . ' - ' . ($listing['quantity_tons'] ?? '0') . ' tons';
+            $listingUrl = 'http://localhost/glass-market/resources/views/listing-detail.php?id=' . $listing_id;
+            
+            $result = $mailer->sendListingNotification(
                 $user['email'],
-                $user['name'],
-                $listing
+                $listingTitle,
+                $listingUrl
             );
             
-            if ($result) {
+            if ($result['success']) {
                 $sent_count++;
             }
         }

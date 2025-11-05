@@ -46,6 +46,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $pdo = new PDO("mysql:host=$db_host;dbname=$db_name", $db_user, $db_pass);
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            
+            // Start transaction
+            $pdo->beginTransaction();
 
             // Check if email already exists
             $stmt = $pdo->prepare('SELECT id FROM users WHERE email = :email OR email = :comm_email LIMIT 1');
@@ -53,6 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($stmt->fetch()) {
                 $error_message = 'This email is already registered.';
+                $pdo->rollBack();
             } else {
                 $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
@@ -125,27 +129,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 require_once __DIR__ . '/../../database/classes/subscriptions.php';
                 $subscription_created = Subscription::createTrialSubscription($pdo, $user_id, $notification_email, $name);
 
-                // Send welcome email using Rust mailer
-                try {
-                    require_once __DIR__ . '/../../app/Services/RustMailer.php';
-                    $rustMailer = new App\Services\RustMailer();
-                    $welcomeResult = $rustMailer->sendWelcomeEmail($notification_email, $name);
-                    
-                    if (!$welcomeResult['success']) {
-                        error_log("Welcome email failed: " . $welcomeResult['message']);
-                    }
-                } catch (Exception $e) {
-                    error_log("Welcome email exception: " . $e->getMessage());
-                }
-
+                // Only commit and send email if subscription was created successfully
                 if ($subscription_created) {
+                    $pdo->commit();
+                    
+                    try {
+                        require_once __DIR__ . '/../../app/Services/RustMailer.php';
+                        $rustMailer = new App\Services\RustMailer();
+                        $welcomeResult = $rustMailer->sendWelcomeEmail($notification_email, $name);
+                        
+                        if (!$welcomeResult['success']) {
+                            error_log("Welcome email failed: " . $welcomeResult['message']);
+                        }
+                    } catch (Exception $e) {
+                        error_log("Welcome email exception: " . $e->getMessage());
+                    }
+                    
                     $success_message = 'Registration successful! You have been granted a 3-month free trial. Check your email for details. You can now log in to your account.';
                 } else {
-                    $success_message = 'Registration successful! However, there was an issue creating your trial subscription. Check your email and contact support if needed.';
-                    error_log("Trial subscription creation failed for user_id: $user_id");
+                    $pdo->rollBack();
+                    $error_message = 'Registration failed: Unable to create trial subscription. Please try again or contact support.';
+                    error_log("Trial subscription creation failed for user_id: $user_id - rolling back user creation");
                 }
             }
         } catch (PDOException $e) {
+            if ($pdo && $pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
             $error_message = 'Registration failed: ' . $e->getMessage();
             error_log("Registration error: " . $e->getMessage());
         }
