@@ -12,8 +12,7 @@ try {
         SELECT l.*, c.name as company_name
         FROM listings l
         LEFT JOIN companies c ON l.company_id = c.id
-        LEFT JOIN users u ON c.id = u.company_id
-        WHERE u.id = :user_id
+        WHERE l.user_id = :user_id
         ORDER BY l.created_at DESC
     ');
     $stmt->execute(['user_id' => $user['id']]);
@@ -27,7 +26,7 @@ try {
     
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
         <p style="margin: 0; font-size: 14px; color: #6b7280;">
-            You have <strong style="color: #2f6df5;"><?php echo count($user_listings); ?></strong> listing(s)
+            You have <strong style="color: #2f6df5;"><?php echo count($user_listings); ?></strong> personal listing(s)
         </p>
         <a 
             href="<?php echo VIEWS_URL; ?>/create.php" 
@@ -150,7 +149,7 @@ try {
                 No Listings Yet
             </h3>
             <p style="margin: 0 0 24px; font-size: 14px; color: #6b7280;">
-                Start selling by creating your first glass listing.
+                Start selling by creating your first personal glass listing.
             </p>
             <a 
                 href="<?php echo VIEWS_URL; ?>/create.php" 

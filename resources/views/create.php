@@ -21,7 +21,7 @@ $success_message = '';
 // Get user info
 $user_id = $_SESSION['user_id'] ?? null;
 
-// Get user's company ID
+// Get user's company ID (optional - can be null for personal listings)
 $company_id = null;
 try {
     $pdo = new PDO("mysql:host=$db_host;dbname=$db_name", $db_user, $db_pass);
@@ -32,15 +32,9 @@ try {
     $user_data = $stmt->fetch(PDO::FETCH_ASSOC);
     $company_id = $user_data['company_id'] ?? null;
     
-    if (!$company_id) {
-        $_SESSION['listing_error'] = 'You need to be associated with a company to create listings.';
-        header('Location: ' . VIEWS_URL . '/profile.php?tab=listings');
-        exit;
-    }
+    // Company is optional - listings can be personal (company_id = NULL) or company-based
 } catch (PDOException $e) {
-    $_SESSION['listing_error'] = 'Database error: ' . $e->getMessage();
-    header('Location: ' . VIEWS_URL . '/profile.php?tab=listings');
-    exit;
+    $error_message = 'Database error: ' . $e->getMessage();
 }
 
 // Handle listing creation
@@ -94,6 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_listing'])) {
             $stmt = $pdo->prepare('
                 INSERT INTO listings (
                     company_id,
+                    user_id,
                     side,
                     glass_type,
                     quantity_tons,
@@ -108,6 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_listing'])) {
                     created_at
                 ) VALUES (
                     :company_id,
+                    :user_id,
                     :side,
                     :glass_type,
                     :quantity_tons,
@@ -125,6 +121,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_listing'])) {
             
             $stmt->execute([
                 'company_id' => $company_id,
+                'user_id' => $user_id,
                 'side' => $side,
                 'glass_type' => $glass_type_mapped,
                 'quantity_tons' => $tons,

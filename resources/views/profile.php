@@ -18,6 +18,18 @@ $db_pass = '';
 $error_message = '';
 $success_message = '';
 
+// Check for session error messages (from redirects)
+if (isset($_SESSION['profile_error'])) {
+    $error_message = $_SESSION['profile_error'];
+    unset($_SESSION['profile_error']);
+}
+
+// Check for session success messages (from redirects)
+if (isset($_SESSION['profile_success'])) {
+    $success_message = $_SESSION['profile_success'];
+    unset($_SESSION['profile_success']);
+}
+
 // Load user data (sets: $user, $company, $user_listings_count, $user_subscriptions, $user_cards)
 require_once __DIR__ . '/loaders/user-data-loader.php';
 

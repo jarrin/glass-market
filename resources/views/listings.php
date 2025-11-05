@@ -20,10 +20,12 @@ $stmt = $pdo->prepare("
         c.company_type,
         c.phone,
         c.website,
-        u.id as owner_user_id
+        u.id as owner_user_id,
+        u.email as seller_email,
+        u.name as seller_name
     FROM listings l 
     LEFT JOIN companies c ON l.company_id = c.id
-    LEFT JOIN users u ON c.id = u.company_id
+    LEFT JOIN users u ON l.user_id = u.id
     WHERE l.id = ? 
     LIMIT 1
 ");
