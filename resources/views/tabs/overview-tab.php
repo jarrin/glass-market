@@ -1,10 +1,14 @@
 <?php
 // Overview Tab Content
-// Expects: $user, $user_listings_count, $user_subscriptions, $company
+// Expects: $user, $user_listings_count, $user_subscriptions, $company, $subscription_status
 ?>
 <div class="tab-panel active" id="tab-overview">
     <h2 class="section-title">Account Overview</h2>
-    
+
+    <?php if (!$subscription_status['has_access']): ?>
+        <?php include __DIR__ . '/../components/subscription-required-message.php'; ?>
+    <?php else: ?>
+
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-bottom: 32px;">
         <!-- Account Status Card -->
         <div style="background: white; padding: 24px; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
@@ -129,4 +133,6 @@
             </div>
         </div>
     </div>
+
+    <?php endif; // End subscription check ?>
 </div>
