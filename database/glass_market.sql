@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 04, 2025 at 12:22 PM
+-- Generation Time: Nov 05, 2025 at 09:16 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -53,15 +53,6 @@ CREATE TABLE `capacities` (
   `notes` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- Dumping data for table `capacities`
---
-
-INSERT INTO `capacities` (`id`, `location_id`, `date_recorded`, `weekly_capacity_tons`, `notes`) VALUES
-(1, 1, '2025-10-01', 500.00, 'Normal capacity'),
-(2, 2, '2025-10-01', 300.00, 'Normal capacity'),
-(3, 3, '2025-10-01', 150.00, 'Normal capacity');
-
 -- --------------------------------------------------------
 
 --
@@ -71,6 +62,16 @@ INSERT INTO `capacities` (`id`, `location_id`, `date_recorded`, `weekly_capacity
 CREATE TABLE `companies` (
   `id` bigint(20) NOT NULL,
   `name` varchar(255) NOT NULL,
+  `logo` varchar(500) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `address_line1` varchar(255) DEFAULT NULL,
+  `address_line2` varchar(255) DEFAULT NULL,
+  `postal_code` varchar(20) DEFAULT NULL,
+  `city` varchar(100) DEFAULT NULL,
+  `country` varchar(100) DEFAULT NULL,
+  `owner_user_id` bigint(20) DEFAULT NULL,
+  `is_verified` tinyint(1) DEFAULT 0,
+  `verified_at` timestamp NULL DEFAULT NULL,
   `company_type` varchar(50) NOT NULL,
   `website` varchar(255) DEFAULT NULL,
   `phone` varchar(50) DEFAULT NULL,
@@ -81,12 +82,10 @@ CREATE TABLE `companies` (
 -- Dumping data for table `companies`
 --
 
-INSERT INTO `companies` (`id`, `name`, `company_type`, `website`, `phone`, `created_at`) VALUES
-(1, 'GlassRecycle BV', 'Glass Recycle Plant', 'https://grb.example', '+31 10 123 4567', '2025-10-15 11:48:18'),
-(2, 'GlassFactory NL', 'Glass Factory', 'https://gfnl.example', '+31 20 987 6543', '2025-10-15 11:48:18'),
-(3, 'CollectionCo BE', 'Collection Company', 'https://ccbe.example', '+32 2 555 1234', '2025-10-15 11:48:18'),
-(4, 'testaccount', 'Other', NULL, NULL, '2025-10-31 10:14:41'),
-(5, 'test_sub', 'Other', NULL, NULL, '2025-11-03 12:45:22');
+INSERT INTO `companies` (`id`, `name`, `logo`, `description`, `address_line1`, `address_line2`, `postal_code`, `city`, `country`, `owner_user_id`, `is_verified`, `verified_at`, `company_type`, `website`, `phone`, `created_at`) VALUES
+(4, 'testaccount', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, 'Other', NULL, NULL, '2025-10-31 10:14:41'),
+(5, 'test_sub', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, 'Other', NULL, NULL, '2025-11-03 12:45:22'),
+(6, 'CP Company', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 5, 0, NULL, 'Other', NULL, NULL, '2025-11-04 11:27:20');
 
 -- --------------------------------------------------------
 
@@ -127,13 +126,6 @@ CREATE TABLE `contracts` (
   `price_text` varchar(255) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `contracts`
---
-
-INSERT INTO `contracts` (`id`, `grp_company_id`, `gf_company_id`, `grp_location_id`, `gf_location_id`, `start_date`, `end_date`, `weekly_quantity_tons`, `price_text`, `created_at`) VALUES
-(1, 1, 2, 1, 2, '2025-01-01', '2025-12-31', 200.00, '€115/ton CIF', '2025-10-15 11:48:18');
 
 -- --------------------------------------------------------
 
@@ -189,9 +181,6 @@ CREATE TABLE `listings` (
 --
 
 INSERT INTO `listings` (`id`, `location_id`, `company_id`, `side`, `glass_type`, `glass_type_other`, `quantity_tons`, `quantity_note`, `recycled`, `tested`, `storage_location`, `price_text`, `currency`, `created_at`, `valid_until`, `published`, `quality_notes`, `image_path`, `accepted_by_contract`) VALUES
-(1, 1, 1, 'WTS', 'Clear Cullet', NULL, 250.00, NULL, 'recycled', 'tested', 'Rotterdam yard', '€120/ton CIF', 'EUR', '2025-10-15 11:48:18', NULL, 1, 'Low Fe content', NULL, 0),
-(2, 2, 2, 'WTB', 'Brown Cullet', NULL, 150.00, NULL, 'recycled', 'tested', 'Amsterdam warehouse', '€110/ton CIF', 'EUR', '2025-10-15 11:48:18', NULL, 1, 'High purity required', NULL, 0),
-(3, 3, 3, 'WTS', 'Mixed Cullet', NULL, 100.00, NULL, 'not_recycled', 'untested', 'Brussels yard', '€80/ton EXW', 'EUR', '2025-10-15 11:48:18', NULL, 1, 'Unsorted mix', NULL, 0),
 (4, NULL, 4, 'WTS', 'Brown Glass', NULL, 432545.00, 'asdfasdf!', 'unknown', 'unknown', NULL, '', 'EUR', '2025-10-31 10:16:48', NULL, 1, 'rtwert', 'uploads/listings/listing_1761905808_69048c908d4b3.jpeg', 0),
 (5, NULL, 5, 'WTS', 'Green Glass', NULL, 324.00, 'ifjbnwjri', 'unknown', 'unknown', NULL, NULL, 'EUR', '2025-11-03 12:45:22', NULL, 1, 'asdf', 'uploads/listings/listing_1762173922_6908a3e2cb7ea.png', 0),
 (6, NULL, 5, 'WTS', 'Green Glass', NULL, 234.00, 'asdfasdf', 'unknown', 'unknown', NULL, NULL, 'EUR', '2025-11-03 12:48:53', NULL, 0, 'erwt', 'uploads/listings/listing_1762174133_6908a4b57b97e.png', 0);
@@ -236,15 +225,6 @@ CREATE TABLE `locations` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- Dumping data for table `locations`
---
-
-INSERT INTO `locations` (`id`, `company_id`, `name`, `address_line1`, `address_line2`, `postal_code`, `city`, `region`, `country_code`, `contact_email_broadcast`, `contact_email_personal`, `phone`, `created_at`) VALUES
-(1, 1, 'Rotterdam Plant', 'Harbour 1', NULL, '3011AA', 'Rotterdam', NULL, 'NL', 'broadcast@grb.example', 'sales@grb.example', NULL, '2025-10-15 11:48:18'),
-(2, 2, 'Amsterdam Factory', 'Factory Street 10', NULL, '1000AA', 'Amsterdam', NULL, 'NL', 'broadcast@gfnl.example', 'person@gfnl.example', NULL, '2025-10-15 11:48:18'),
-(3, 3, 'Brussels Collection', 'Glass Road 5', NULL, '1000', 'Brussels', NULL, 'BE', 'broadcast@ccbe.example', 'person@ccbe.example', NULL, '2025-10-15 11:48:18');
-
 -- --------------------------------------------------------
 
 --
@@ -260,13 +240,6 @@ CREATE TABLE `maintenance_events` (
   `planned` tinyint(1) DEFAULT 1,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `maintenance_events`
---
-
-INSERT INTO `maintenance_events` (`id`, `location_id`, `start_datetime`, `end_datetime`, `reason`, `planned`, `created_at`) VALUES
-(1, 1, '2025-12-24 08:00:00', '2025-12-26 18:00:00', 'Christmas shutdown', 1, '2025-10-15 11:48:18');
 
 -- --------------------------------------------------------
 
@@ -756,15 +729,6 @@ CREATE TABLE `subscriptions` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- Dumping data for table `subscriptions`
---
-
-INSERT INTO `subscriptions` (`id`, `location_id`, `start_date`, `duration_years`, `active`, `created_at`) VALUES
-(1, 1, '2025-01-01', 1, 1, '2025-10-15 11:48:18'),
-(2, 2, '2025-02-01', 1, 1, '2025-10-15 11:48:18'),
-(3, 3, '2025-03-01', 1, 1, '2025-10-15 11:48:18');
-
 -- --------------------------------------------------------
 
 --
@@ -835,12 +799,13 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `company_id`, `created_by`, `email`, `avatar`, `email_verified_at`, `password`, `remember_token`, `name`, `company_name`, `phone`, `roles`, `is_admin`, `is_approved`, `approved_at`, `approved_by`, `last_login`, `created_at`, `updated_at`) VALUES
 (4, NULL, NULL, 'admin@glassmarket.com', NULL, '2025-10-27 13:08:53', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', NULL, 'Admin', NULL, NULL, NULL, 1, 0, NULL, NULL, NULL, '2025-10-27 12:29:44', '2025-10-29 14:40:57'),
-(5, NULL, NULL, 'colinpoort@hotmail.com', '/glass-market/public/uploads/avatars/avatar_5_1761660214.jpg', '2025-10-27 13:14:36', '$2y$10$3le7iqImsFG85PwGuK60i.KcZpRP0wxk9MoHF3iBFXjpRx3oaJxpq', '30804072962d6ccea488d67d676f56a61fda774d49489c2114982b317eef78c9', 'Cornelis Wim Poort', 'CP Company', NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-10-27 13:13:58', '2025-10-28 14:03:34'),
+(5, 6, NULL, 'colinpoort@hotmail.com', '/glass-market/public/uploads/avatars/avatar_5_1761660214.jpg', '2025-10-27 13:14:36', '$2y$10$3le7iqImsFG85PwGuK60i.KcZpRP0wxk9MoHF3iBFXjpRx3oaJxpq', '30804072962d6ccea488d67d676f56a61fda774d49489c2114982b317eef78c9', 'Cornelis Wim Poort', 'CP Company', NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-10-27 13:13:58', '2025-11-04 11:27:20'),
 (6, NULL, NULL, 'gijs@gmail.com', NULL, '2025-10-27 13:33:45', '$2y$10$qiL225fIXPba/gq8Z/mZwOGOaXBiYU8lmIjQzBMy4vn6mZ4X0fWoa', NULL, 'Gijsje Radijsje', NULL, NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-10-27 13:33:06', '2025-10-27 13:33:45'),
 (7, NULL, NULL, 'Kaj@gmail.com', NULL, '2025-10-27 14:04:47', '$2y$10$e3IsWujghleCxhlVwmlOwOph2Ijlq3gOfOMc8EcTxIUJVkZL6wpdq', NULL, 'Kaj', NULL, NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-10-27 13:56:22', '2025-10-27 14:04:47'),
 (9, NULL, NULL, 'colinpoort12@hotmail.com', NULL, NULL, '$2y$10$5LuxQblwc2OqwTw7tzQU7eDA3g1QV4L/.3rn6XsQSn5301dSLpcQ.', NULL, 'Colin', NULL, NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-10-28 14:15:57', '2025-10-29 13:40:57'),
 (10, 5, NULL, 'test_sub@testsub.com', NULL, '2025-10-29 14:07:18', '$2y$10$qYcQxm8kHYBDjXc2Skh05erADJ5uxwub0DOHWojfcgYLEVfiKHwOi', NULL, 'test_sub', 'test_sub', NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-10-29 14:06:07', '2025-11-03 12:45:22'),
-(11, 4, NULL, 'testaccount@gmail.com', '/glass-market/public/uploads/avatars/avatar_11_1761905779.jpg', '2025-10-31 09:40:18', '$2y$10$9SuQyKcOKfwc5v5Nxep.tOeqwCztfV3ikKI/cQHFRq2Sx.9IHj.h.', NULL, 'testaccount', 'testaccount', NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-10-31 09:39:51', '2025-10-31 10:16:19');
+(11, 4, NULL, 'testaccount@gmail.com', '/glass-market/public/uploads/avatars/avatar_11_1761905779.jpg', '2025-10-31 09:40:18', '$2y$10$9SuQyKcOKfwc5v5Nxep.tOeqwCztfV3ikKI/cQHFRq2Sx.9IHj.h.', NULL, 'testaccount', 'testaccount', NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-10-31 09:39:51', '2025-10-31 10:16:19'),
+(12, NULL, NULL, 'testsa@gmail.com', NULL, '2025-11-04 18:15:36', '$2y$10$d2m/MmsVZILbXCCy5u2Q.euUrb5RwIMDYg6pBhU0c.csJBCNilXka', NULL, 'testsa', NULL, NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-11-04 18:15:36', NULL);
 
 -- --------------------------------------------------------
 
@@ -901,7 +866,9 @@ CREATE TABLE `user_subscriptions` (
 
 INSERT INTO `user_subscriptions` (`id`, `user_id`, `start_date`, `end_date`, `is_trial`, `is_active`, `created_at`, `updated_at`) VALUES
 (5, 10, '2025-10-31', '2025-12-01', 0, 1, '2025-10-31 09:22:15', NULL),
-(7, 11, '2025-10-31', '2025-12-01', 0, 1, '2025-10-31 09:42:51', NULL);
+(7, 11, '2025-10-31', '2025-12-01', 0, 1, '2025-10-31 09:42:51', NULL),
+(8, 12, '2025-11-04', '2026-02-04', 1, 1, '2025-11-04 18:15:36', NULL),
+(9, 12, '2025-11-04', '2026-02-04', 1, 1, '2025-11-04 18:20:42', NULL);
 
 -- --------------------------------------------------------
 
@@ -935,7 +902,9 @@ ALTER TABLE `capacities`
 --
 ALTER TABLE `companies`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `company_type` (`company_type`);
+  ADD KEY `company_type` (`company_type`),
+  ADD KEY `idx_companies_owner` (`owner_user_id`),
+  ADD KEY `idx_companies_verified` (`is_verified`);
 
 --
 -- Indexes for table `company_types`
@@ -1107,7 +1076,7 @@ ALTER TABLE `capacities`
 -- AUTO_INCREMENT for table `companies`
 --
 ALTER TABLE `companies`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `contracts`
@@ -1149,7 +1118,7 @@ ALTER TABLE `pages`
 -- AUTO_INCREMENT for table `page_content`
 --
 ALTER TABLE `page_content`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=252;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=223;
 
 --
 -- AUTO_INCREMENT for table `page_sections`
@@ -1179,7 +1148,7 @@ ALTER TABLE `subscriptions`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `user_emails`
@@ -1191,7 +1160,7 @@ ALTER TABLE `user_emails`
 -- AUTO_INCREMENT for table `user_subscriptions`
 --
 ALTER TABLE `user_subscriptions`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- Constraints for dumped tables
@@ -1213,7 +1182,8 @@ ALTER TABLE `capacities`
 -- Constraints for table `companies`
 --
 ALTER TABLE `companies`
-  ADD CONSTRAINT `companies_ibfk_1` FOREIGN KEY (`company_type`) REFERENCES `company_types` (`type`);
+  ADD CONSTRAINT `companies_ibfk_1` FOREIGN KEY (`company_type`) REFERENCES `company_types` (`type`),
+  ADD CONSTRAINT `fk_companies_owner` FOREIGN KEY (`owner_user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 
 --
 -- Constraints for table `contracts`
