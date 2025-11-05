@@ -441,13 +441,14 @@
                         c.website,
                         c.city,
                         c.country,
+                        c.cover_image,
                         COUNT(l.id) as listing_count,
                         u.name as owner_name
                     FROM companies c
                     LEFT JOIN users u ON c.owner_user_id = u.id
                     LEFT JOIN listings l ON c.id = l.company_id AND l.published = 1
                     WHERE c.owner_user_id IS NOT NULL
-                    GROUP BY c.id, c.name, c.company_type, c.phone, c.website, c.city, c.country, u.name
+                    GROUP BY c.id, c.name, c.company_type, c.phone, c.website, c.city, c.country, c.cover_image, u.name
                     ORDER BY listing_count DESC, c.created_at DESC
                 ");
                 
@@ -464,9 +465,10 @@
                         $location = $seller['country'];
                     }
                     
-                    // Generate avatar image
-                    $avatarSeed = $seller['id'];
-                    $avatarUrl = "https://picsum.photos/seed/seller{$avatarSeed}/600/600";
+                    // Use company cover image or fallback
+                    $avatarUrl = !empty($seller['cover_image']) 
+                        ? PUBLIC_URL . '/' . $seller['cover_image']
+                        : PUBLIC_URL . '/uploads/default/fallback_company.png';
                     
                     // Use company_type as specialty
                     $specialty = $seller['company_type'] ?? 'Glass Trading';
