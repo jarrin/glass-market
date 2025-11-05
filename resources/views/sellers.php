@@ -1,5 +1,6 @@
 <?php session_start(); ?>
 <?php require_once __DIR__ . '/../../config.php'; ?>
+<?php require_once __DIR__ . '/../../includes/subscription-check.php'; ?>
 <!doctype html>
 <html lang="en">
 <head>
