@@ -16,7 +16,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: #f9fafb;
+            background: #f5f7fa;
             min-height: 100vh;
             padding-top: 80px;
         }
@@ -24,17 +24,13 @@
         /* Seller Header Section */
         .seller-header {
             padding: 40px 20px 60px;
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
         }
         
         .seller-header-content {
             max-width: 1280px;
             margin: 0 auto;
-            background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(20px);
-            border-radius: 24px;
-            padding: 48px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.5);
             display: flex;
             gap: 40px;
             align-items: flex-start;
@@ -43,11 +39,12 @@
         .seller-avatar-large {
             width: 200px;
             height: 200px;
-            border-radius: 24px;
+            border-radius: 12px;
             background-size: cover;
             background-position: center;
             flex-shrink: 0;
-            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e5e7eb;
         }
         
         .seller-header-info {
@@ -55,86 +52,118 @@
         }
         
         .seller-name-large {
-            font-size: 48px;
-            font-weight: 900;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin: 0 0 16px 0;
-            letter-spacing: -1px;
+            font-size: 36px;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0 0 12px 0;
         }
         
         .seller-specialty-large {
             display: inline-block;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 10px 24px;
-            border-radius: 20px;
+            background: #f3f4f6;
+            color: #4b5563;
+            padding: 8px 16px;
+            border-radius: 8px;
             font-size: 13px;
-            font-weight: 700;
-            margin-bottom: 20px;
+            font-weight: 600;
+            margin-bottom: 16px;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            letter-spacing: 0.5px;
         }
         
         .seller-description {
-            font-size: 17px;
-            color: #4b5563;
-            line-height: 1.7;
-            margin: 0 0 24px 0;
+            font-size: 15px;
+            color: #6b7280;
+            line-height: 1.6;
+            margin: 0 0 20px 0;
             max-width: 700px;
+        }
+
+        .company-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+            max-width: 700px;
+        }
+
+        .company-info-item {
+            padding: 12px;
+            background: #f9fafb;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .company-info-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .company-info-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .company-info-value a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        .company-info-value a:hover {
+            text-decoration: underline;
         }
         
         .seller-location-large {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             color: #6b7280;
-            font-size: 16px;
-            margin-bottom: 28px;
+            font-size: 15px;
+            margin-bottom: 20px;
             font-weight: 500;
         }
         
         .seller-location-large svg {
-            width: 22px;
-            height: 22px;
-            color: #667eea;
+            width: 18px;
+            height: 18px;
+            color: #9ca3af;
         }
         
         .seller-stats-large {
             display: flex;
-            gap: 48px;
+            gap: 40px;
             flex-wrap: wrap;
+            margin-top: 24px;
         }
         
         .seller-stat-large {
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 4px;
         }
         
         .seller-stat-value-large {
-            font-size: 40px;
-            font-weight: 900;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-size: 32px;
+            font-weight: 700;
+            color: #1f2937;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
         
         .seller-stat-value-large svg {
-            width: 32px;
-            height: 32px;
-            color: #667eea;
+            width: 24px;
+            height: 24px;
+            color: #6b7280;
         }
         
         .seller-stat-label-large {
-            font-size: 13px;
+            font-size: 12px;
             color: #6b7280;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -143,130 +172,74 @@
         
         /* Contact Section */
         .seller-contact {
-            background: rgba(255, 255, 255, 0.95);
-            border: 2px solid #e5e7eb;
-            border-radius: 16px;
-            padding: 28px;
-            margin-top: 32px;
-            max-width: 400px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 24px;
+            margin-top: 24px;
+            max-width: 350px;
         }
         
         .seller-contact h3 {
-            margin: 0 0 20px 0;
-            font-size: 20px;
-            font-weight: 800;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            margin: 0 0 16px 0;
+            font-size: 16px;
+            font-weight: 700;
+            color: #1f2937;
         }
         
         .contact-info {
             display: flex;
             flex-direction: column;
-            gap: 14px;
+            gap: 12px;
         }
         
         .contact-item {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             color: #4b5563;
             font-size: 14px;
             font-weight: 500;
         }
         
         .contact-item svg {
-            width: 20px;
-            height: 20px;
-            color: #667eea;
+            width: 18px;
+            height: 18px;
+            color: #6b7280;
             flex-shrink: 0;
         }
         
         .contact-item a {
-            color: #1f2937;
+            color: #2563eb;
             text-decoration: none;
-            transition: color 0.2s ease;
         }
         
         .contact-item a:hover {
-            color: #667eea;
+            text-decoration: underline;
         }
         
         .contact-btn {
             width: 100%;
-            padding: 16px 24px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 12px 20px;
+            background: #1f2937;
             color: #fff;
             border: none;
-            border-radius: 12px;
-            font-size: 15px;
-            font-weight: 700;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 20px;
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+            transition: all 0.2s ease;
+            margin-top: 16px;
         }
         
         .contact-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 28px rgba(102, 126, 234, 0.4);
-        }
-        
-        /* Tab Navigation */
-        .tab-navigation {
-            max-width: 1280px;
-            margin: 40px auto 0;
-            padding: 0 20px;
-        }
-
-        .tab-nav {
-            display: flex;
-            gap: 8px;
-            background: white;
-            padding: 8px;
-            border-radius: 16px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-            margin-bottom: 32px;
-        }
-
-        .tab-btn {
-            flex: 1;
-            padding: 14px 24px;
-            background: transparent;
-            border: none;
-            border-radius: 12px;
-            font-size: 15px;
-            font-weight: 600;
-            color: #6b7280;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .tab-btn:hover {
-            color: #667eea;
-            background: #f3f4f6;
-        }
-
-        .tab-btn.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
+            background: #111827;
         }
         
         /* Products Section */
         .products-section {
             max-width: 1280px;
-            margin: 0 auto 60px;
+            margin: 40px auto 60px;
             padding: 0 20px;
         }
         
@@ -274,68 +247,55 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 28px;
-            padding: 28px;
-            background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.5);
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #e5e7eb;
         }
         
         .section-title {
-            font-size: 32px;
-            font-weight: 900;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-size: 24px;
+            font-weight: 700;
+            color: #1f2937;
             margin: 0;
         }
         
         .product-count {
-            font-size: 16px;
+            font-size: 14px;
             color: #6b7280;
-            font-weight: 600;
+            font-weight: 500;
         }
         
         /* Filter Tabs */
         .filter-tabs {
             display: flex;
-            gap: 12px;
+            gap: 10px;
             margin-bottom: 28px;
             overflow-x: auto;
-            padding: 16px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            padding-bottom: 8px;
         }
         
         .filter-tab {
-            padding: 12px 24px;
+            padding: 10px 20px;
             background: white;
-            border: 2px solid #e5e7eb;
-            border-radius: 12px;
-            font-size: 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 13px;
             font-weight: 600;
             color: #6b7280;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             white-space: nowrap;
         }
         
         .filter-tab:hover {
-            border-color: #667eea;
-            color: #667eea;
-            transform: translateY(-2px);
+            border-color: #9ca3af;
+            color: #374151;
         }
         
         .filter-tab.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #1f2937;
             color: #fff;
-            border-color: transparent;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            border-color: #1f2937;
         }
         
         /* Product Grid */
@@ -347,25 +307,24 @@
         }
         
         .product-card {
-            background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            border-radius: 20px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
             overflow: hidden;
             transition: all 0.3s ease;
             cursor: pointer;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
         }
         
         .product-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+            border-color: #d1d5db;
         }
         
         .product-image {
             width: 100%;
-            height: 280px;
-            background: #e5e7eb;
+            height: 240px;
+            background: #f3f4f6;
             background-size: cover;
             background-position: center;
             position: relative;
@@ -373,127 +332,126 @@
         
         .product-badge {
             position: absolute;
-            top: 16px;
-            right: 16px;
-            background: rgba(255,255,255,0.98);
-            backdrop-filter: blur(10px);
-            padding: 8px 16px;
-            border-radius: 12px;
-            font-size: 12px;
+            top: 12px;
+            right: 12px;
+            background: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11px;
             font-weight: 700;
             color: #1f2937;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
         .product-badge.wts {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: #fff;
+            background: #10b981;
+            color: white;
         }
         
         .product-badge.wtb {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-            color: #fff;
+            background: #3b82f6;
+            color: white;
         }
         
         .product-info {
-            padding: 24px;
+            padding: 20px;
         }
         
         .product-title {
-            font-size: 18px;
-            font-weight: 800;
+            font-size: 16px;
+            font-weight: 700;
             color: #1f2937;
-            margin: 0 0 8px 0;
+            margin: 0 0 6px 0;
             line-height: 1.3;
         }
         
         .product-type {
-            font-size: 12px;
+            font-size: 11px;
             color: #6b7280;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
             font-weight: 600;
         }
         
         .product-details {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            margin-bottom: 16px;
+            gap: 8px;
+            margin-bottom: 14px;
         }
         
         .product-detail {
             display: flex;
             align-items: center;
-            gap: 10px;
-            font-size: 14px;
+            gap: 8px;
+            font-size: 13px;
             color: #4b5563;
         }
         
         .product-detail svg {
-            width: 18px;
-            height: 18px;
-            color: #667eea;
+            width: 16px;
+            height: 16px;
+            color: #6b7280;
             flex-shrink: 0;
         }
         
         .product-detail strong {
             color: #1f2937;
-            font-weight: 700;
+            font-weight: 600;
         }
         
         .product-price {
-            font-size: 20px;
-            font-weight: 800;
-            color: #10b981;
-            margin-top: 16px;
-            padding-top: 16px;
-            border-top: 2px solid #f3f4f6;
+            font-size: 18px;
+            font-weight: 700;
+            color: #059669;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #f3f4f6;
         }
         
         .product-location {
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 13px;
+            gap: 6px;
+            font-size: 12px;
             color: #6b7280;
-            margin-top: 10px;
+            margin-top: 8px;
             font-weight: 500;
         }
         
         .product-location svg {
-            width: 16px;
-            height: 16px;
-            color: #667eea;
+            width: 14px;
+            height: 14px;
         }
         
         /* Empty State */
         .empty-state {
             text-align: center;
             padding: 80px 20px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 24px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
         }
         
         .empty-state svg {
-            width: 80px;
-            height: 80px;
+            width: 64px;
+            height: 64px;
             color: #d1d5db;
-            margin-bottom: 24px;
+            margin-bottom: 16px;
         }
         
         .empty-state h3 {
-            font-size: 24px;
+            font-size: 20px;
             color: #1f2937;
-            margin: 0 0 12px 0;
-            font-weight: 800;
+            margin: 0 0 8px 0;
+            font-weight: 700;
         }
         
         .empty-state p {
-            font-size: 16px;
+            font-size: 14px;
             margin: 0;
             color: #6b7280;
         }
@@ -512,7 +470,6 @@
                 flex-direction: column;
                 align-items: center;
                 text-align: center;
-                padding: 32px 24px;
             }
             
             .seller-avatar-large {
@@ -521,10 +478,14 @@
             }
             
             .seller-name-large {
-                font-size: 32px;
+                font-size: 28px;
             }
             
             .seller-description {
+                max-width: 100%;
+            }
+
+            .company-info-grid {
                 max-width: 100%;
             }
             
@@ -534,7 +495,7 @@
             
             .seller-stats-large {
                 justify-content: center;
-                gap: 32px;
+                gap: 24px;
             }
             
             .seller-contact {
@@ -542,21 +503,7 @@
             }
             
             .section-title {
-                font-size: 24px;
-            }
-            
-            .products-grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-            
-            .filter-tabs {
-                gap: 8px;
-                padding: 12px;
-            }
-        }
-    </style>
-                font-size: 24px;
+                font-size: 20px;
             }
             
             .products-grid {
@@ -697,12 +644,35 @@
                 </p>
                 <?php endif; ?>
                 
-                <div class="seller-location-large">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    </svg>
-                    <span><?php echo htmlspecialchars($location, ENT_QUOTES, 'UTF-8'); ?></span>
+                <div class="company-info-grid">
+                    <div class="company-info-item">
+                        <div class="company-info-label">Company Type</div>
+                        <div class="company-info-value"><?php echo htmlspecialchars($seller['company_type'], ENT_QUOTES, 'UTF-8'); ?></div>
+                    </div>
+                    <div class="company-info-item">
+                        <div class="company-info-label">Location</div>
+                        <div class="company-info-value"><?php echo htmlspecialchars($location, ENT_QUOTES, 'UTF-8'); ?></div>
+                    </div>
+                    <?php if (!empty($seller['phone'])): ?>
+                    <div class="company-info-item">
+                        <div class="company-info-label">Phone</div>
+                        <div class="company-info-value">
+                            <a href="tel:<?php echo htmlspecialchars($seller['phone'], ENT_QUOTES, 'UTF-8'); ?>">
+                                <?php echo htmlspecialchars($seller['phone'], ENT_QUOTES, 'UTF-8'); ?>
+                            </a>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                    <?php if (!empty($seller['website'])): ?>
+                    <div class="company-info-item">
+                        <div class="company-info-label">Website</div>
+                        <div class="company-info-value">
+                            <a href="<?php echo htmlspecialchars($seller['website'], ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">
+                                Visit Website
+                            </a>
+                        </div>
+                    </div>
+                    <?php endif; ?>
                 </div>
                 
                 <div class="seller-stats-large">
@@ -768,66 +738,7 @@
         </div>
     </section>
     
-    <!-- Tab Navigation -->
-    <div class="tab-navigation">
-        <div class="tab-nav">
-            <button class="tab-btn active" onclick="switchTab('about')">About</button>
-            <button class="tab-btn" onclick="switchTab('products')">Products (<?php echo count($listings); ?>)</button>
-        </div>
 
-        <!-- About Tab -->
-        <div id="tab-about" class="tab-content active">
-            <section class="products-section">
-                <div class="section-header">
-                    <h2 class="section-title">About <?php echo htmlspecialchars($seller['name'], ENT_QUOTES, 'UTF-8'); ?></h2>
-                </div>
-                
-                <div style="background: white; border-radius: 20px; padding: 40px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);">
-                    <?php if (!empty($seller['description'])): ?>
-                        <h3 style="font-size: 20px; font-weight: 700; color: #1f2937; margin: 0 0 16px;">Company Description</h3>
-                        <p style="font-size: 16px; line-height: 1.7; color: #4b5563; margin-bottom: 32px;">
-                            <?php echo nl2br(htmlspecialchars($seller['description'], ENT_QUOTES, 'UTF-8')); ?>
-                        </p>
-                    <?php endif; ?>
-
-                    <h3 style="font-size: 20px; font-weight: 700; color: #1f2937; margin: 0 0 16px;">Company Information</h3>
-                    <div style="display: grid; gap: 16px;">
-                        <div style="padding: 16px; background: #f9fafb; border-radius: 12px;">
-                            <strong style="color: #6b7280; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Company Type</strong>
-                            <p style="color: #1f2937; font-size: 16px; margin: 4px 0 0; font-weight: 600;"><?php echo htmlspecialchars($specialty, ENT_QUOTES, 'UTF-8'); ?></p>
-                        </div>
-                        <div style="padding: 16px; background: #f9fafb; border-radius: 12px;">
-                            <strong style="color: #6b7280; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Location</strong>
-                            <p style="color: #1f2937; font-size: 16px; margin: 4px 0 0; font-weight: 600;"><?php echo htmlspecialchars($location, ENT_QUOTES, 'UTF-8'); ?></p>
-                        </div>
-                        <?php if (!empty($seller['phone'])): ?>
-                        <div style="padding: 16px; background: #f9fafb; border-radius: 12px;">
-                            <strong style="color: #6b7280; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Phone</strong>
-                            <p style="color: #1f2937; font-size: 16px; margin: 4px 0 0; font-weight: 600;">
-                                <a href="tel:<?php echo htmlspecialchars($seller['phone'], ENT_QUOTES, 'UTF-8'); ?>" style="color: #667eea; text-decoration: none;">
-                                    <?php echo htmlspecialchars($seller['phone'], ENT_QUOTES, 'UTF-8'); ?>
-                                </a>
-                            </p>
-                        </div>
-                        <?php endif; ?>
-                        <?php if (!empty($seller['website'])): ?>
-                        <div style="padding: 16px; background: #f9fafb; border-radius: 12px;">
-                            <strong style="color: #6b7280; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Website</strong>
-                            <p style="color: #1f2937; font-size: 16px; margin: 4px 0 0; font-weight: 600;">
-                                <a href="<?php echo htmlspecialchars($seller['website'], ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer" style="color: #667eea; text-decoration: none;">
-                                    Visit Website →
-                                </a>
-                            </p>
-                        </div>
-                        <?php endif; ?>
-                    </div>
-                </div>
-            </section>
-        </div>
-
-        <!-- Products Tab -->
-        <div id="tab-products" class="tab-content">
-    <!-- Products Section -->
     <section class="products-section">
         <div class="section-header">
             <h2 class="section-title">Available Products</h2>
@@ -930,7 +841,7 @@
         <?php endif; ?>
     </section>
         </div><!-- End Products Tab -->
-    </div><!-- End Tab Navigation -->
+
     
     <?php include __DIR__ . '/../../includes/footer.php'; ?>
     
