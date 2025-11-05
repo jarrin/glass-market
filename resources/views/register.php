@@ -113,15 +113,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         
                         error_log("Company created successfully: ID $company_id for user $user_id");
                     } catch (PDOException $e) {
-                        // Company creation failed, but user is still created
+                        // Company creation failed - rollback everything
                         error_log("Company creation failed: " . $e->getMessage());
+                        $pdo->rollBack();
+                        throw new Exception("Failed to create company profile. Please try again.");
                     }
                 }
 
-                // Commit the user creation (trial subscription will be created after admin approval)
-                $pdo->commit();
+                // Send registration notification email BEFORE committing
+                $emailSent = false;
+                $emailError = '';
                 
-                // Send registration notification email
                 try {
                     require_once __DIR__ . '/../../app/Services/RustMailer.php';
                     $rustMailer = new App\Services\RustMailer();
@@ -148,21 +150,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         true
                     );
                     
-                    if (!$emailResult['success']) {
-                        error_log("Registration notification email failed: " . $emailResult['message']);
+                    if ($emailResult['success']) {
+                        $emailSent = true;
+                    } else {
+                        $emailError = $emailResult['message'] ?? 'Unknown email error';
+                        error_log("Registration notification email failed: " . $emailError);
                     }
                 } catch (Exception $e) {
-                    error_log("Registration notification email exception: " . $e->getMessage());
+                    $emailError = $e->getMessage();
+                    error_log("Registration notification email exception: " . $emailError);
                 }
                 
-                $success_message = 'Registration successful! Your account is pending admin approval. You will receive an email notification once approved (typically within 24-48 hours).';
+                // Only commit if email was sent successfully
+                if ($emailSent) {
+                    $pdo->commit();
+                    $success_message = 'Registration successful! Your account is pending admin approval. You will receive an email notification once approved (typically within 24-48 hours).';
+                } else {
+                    // Email failed - rollback registration
+                    $pdo->rollBack();
+                    $error_message = 'Registration failed: Unable to send confirmation email. Please verify your email address is correct and try again. If the problem persists, contact support.';
+                    error_log("Registration rolled back for $notification_email due to email failure: $emailError");
+                }
             }
-        } catch (PDOException $e) {
-            if ($pdo && $pdo->inTransaction()) {
+        } catch (Exception $e) {
+            // Rollback any active transaction
+            if (isset($pdo) && $pdo instanceof PDO && $pdo->inTransaction()) {
                 $pdo->rollBack();
+                error_log("Transaction rolled back due to error");
             }
-            $error_message = 'Registration failed: ' . $e->getMessage();
-            error_log("Registration error: " . $e->getMessage());
+            
+            // User-friendly error message
+            if (strpos($e->getMessage(), 'Duplicate entry') !== false) {
+                $error_message = 'Registration failed: This email address is already in use.';
+            } elseif (strpos($e->getMessage(), 'email') !== false) {
+                $error_message = 'Registration failed: Unable to send confirmation email. Please check your email address and try again.';
+            } else {
+                $error_message = 'Registration failed: ' . $e->getMessage();
+            }
+            
+            error_log("Registration error for $notification_email: " . $e->getMessage());
         }
     }
 }
