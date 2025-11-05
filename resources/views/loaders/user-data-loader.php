@@ -47,11 +47,12 @@ try {
     $stmt = $pdo->prepare('
         SELECT COUNT(*) as count
         FROM listings l
-        LEFT JOIN companies c ON l.company_id = c.id
-        LEFT JOIN users u ON c.id = u.company_id
-        WHERE u.id = :user_id
+        WHERE l.user_id = :user_id OR l.company_id = :company_id
     ');
-    $stmt->execute(['user_id' => $user['id']]);
+    $stmt->execute([
+        'user_id' => $user['id'],
+        'company_id' => $dbUser['company_id'] ?? 0
+    ]);
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
     $user_listings_count = $result['count'] ?? 0;
     
