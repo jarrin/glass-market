@@ -4,7 +4,12 @@
 ?>
 <div class="tab-panel" id="tab-subscription">
     <h2 class="section-title">My Subscriptions</h2>
-    
+
+    <?php
+    // Show pending/failed payment notice
+    include __DIR__ . '/../components/pending-payment-notice.php';
+    ?>
+
     <?php if ($success_message): ?>
         <div class="alert alert-success">
             <?php echo htmlspecialchars($success_message); ?>
