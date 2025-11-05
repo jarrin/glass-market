@@ -1500,11 +1500,15 @@ try {
                     </div>
                 </div>
 
-            </div>
-        </form>
-    </main>
+                            </div>
+                        </form>
 
-    <?php include __DIR__ . '/../../includes/footer.php'; ?>
+        <!-- Delete Form (Outside main form to avoid nesting) -->
+        <form id="delete-form" method="POST" action="<?php echo VIEWS_URL; ?>/profile.php?tab=listings" style="display: none;">
+            <input type="hidden" name="delete_listing" value="1">
+            <input type="hidden" name="listing_id" value="<?php echo $listing_id; ?>">
+        </form>
+    </main>    <?php include __DIR__ . '/../../includes/footer.php'; ?>
 
     <script>
     // Update Status Text
@@ -1936,7 +1940,13 @@ try {
     // Confirm delete function
     function confirmDelete() {
         if (confirm('⚠️ FINAL WARNING ⚠️\n\nAre you absolutely sure you want to permanently delete this listing?\n\nThis action CANNOT be undone!\n\nClick OK to delete forever, or Cancel to keep the listing.')) {
-            document.getElementById('delete-form').submit();
+            const form = document.getElementById('delete-form');
+            if (form) {
+                form.submit();
+            } else {
+                console.error('Delete form not found');
+                alert('Error: Could not find delete form. Please refresh the page and try again.');
+            }
         }
     }
     </script>
