@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 05, 2025 at 11:53 AM
+-- Generation Time: Nov 05, 2025 at 02:14 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -206,6 +206,7 @@ CREATE TABLE `listings` (
   `id` bigint(20) NOT NULL,
   `location_id` bigint(20) DEFAULT NULL,
   `company_id` bigint(20) DEFAULT NULL,
+  `user_id` bigint(20) DEFAULT NULL,
   `side` varchar(10) NOT NULL,
   `glass_type` varchar(255) NOT NULL,
   `glass_type_other` varchar(255) DEFAULT NULL,
@@ -228,107 +229,130 @@ CREATE TABLE `listings` (
 -- Dumping data for table `listings`
 --
 
-INSERT INTO `listings` (`id`, `location_id`, `company_id`, `side`, `glass_type`, `glass_type_other`, `quantity_tons`, `quantity_note`, `recycled`, `tested`, `storage_location`, `price_text`, `currency`, `created_at`, `valid_until`, `published`, `quality_notes`, `image_path`, `accepted_by_contract`) VALUES
-(1, NULL, 1, 'WTS', 'Amber Glass', NULL, 3797.00, 'Loose bulk', 'unknown', 'unknown', NULL, '€348/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Premium grade glass material', 'image.png', 0),
-(2, NULL, 1, 'WTS', 'Blue Glass', NULL, 3413.00, 'Container loads', 'unknown', 'unknown', NULL, '£190/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Long-term contract available', 'image.png', 0),
-(3, NULL, 1, 'WTB', 'Brown Glass', NULL, 3715.00, 'Weekly deliveries available', 'not_recycled', 'tested', NULL, '$163/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Bulk quantities available', 'image.png', 0),
-(4, NULL, 1, 'WTB', 'Green Glass', NULL, 4576.00, 'Regular monthly supply', 'unknown', 'unknown', NULL, '$238/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'FOB pricing negotiable', 'image.png', 0),
-(5, NULL, 1, 'WTS', 'Blue Glass', NULL, 3513.00, 'One-time bulk sale', 'not_recycled', 'untested', NULL, '£287/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Certified recycled content', 'image.png', 0),
-(6, NULL, 1, 'WTB', 'Blue Glass', NULL, 909.00, 'One-time bulk sale', 'not_recycled', 'tested', NULL, '$128/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'FOB pricing negotiable', 'image.png', 0),
-(7, NULL, 1, 'WTB', 'Brown Glass', NULL, 1935.00, 'Ongoing contract', 'unknown', 'untested', NULL, '£458/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Bulk quantities available', 'image.png', 0),
-(8, NULL, 1, 'WTS', 'Other Glass', NULL, 4283.00, 'Pre-sorted material', 'not_recycled', 'untested', NULL, '€443/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Premium grade glass material', 'image.png', 0),
-(9, NULL, 1, 'WTB', 'Brown Glass', NULL, 4110.00, 'Container loads', 'not_recycled', 'tested', NULL, '£411/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Industrial grade glass cullet', 'image.png', 0),
-(10, NULL, 1, 'WTB', 'Amber Glass', NULL, 183.00, 'Palletized', 'recycled', 'untested', NULL, '£290/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Bulk quantities available', 'image.png', 0),
-(11, NULL, 1, 'WTS', 'Brown Glass', NULL, 4194.00, 'Big bags available', 'not_recycled', 'tested', NULL, '£298/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Industrial grade glass cullet', 'image.png', 0),
-(12, NULL, 1, 'WTS', 'Brown Glass', NULL, 4802.00, 'Ongoing contract', 'not_recycled', 'untested', NULL, '€470/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Certified recycled content', 'image.png', 0),
-(13, NULL, 1, 'WTS', 'Green Glass', NULL, 2164.00, 'Regular monthly supply', 'unknown', 'tested', NULL, '€254/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Mixed color glass available', 'image.png', 0),
-(14, NULL, 1, 'WTS', 'Amber Glass', NULL, 4136.00, 'One-time bulk sale', 'not_recycled', 'unknown', NULL, '$298/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Long-term contract available', 'image.png', 0),
-(15, NULL, 1, 'WTB', 'Green Glass', NULL, 590.00, 'Ongoing contract', 'recycled', 'untested', NULL, '£500/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Industrial grade glass cullet', 'image.png', 0),
-(16, NULL, 1, 'WTB', 'Green Glass', NULL, 804.00, 'Palletized', 'not_recycled', 'unknown', NULL, '$300/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'High-quality recycled glass', 'image.png', 0),
-(17, NULL, 1, 'WTS', 'Green Glass', NULL, 3109.00, 'Palletized', 'unknown', 'unknown', NULL, '$59/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Mixed color glass available', 'image.png', 0),
-(18, NULL, 1, 'WTB', 'Green Glass', NULL, 553.00, 'Regular monthly supply', 'recycled', 'unknown', NULL, '£268/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Ready for immediate pickup', 'image.png', 0),
-(19, NULL, 1, 'WTB', 'Blue Glass', NULL, 778.00, 'Regular monthly supply', 'unknown', 'tested', NULL, '€344/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Mixed color glass available', 'image.png', 0),
-(20, NULL, 1, 'WTB', 'Clear Glass', NULL, 246.00, 'Palletized', 'not_recycled', 'tested', NULL, '€414/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Industrial grade glass cullet', 'image.png', 0),
-(21, NULL, 1, 'WTB', 'Brown Glass', NULL, 350.00, 'Ongoing contract', 'unknown', 'untested', NULL, '$312/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Industrial grade glass cullet', 'image.png', 0),
-(22, NULL, 1, 'WTB', 'Brown Glass', NULL, 283.00, 'Loose bulk', 'recycled', 'tested', NULL, '$436/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Premium grade glass material', 'image.png', 0),
-(23, NULL, 1, 'WTS', 'Brown Glass', NULL, 2219.00, 'Loose bulk', 'unknown', 'tested', NULL, '€387/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Clean sorted glass', 'image.png', 0),
-(24, NULL, 1, 'WTS', 'Other Glass', NULL, 4317.00, 'Palletized', 'recycled', 'unknown', NULL, '$477/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Bulk quantities available', 'image.png', 0),
-(25, NULL, 1, 'WTS', 'Clear Glass', NULL, 3240.00, 'Ongoing contract', 'not_recycled', 'unknown', NULL, '£156/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Industrial grade glass cullet', 'image.png', 0),
-(26, NULL, 1, 'WTB', 'Other Glass', NULL, 1009.00, 'Big bags available', 'recycled', 'unknown', NULL, '$351/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Certified recycled content', 'image.png', 0),
-(27, NULL, 1, 'WTS', 'Other Glass', NULL, 4632.00, 'Ongoing contract', 'unknown', 'tested', NULL, '£85/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Bulk quantities available', 'image.png', 0),
-(28, NULL, 1, 'WTS', 'Green Glass', NULL, 187.00, 'Palletized', 'unknown', 'tested', NULL, '£174/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Certified recycled content', 'image.png', 0),
-(29, NULL, 1, 'WTS', 'Blue Glass', NULL, 2807.00, 'One-time bulk sale', 'not_recycled', 'tested', NULL, '$255/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Clean sorted glass', 'image.png', 0),
-(30, NULL, 1, 'WTB', 'Brown Glass', NULL, 1294.00, 'Big bags available', 'not_recycled', 'unknown', NULL, '€397/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Ready for immediate pickup', 'image.png', 0),
-(31, NULL, 1, 'WTB', 'Amber Glass', NULL, 3657.00, 'Spot sale available', 'recycled', 'untested', NULL, '$323/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'High-quality recycled glass', 'image.png', 0),
-(32, NULL, 1, 'WTB', 'Clear Glass', NULL, 4472.00, 'Pre-sorted material', 'unknown', 'untested', NULL, '£134/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Premium grade glass material', 'image.png', 0),
-(33, NULL, 1, 'WTS', 'Brown Glass', NULL, 705.00, 'Spot sale available', 'recycled', 'tested', NULL, '€309/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Premium grade glass material', 'image.png', 0),
-(34, NULL, 1, 'WTS', 'Green Glass', NULL, 2101.00, 'Big bags available', 'not_recycled', 'unknown', NULL, '€155/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Premium grade glass material', 'image.png', 0),
-(35, NULL, 1, 'WTS', 'Amber Glass', NULL, 1538.00, 'One-time bulk sale', 'recycled', 'unknown', NULL, '€82/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Premium grade glass material', 'image.png', 0),
-(36, NULL, 1, 'WTB', 'Brown Glass', NULL, 1327.00, 'One-time bulk sale', 'recycled', 'unknown', NULL, '$306/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Long-term contract available', 'image.png', 0),
-(37, NULL, 1, 'WTB', 'Other Glass', NULL, 393.00, 'Big bags available', 'unknown', 'untested', NULL, '£412/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Clean sorted glass', 'image.png', 0),
-(38, NULL, 1, 'WTS', 'Green Glass', NULL, 2442.00, 'Container loads', 'recycled', 'unknown', NULL, '€106/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Bulk quantities available', 'image.png', 0),
-(39, NULL, 1, 'WTS', 'Brown Glass', NULL, 2442.00, 'Loose bulk', 'unknown', 'unknown', NULL, '£348/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Clean sorted glass', 'image.png', 0),
-(40, NULL, 1, 'WTS', 'Blue Glass', NULL, 3984.00, 'Big bags available', 'not_recycled', 'untested', NULL, '€500/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Premium grade glass material', 'image.png', 0),
-(41, NULL, 1, 'WTS', 'Clear Glass', NULL, 18.00, 'Palletized', 'unknown', 'untested', NULL, '£114/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'FOB pricing negotiable', 'image.png', 0),
-(42, NULL, 1, 'WTB', 'Blue Glass', NULL, 2392.00, 'One-time bulk sale', 'recycled', 'unknown', NULL, '€92/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Bulk quantities available', 'image.png', 0),
-(43, NULL, 1, 'WTS', 'Amber Glass', NULL, 765.00, 'Palletized', 'recycled', 'tested', NULL, '£177/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Certified recycled content', 'image.png', 0),
-(44, NULL, 1, 'WTB', 'Brown Glass', NULL, 4415.00, 'Palletized', 'recycled', 'unknown', NULL, '$55/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Mixed color glass available', 'image.png', 0),
-(45, NULL, 1, 'WTB', 'Brown Glass', NULL, 3799.00, 'Big bags available', 'recycled', 'tested', NULL, '$161/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'High-quality recycled glass', 'image.png', 0),
-(46, NULL, 1, 'WTB', 'Clear Glass', NULL, 1502.00, 'Big bags available', 'not_recycled', 'tested', NULL, '£86/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Bulk quantities available', 'image.png', 0),
-(47, NULL, 1, 'WTB', 'Other Glass', NULL, 2242.00, 'Container loads', 'not_recycled', 'tested', NULL, '$266/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Premium grade glass material', 'image.png', 0),
-(48, NULL, 1, 'WTS', 'Green Glass', NULL, 1681.00, 'One-time bulk sale', 'unknown', 'unknown', NULL, '£144/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Industrial grade glass cullet', 'image.png', 0),
-(49, NULL, 1, 'WTS', 'Brown Glass', NULL, 1416.00, 'Ongoing contract', 'not_recycled', 'unknown', NULL, '$185/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Bulk quantities available', 'image.png', 0),
-(50, NULL, 1, 'WTS', 'Clear Glass', NULL, 2398.00, 'Ongoing contract', 'recycled', 'unknown', NULL, '€92/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Premium grade glass material', 'image.png', 0),
-(51, NULL, 1, 'WTS', 'Blue Glass', NULL, 2267.00, 'Big bags available', 'not_recycled', 'unknown', NULL, '$166/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Mixed color glass available', 'image.png', 0),
-(52, NULL, 1, 'WTS', 'Blue Glass', NULL, 2668.00, 'Big bags available', 'not_recycled', 'tested', NULL, '€356/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Long-term contract available', 'image.png', 0),
-(53, NULL, 1, 'WTB', 'Clear Glass', NULL, 4457.00, 'Weekly deliveries available', 'not_recycled', 'tested', NULL, '$315/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Certified recycled content', 'image.png', 0),
-(54, NULL, 1, 'WTB', 'Clear Glass', NULL, 4529.00, 'Palletized', 'recycled', 'unknown', NULL, '€143/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'High-quality recycled glass', 'image.png', 0),
-(55, NULL, 1, 'WTB', 'Brown Glass', NULL, 1280.00, 'Spot sale available', 'unknown', 'untested', NULL, '£196/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Certified recycled content', 'image.png', 0),
-(56, NULL, 1, 'WTB', 'Other Glass', NULL, 2058.00, 'Pre-sorted material', 'not_recycled', 'untested', NULL, '$333/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Long-term contract available', 'image.png', 0),
-(57, NULL, 1, 'WTB', 'Other Glass', NULL, 4362.00, 'Big bags available', 'unknown', 'unknown', NULL, '€429/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Certified recycled content', 'image.png', 0),
-(58, NULL, 1, 'WTB', 'Brown Glass', NULL, 2926.00, 'Weekly deliveries available', 'recycled', 'untested', NULL, '$356/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Industrial grade glass cullet', 'image.png', 0),
-(59, NULL, 1, 'WTB', 'Clear Glass', NULL, 2634.00, 'Big bags available', 'not_recycled', 'tested', NULL, '€111/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Bulk quantities available', 'image.png', 0),
-(60, NULL, 1, 'WTS', 'Amber Glass', NULL, 531.00, 'Ongoing contract', 'recycled', 'tested', NULL, '£85/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Long-term contract available', 'image.png', 0),
-(61, NULL, 1, 'WTS', 'Amber Glass', NULL, 424.00, 'Regular monthly supply', 'unknown', 'untested', NULL, '€250/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Ready for immediate pickup', 'image.png', 0),
-(62, NULL, 1, 'WTS', 'Other Glass', NULL, 3624.00, 'Pre-sorted material', 'not_recycled', 'untested', NULL, '$431/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'FOB pricing negotiable', 'image.png', 0),
-(63, NULL, 1, 'WTB', 'Clear Glass', NULL, 3294.00, 'Loose bulk', 'recycled', 'unknown', NULL, '£328/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Bulk quantities available', 'image.png', 0),
-(64, NULL, 1, 'WTS', 'Green Glass', NULL, 2029.00, 'One-time bulk sale', 'not_recycled', 'untested', NULL, '$349/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Certified recycled content', 'image.png', 0),
-(65, NULL, 1, 'WTB', 'Amber Glass', NULL, 2591.00, 'Loose bulk', 'not_recycled', 'tested', NULL, '$320/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Ready for immediate pickup', 'image.png', 0),
-(66, NULL, 1, 'WTS', 'Brown Glass', NULL, 2619.00, 'Weekly deliveries available', 'not_recycled', 'tested', NULL, '€227/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Long-term contract available', 'image.png', 0),
-(67, NULL, 1, 'WTB', 'Blue Glass', NULL, 180.00, 'Spot sale available', 'not_recycled', 'untested', NULL, '€332/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Industrial grade glass cullet', 'image.png', 0),
-(68, NULL, 1, 'WTS', 'Blue Glass', NULL, 4776.00, 'Container loads', 'unknown', 'tested', NULL, '€249/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Clean sorted glass', 'image.png', 0),
-(69, NULL, 1, 'WTB', 'Blue Glass', NULL, 3054.00, 'Big bags available', 'unknown', 'tested', NULL, '€277/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Industrial grade glass cullet', 'image.png', 0),
-(70, NULL, 1, 'WTS', 'Clear Glass', NULL, 3499.00, 'Weekly deliveries available', 'unknown', 'unknown', NULL, '$128/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'High-quality recycled glass', 'image.png', 0),
-(71, NULL, 1, 'WTS', 'Brown Glass', NULL, 4191.00, 'Pre-sorted material', 'unknown', 'tested', NULL, '$413/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Mixed color glass available', 'image.png', 0),
-(72, NULL, 1, 'WTS', 'Other Glass', NULL, 1317.00, 'Pre-sorted material', 'not_recycled', 'tested', NULL, '€231/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Industrial grade glass cullet', 'image.png', 0),
-(73, NULL, 1, 'WTS', 'Amber Glass', NULL, 1845.00, 'One-time bulk sale', 'not_recycled', 'untested', NULL, '£329/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Certified recycled content', 'image.png', 0),
-(74, NULL, 1, 'WTS', 'Brown Glass', NULL, 2280.00, 'Container loads', 'not_recycled', 'tested', NULL, '$287/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Clean sorted glass', 'image.png', 0),
-(75, NULL, 1, 'WTB', 'Other Glass', NULL, 4401.00, 'Pre-sorted material', 'not_recycled', 'tested', NULL, '$442/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Premium grade glass material', 'image.png', 0),
-(76, NULL, 1, 'WTS', 'Clear Glass', NULL, 1159.00, 'Palletized', 'not_recycled', 'unknown', NULL, '$238/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'FOB pricing negotiable', 'image.png', 0),
-(77, NULL, 1, 'WTB', 'Amber Glass', NULL, 4808.00, 'Pre-sorted material', 'not_recycled', 'tested', NULL, '$307/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'High-quality recycled glass', 'image.png', 0),
-(78, NULL, 1, 'WTS', 'Clear Glass', NULL, 4600.00, 'Pre-sorted material', 'recycled', 'tested', NULL, '€276/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Certified recycled content', 'image.png', 0),
-(79, NULL, 1, 'WTB', 'Amber Glass', NULL, 1938.00, 'Regular monthly supply', 'not_recycled', 'untested', NULL, '$474/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Premium grade glass material', 'image.png', 0),
-(80, NULL, 1, 'WTS', 'Other Glass', NULL, 2853.00, 'Ongoing contract', 'unknown', 'tested', NULL, '$142/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Ready for immediate pickup', 'image.png', 0),
-(81, NULL, 1, 'WTB', 'Amber Glass', NULL, 2909.00, 'Regular monthly supply', 'unknown', 'tested', NULL, '£76/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Certified recycled content', 'image.png', 0),
-(82, NULL, 1, 'WTS', 'Clear Glass', NULL, 4401.00, 'Container loads', 'not_recycled', 'untested', NULL, '€60/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Long-term contract available', 'image.png', 0),
-(83, NULL, 1, 'WTB', 'Brown Glass', NULL, 2138.00, 'Spot sale available', 'unknown', 'unknown', NULL, '£138/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Certified recycled content', 'image.png', 0),
-(84, NULL, 1, 'WTB', 'Other Glass', NULL, 35.00, 'Container loads', 'unknown', 'tested', NULL, '$335/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'FOB pricing negotiable', 'image.png', 0),
-(85, NULL, 1, 'WTS', 'Other Glass', NULL, 4804.00, 'Regular monthly supply', 'recycled', 'untested', NULL, '€229/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'High-quality recycled glass', 'image.png', 0),
-(86, NULL, 1, 'WTB', 'Brown Glass', NULL, 4824.00, 'Container loads', 'unknown', 'unknown', NULL, '£477/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Mixed color glass available', 'image.png', 0),
-(87, NULL, 1, 'WTB', 'Blue Glass', NULL, 713.00, 'Weekly deliveries available', 'unknown', 'unknown', NULL, '£363/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Bulk quantities available', 'image.png', 0),
-(88, NULL, 1, 'WTB', 'Amber Glass', NULL, 944.00, 'Regular monthly supply', 'not_recycled', 'tested', NULL, '£457/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Certified recycled content', 'image.png', 0),
-(89, NULL, 1, 'WTB', 'Green Glass', NULL, 2100.00, 'Pre-sorted material', 'unknown', 'untested', NULL, '$288/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Industrial grade glass cullet', 'image.png', 0),
-(90, NULL, 1, 'WTB', 'Clear Glass', NULL, 345.00, 'Weekly deliveries available', 'recycled', 'unknown', NULL, '$364/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Certified recycled content', 'image.png', 0),
-(91, NULL, 1, 'WTB', 'Brown Glass', NULL, 1192.00, 'Spot sale available', 'recycled', 'unknown', NULL, '£73/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Industrial grade glass cullet', 'image.png', 0),
-(92, NULL, 1, 'WTS', 'Green Glass', NULL, 1101.00, 'Spot sale available', 'recycled', 'unknown', NULL, '$467/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Premium grade glass material', 'image.png', 0),
-(93, NULL, 1, 'WTB', 'Amber Glass', NULL, 2624.00, 'One-time bulk sale', 'unknown', 'untested', NULL, '€225/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Industrial grade glass cullet', 'image.png', 0),
-(94, NULL, 1, 'WTS', 'Amber Glass', NULL, 1771.00, 'One-time bulk sale', 'unknown', 'tested', NULL, '£450/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Bulk quantities available', 'image.png', 0),
-(95, NULL, 1, 'WTB', 'Amber Glass', NULL, 47.00, 'Pre-sorted material', 'unknown', 'untested', NULL, '£159/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Clean sorted glass', 'image.png', 0),
-(96, NULL, 1, 'WTB', 'Brown Glass', NULL, 1816.00, 'Loose bulk', 'recycled', 'untested', NULL, '€433/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Long-term contract available', 'image.png', 0),
-(97, NULL, 1, 'WTS', 'Clear Glass', NULL, 1853.00, 'Ongoing contract', 'not_recycled', 'untested', NULL, '$416/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Industrial grade glass cullet', 'image.png', 0),
-(98, NULL, 1, 'WTB', 'Green Glass', NULL, 1533.00, 'One-time bulk sale', 'not_recycled', 'unknown', NULL, '£427/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Certified recycled content', 'image.png', 0),
-(99, NULL, 1, 'WTS', 'Brown Glass', NULL, 4403.00, 'Ongoing contract', 'recycled', 'unknown', NULL, '£330/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'High-quality recycled glass', 'image.png', 0),
-(100, NULL, 1, 'WTS', 'Green Glass', NULL, 1276.00, 'Big bags available', 'recycled', 'untested', NULL, '$118/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Premium grade glass material', 'image.png', 0);
+INSERT INTO `listings` (`id`, `location_id`, `company_id`, `user_id`, `side`, `glass_type`, `glass_type_other`, `quantity_tons`, `quantity_note`, `recycled`, `tested`, `storage_location`, `price_text`, `currency`, `created_at`, `valid_until`, `published`, `quality_notes`, `image_path`, `accepted_by_contract`) VALUES
+(1, NULL, 1, 4, 'WTS', 'Amber Glass', NULL, 3797.00, 'Loose bulk', 'unknown', 'unknown', NULL, '€348/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Premium grade glass material', 'image.png', 0),
+(2, NULL, 1, 4, 'WTS', 'Blue Glass', NULL, 3413.00, 'Container loads', 'unknown', 'unknown', NULL, '£190/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Long-term contract available', 'image.png', 0),
+(3, NULL, 1, 4, 'WTB', 'Brown Glass', NULL, 3715.00, 'Weekly deliveries available', 'not_recycled', 'tested', NULL, '$163/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Bulk quantities available', 'image.png', 0),
+(4, NULL, 1, 4, 'WTB', 'Green Glass', NULL, 4576.00, 'Regular monthly supply', 'unknown', 'unknown', NULL, '$238/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'FOB pricing negotiable', 'image.png', 0),
+(5, NULL, 1, 4, 'WTS', 'Blue Glass', NULL, 3513.00, 'One-time bulk sale', 'not_recycled', 'untested', NULL, '£287/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Certified recycled content', 'image.png', 0),
+(6, NULL, 1, 4, 'WTB', 'Blue Glass', NULL, 909.00, 'One-time bulk sale', 'not_recycled', 'tested', NULL, '$128/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'FOB pricing negotiable', 'image.png', 0),
+(7, NULL, 1, 4, 'WTB', 'Brown Glass', NULL, 1935.00, 'Ongoing contract', 'unknown', 'untested', NULL, '£458/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Bulk quantities available', 'image.png', 0),
+(8, NULL, 1, 4, 'WTS', 'Other Glass', NULL, 4283.00, 'Pre-sorted material', 'not_recycled', 'untested', NULL, '€443/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Premium grade glass material', 'image.png', 0),
+(9, NULL, 1, 4, 'WTB', 'Brown Glass', NULL, 4110.00, 'Container loads', 'not_recycled', 'tested', NULL, '£411/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Industrial grade glass cullet', 'image.png', 0),
+(10, NULL, 1, 4, 'WTB', 'Amber Glass', NULL, 183.00, 'Palletized', 'recycled', 'untested', NULL, '£290/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Bulk quantities available', 'image.png', 0),
+(11, NULL, 1, 4, 'WTS', 'Brown Glass', NULL, 4194.00, 'Big bags available', 'not_recycled', 'tested', NULL, '£298/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Industrial grade glass cullet', 'image.png', 0),
+(12, NULL, 1, 4, 'WTS', 'Brown Glass', NULL, 4802.00, 'Ongoing contract', 'not_recycled', 'untested', NULL, '€470/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Certified recycled content', 'image.png', 0),
+(13, NULL, 1, 4, 'WTS', 'Green Glass', NULL, 2164.00, 'Regular monthly supply', 'unknown', 'tested', NULL, '€254/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Mixed color glass available', 'image.png', 0),
+(14, NULL, 1, 4, 'WTS', 'Amber Glass', NULL, 4136.00, 'One-time bulk sale', 'not_recycled', 'unknown', NULL, '$298/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Long-term contract available', 'image.png', 0),
+(15, NULL, 1, 4, 'WTB', 'Green Glass', NULL, 590.00, 'Ongoing contract', 'recycled', 'untested', NULL, '£500/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Industrial grade glass cullet', 'image.png', 0),
+(16, NULL, 1, 4, 'WTB', 'Green Glass', NULL, 804.00, 'Palletized', 'not_recycled', 'unknown', NULL, '$300/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'High-quality recycled glass', 'image.png', 0),
+(17, NULL, 1, 4, 'WTS', 'Green Glass', NULL, 3109.00, 'Palletized', 'unknown', 'unknown', NULL, '$59/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Mixed color glass available', 'image.png', 0),
+(18, NULL, 1, 4, 'WTB', 'Green Glass', NULL, 553.00, 'Regular monthly supply', 'recycled', 'unknown', NULL, '£268/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Ready for immediate pickup', 'image.png', 0),
+(19, NULL, 1, 4, 'WTB', 'Blue Glass', NULL, 778.00, 'Regular monthly supply', 'unknown', 'tested', NULL, '€344/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Mixed color glass available', 'image.png', 0),
+(20, NULL, 1, 4, 'WTB', 'Clear Glass', NULL, 246.00, 'Palletized', 'not_recycled', 'tested', NULL, '€414/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Industrial grade glass cullet', 'image.png', 0),
+(21, NULL, 1, 4, 'WTB', 'Brown Glass', NULL, 350.00, 'Ongoing contract', 'unknown', 'untested', NULL, '$312/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Industrial grade glass cullet', 'image.png', 0),
+(22, NULL, 1, 4, 'WTB', 'Brown Glass', NULL, 283.00, 'Loose bulk', 'recycled', 'tested', NULL, '$436/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Premium grade glass material', 'image.png', 0),
+(23, NULL, 1, 4, 'WTS', 'Brown Glass', NULL, 2219.00, 'Loose bulk', 'unknown', 'tested', NULL, '€387/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Clean sorted glass', 'image.png', 0),
+(24, NULL, 1, 4, 'WTS', 'Other Glass', NULL, 4317.00, 'Palletized', 'recycled', 'unknown', NULL, '$477/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Bulk quantities available', 'image.png', 0),
+(25, NULL, 1, 4, 'WTS', 'Clear Glass', NULL, 3240.00, 'Ongoing contract', 'not_recycled', 'unknown', NULL, '£156/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Industrial grade glass cullet', 'image.png', 0),
+(26, NULL, 1, 4, 'WTB', 'Other Glass', NULL, 1009.00, 'Big bags available', 'recycled', 'unknown', NULL, '$351/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Certified recycled content', 'image.png', 0),
+(27, NULL, 1, 4, 'WTS', 'Other Glass', NULL, 4632.00, 'Ongoing contract', 'unknown', 'tested', NULL, '£85/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Bulk quantities available', 'image.png', 0),
+(28, NULL, 1, 4, 'WTS', 'Green Glass', NULL, 187.00, 'Palletized', 'unknown', 'tested', NULL, '£174/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Certified recycled content', 'image.png', 0),
+(29, NULL, 1, 4, 'WTS', 'Blue Glass', NULL, 2807.00, 'One-time bulk sale', 'not_recycled', 'tested', NULL, '$255/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Clean sorted glass', 'image.png', 0),
+(30, NULL, 1, 4, 'WTB', 'Brown Glass', NULL, 1294.00, 'Big bags available', 'not_recycled', 'unknown', NULL, '€397/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Ready for immediate pickup', 'image.png', 0),
+(31, NULL, 1, 4, 'WTB', 'Amber Glass', NULL, 3657.00, 'Spot sale available', 'recycled', 'untested', NULL, '$323/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'High-quality recycled glass', 'image.png', 0),
+(32, NULL, 1, 4, 'WTB', 'Clear Glass', NULL, 4472.00, 'Pre-sorted material', 'unknown', 'untested', NULL, '£134/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Premium grade glass material', 'image.png', 0),
+(33, NULL, 1, 4, 'WTS', 'Brown Glass', NULL, 705.00, 'Spot sale available', 'recycled', 'tested', NULL, '€309/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Premium grade glass material', 'image.png', 0),
+(34, NULL, 1, 4, 'WTS', 'Green Glass', NULL, 2101.00, 'Big bags available', 'not_recycled', 'unknown', NULL, '€155/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Premium grade glass material', 'image.png', 0),
+(35, NULL, 1, 4, 'WTS', 'Amber Glass', NULL, 1538.00, 'One-time bulk sale', 'recycled', 'unknown', NULL, '€82/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Premium grade glass material', 'image.png', 0),
+(36, NULL, 1, 4, 'WTB', 'Brown Glass', NULL, 1327.00, 'One-time bulk sale', 'recycled', 'unknown', NULL, '$306/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Long-term contract available', 'image.png', 0),
+(37, NULL, 1, 4, 'WTB', 'Other Glass', NULL, 393.00, 'Big bags available', 'unknown', 'untested', NULL, '£412/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Clean sorted glass', 'image.png', 0),
+(38, NULL, 1, 4, 'WTS', 'Green Glass', NULL, 2442.00, 'Container loads', 'recycled', 'unknown', NULL, '€106/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Bulk quantities available', 'image.png', 0),
+(39, NULL, 1, 4, 'WTS', 'Brown Glass', NULL, 2442.00, 'Loose bulk', 'unknown', 'unknown', NULL, '£348/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Clean sorted glass', 'image.png', 0),
+(40, NULL, 1, 4, 'WTS', 'Blue Glass', NULL, 3984.00, 'Big bags available', 'not_recycled', 'untested', NULL, '€500/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Premium grade glass material', 'image.png', 0),
+(41, NULL, 1, 4, 'WTS', 'Clear Glass', NULL, 18.00, 'Palletized', 'unknown', 'untested', NULL, '£114/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'FOB pricing negotiable', 'image.png', 0),
+(42, NULL, 1, 4, 'WTB', 'Blue Glass', NULL, 2392.00, 'One-time bulk sale', 'recycled', 'unknown', NULL, '€92/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Bulk quantities available', 'image.png', 0),
+(43, NULL, 1, 4, 'WTS', 'Amber Glass', NULL, 765.00, 'Palletized', 'recycled', 'tested', NULL, '£177/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Certified recycled content', 'image.png', 0),
+(44, NULL, 1, 4, 'WTB', 'Brown Glass', NULL, 4415.00, 'Palletized', 'recycled', 'unknown', NULL, '$55/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Mixed color glass available', 'image.png', 0),
+(45, NULL, 1, 4, 'WTB', 'Brown Glass', NULL, 3799.00, 'Big bags available', 'recycled', 'tested', NULL, '$161/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'High-quality recycled glass', 'image.png', 0),
+(46, NULL, 1, 4, 'WTB', 'Clear Glass', NULL, 1502.00, 'Big bags available', 'not_recycled', 'tested', NULL, '£86/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Bulk quantities available', 'image.png', 0),
+(47, NULL, 1, 4, 'WTB', 'Other Glass', NULL, 2242.00, 'Container loads', 'not_recycled', 'tested', NULL, '$266/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Premium grade glass material', 'image.png', 0),
+(48, NULL, 1, 4, 'WTS', 'Green Glass', NULL, 1681.00, 'One-time bulk sale', 'unknown', 'unknown', NULL, '£144/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Industrial grade glass cullet', 'image.png', 0),
+(49, NULL, 1, 4, 'WTS', 'Brown Glass', NULL, 1416.00, 'Ongoing contract', 'not_recycled', 'unknown', NULL, '$185/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Bulk quantities available', 'image.png', 0),
+(50, NULL, 1, 4, 'WTS', 'Clear Glass', NULL, 2398.00, 'Ongoing contract', 'recycled', 'unknown', NULL, '€92/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Premium grade glass material', 'image.png', 0),
+(51, NULL, 1, 4, 'WTS', 'Blue Glass', NULL, 2267.00, 'Big bags available', 'not_recycled', 'unknown', NULL, '$166/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Mixed color glass available', 'image.png', 0),
+(52, NULL, 1, 4, 'WTS', 'Blue Glass', NULL, 2668.00, 'Big bags available', 'not_recycled', 'tested', NULL, '€356/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Long-term contract available', 'image.png', 0),
+(53, NULL, 1, 4, 'WTB', 'Clear Glass', NULL, 4457.00, 'Weekly deliveries available', 'not_recycled', 'tested', NULL, '$315/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Certified recycled content', 'image.png', 0),
+(54, NULL, 1, 4, 'WTB', 'Clear Glass', NULL, 4529.00, 'Palletized', 'recycled', 'unknown', NULL, '€143/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'High-quality recycled glass', 'image.png', 0),
+(55, NULL, 1, 4, 'WTB', 'Brown Glass', NULL, 1280.00, 'Spot sale available', 'unknown', 'untested', NULL, '£196/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Certified recycled content', 'image.png', 0),
+(56, NULL, 1, 4, 'WTB', 'Other Glass', NULL, 2058.00, 'Pre-sorted material', 'not_recycled', 'untested', NULL, '$333/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Long-term contract available', 'image.png', 0),
+(57, NULL, 1, 4, 'WTB', 'Other Glass', NULL, 4362.00, 'Big bags available', 'unknown', 'unknown', NULL, '€429/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Certified recycled content', 'image.png', 0),
+(58, NULL, 1, 4, 'WTB', 'Brown Glass', NULL, 2926.00, 'Weekly deliveries available', 'recycled', 'untested', NULL, '$356/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Industrial grade glass cullet', 'image.png', 0),
+(59, NULL, 1, 4, 'WTB', 'Clear Glass', NULL, 2634.00, 'Big bags available', 'not_recycled', 'tested', NULL, '€111/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Bulk quantities available', 'image.png', 0),
+(60, NULL, 1, 4, 'WTS', 'Amber Glass', NULL, 531.00, 'Ongoing contract', 'recycled', 'tested', NULL, '£85/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Long-term contract available', 'image.png', 0),
+(61, NULL, 1, 4, 'WTS', 'Amber Glass', NULL, 424.00, 'Regular monthly supply', 'unknown', 'untested', NULL, '€250/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Ready for immediate pickup', 'image.png', 0),
+(62, NULL, 1, 4, 'WTS', 'Other Glass', NULL, 3624.00, 'Pre-sorted material', 'not_recycled', 'untested', NULL, '$431/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'FOB pricing negotiable', 'image.png', 0),
+(63, NULL, 1, 4, 'WTB', 'Clear Glass', NULL, 3294.00, 'Loose bulk', 'recycled', 'unknown', NULL, '£328/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Bulk quantities available', 'image.png', 0),
+(64, NULL, 1, 4, 'WTS', 'Green Glass', NULL, 2029.00, 'One-time bulk sale', 'not_recycled', 'untested', NULL, '$349/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Certified recycled content', 'image.png', 0),
+(65, NULL, 1, 4, 'WTB', 'Amber Glass', NULL, 2591.00, 'Loose bulk', 'not_recycled', 'tested', NULL, '$320/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Ready for immediate pickup', 'image.png', 0),
+(66, NULL, 1, 4, 'WTS', 'Brown Glass', NULL, 2619.00, 'Weekly deliveries available', 'not_recycled', 'tested', NULL, '€227/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Long-term contract available', 'image.png', 0),
+(67, NULL, 1, 4, 'WTB', 'Blue Glass', NULL, 180.00, 'Spot sale available', 'not_recycled', 'untested', NULL, '€332/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Industrial grade glass cullet', 'image.png', 0),
+(68, NULL, 1, 4, 'WTS', 'Blue Glass', NULL, 4776.00, 'Container loads', 'unknown', 'tested', NULL, '€249/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Clean sorted glass', 'image.png', 0),
+(69, NULL, 1, 4, 'WTB', 'Blue Glass', NULL, 3054.00, 'Big bags available', 'unknown', 'tested', NULL, '€277/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Industrial grade glass cullet', 'image.png', 0),
+(70, NULL, 1, 4, 'WTS', 'Clear Glass', NULL, 3499.00, 'Weekly deliveries available', 'unknown', 'unknown', NULL, '$128/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'High-quality recycled glass', 'image.png', 0),
+(71, NULL, 1, 4, 'WTS', 'Brown Glass', NULL, 4191.00, 'Pre-sorted material', 'unknown', 'tested', NULL, '$413/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Mixed color glass available', 'image.png', 0),
+(72, NULL, 1, 4, 'WTS', 'Other Glass', NULL, 1317.00, 'Pre-sorted material', 'not_recycled', 'tested', NULL, '€231/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Industrial grade glass cullet', 'image.png', 0),
+(73, NULL, 1, 4, 'WTS', 'Amber Glass', NULL, 1845.00, 'One-time bulk sale', 'not_recycled', 'untested', NULL, '£329/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Certified recycled content', 'image.png', 0),
+(74, NULL, 1, 4, 'WTS', 'Brown Glass', NULL, 2280.00, 'Container loads', 'not_recycled', 'tested', NULL, '$287/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Clean sorted glass', 'image.png', 0),
+(75, NULL, 1, 4, 'WTB', 'Other Glass', NULL, 4401.00, 'Pre-sorted material', 'not_recycled', 'tested', NULL, '$442/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Premium grade glass material', 'image.png', 0),
+(76, NULL, 1, 4, 'WTS', 'Clear Glass', NULL, 1159.00, 'Palletized', 'not_recycled', 'unknown', NULL, '$238/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'FOB pricing negotiable', 'image.png', 0),
+(77, NULL, 1, 4, 'WTB', 'Amber Glass', NULL, 4808.00, 'Pre-sorted material', 'not_recycled', 'tested', NULL, '$307/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'High-quality recycled glass', 'image.png', 0),
+(78, NULL, 1, 4, 'WTS', 'Clear Glass', NULL, 4600.00, 'Pre-sorted material', 'recycled', 'tested', NULL, '€276/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Certified recycled content', 'image.png', 0),
+(79, NULL, 1, 4, 'WTB', 'Amber Glass', NULL, 1938.00, 'Regular monthly supply', 'not_recycled', 'untested', NULL, '$474/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Premium grade glass material', 'image.png', 0),
+(80, NULL, 1, 4, 'WTS', 'Other Glass', NULL, 2853.00, 'Ongoing contract', 'unknown', 'tested', NULL, '$142/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Ready for immediate pickup', 'image.png', 0),
+(81, NULL, 1, 4, 'WTB', 'Amber Glass', NULL, 2909.00, 'Regular monthly supply', 'unknown', 'tested', NULL, '£76/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Certified recycled content', 'image.png', 0),
+(82, NULL, 1, 4, 'WTS', 'Clear Glass', NULL, 4401.00, 'Container loads', 'not_recycled', 'untested', NULL, '€60/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Long-term contract available', 'image.png', 0),
+(83, NULL, 1, 4, 'WTB', 'Brown Glass', NULL, 2138.00, 'Spot sale available', 'unknown', 'unknown', NULL, '£138/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Certified recycled content', 'image.png', 0),
+(84, NULL, 1, 4, 'WTB', 'Other Glass', NULL, 35.00, 'Container loads', 'unknown', 'tested', NULL, '$335/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'FOB pricing negotiable', 'image.png', 0),
+(85, NULL, 1, 4, 'WTS', 'Other Glass', NULL, 4804.00, 'Regular monthly supply', 'recycled', 'untested', NULL, '€229/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'High-quality recycled glass', 'image.png', 0),
+(86, NULL, 1, 4, 'WTB', 'Brown Glass', NULL, 4824.00, 'Container loads', 'unknown', 'unknown', NULL, '£477/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Mixed color glass available', 'image.png', 0),
+(87, NULL, 1, 4, 'WTB', 'Blue Glass', NULL, 713.00, 'Weekly deliveries available', 'unknown', 'unknown', NULL, '£363/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Bulk quantities available', 'image.png', 0),
+(88, NULL, 1, 4, 'WTB', 'Amber Glass', NULL, 944.00, 'Regular monthly supply', 'not_recycled', 'tested', NULL, '£457/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Certified recycled content', 'image.png', 0),
+(89, NULL, 1, 4, 'WTB', 'Green Glass', NULL, 2100.00, 'Pre-sorted material', 'unknown', 'untested', NULL, '$288/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Industrial grade glass cullet', 'image.png', 0),
+(90, NULL, 1, 4, 'WTB', 'Clear Glass', NULL, 345.00, 'Weekly deliveries available', 'recycled', 'unknown', NULL, '$364/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Certified recycled content', 'image.png', 0),
+(91, NULL, 1, 4, 'WTB', 'Brown Glass', NULL, 1192.00, 'Spot sale available', 'recycled', 'unknown', NULL, '£73/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Industrial grade glass cullet', 'image.png', 0),
+(92, NULL, 1, 4, 'WTS', 'Green Glass', NULL, 1101.00, 'Spot sale available', 'recycled', 'unknown', NULL, '$467/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Premium grade glass material', 'image.png', 0),
+(93, NULL, 1, 4, 'WTB', 'Amber Glass', NULL, 2624.00, 'One-time bulk sale', 'unknown', 'untested', NULL, '€225/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Industrial grade glass cullet', 'image.png', 0),
+(94, NULL, 1, 4, 'WTS', 'Amber Glass', NULL, 1771.00, 'One-time bulk sale', 'unknown', 'tested', NULL, '£450/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Bulk quantities available', 'image.png', 0),
+(95, NULL, 1, 4, 'WTB', 'Amber Glass', NULL, 47.00, 'Pre-sorted material', 'unknown', 'untested', NULL, '£159/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Clean sorted glass', 'image.png', 0),
+(96, NULL, 1, 4, 'WTB', 'Brown Glass', NULL, 1816.00, 'Loose bulk', 'recycled', 'untested', NULL, '€433/ton', 'EUR', '2025-11-05 10:09:15', '2026-02-03', 1, 'Long-term contract available', 'image.png', 0),
+(97, NULL, 1, 4, 'WTS', 'Clear Glass', NULL, 1853.00, 'Ongoing contract', 'not_recycled', 'untested', NULL, '$416/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Industrial grade glass cullet', 'image.png', 0),
+(98, NULL, 1, 4, 'WTB', 'Green Glass', NULL, 1533.00, 'One-time bulk sale', 'not_recycled', 'unknown', NULL, '£427/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Certified recycled content', 'image.png', 0),
+(99, NULL, 1, 4, 'WTS', 'Brown Glass', NULL, 4403.00, 'Ongoing contract', 'recycled', 'unknown', NULL, '£330/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'High-quality recycled glass', 'image.png', 0),
+(100, NULL, 1, 4, 'WTS', 'Green Glass', NULL, 1276.00, 'Big bags available', 'recycled', 'untested', NULL, '$118/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Premium grade glass material', 'image.png', 0),
+(101, NULL, NULL, 65, 'WTS', 'Green', NULL, 120.00, 'Premium Green Bottle Glass Cullet – Clean and Ready for Melt!', 'recycled', 'tested', '', '€145/ton', 'EUR', '2025-11-05 11:05:09', NULL, 1, 'Clean green bottle glass cullet sourced from post-consumer recycling. Material is fully washed, magnetically separated, and screened to 10–50 mm particle size. Contamination level below 1%. Suitable for container glass production.', 'uploads/listings/listing_1762340709_690b2f6569f6e.jpg', 0);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `listing_images`
+--
+
+CREATE TABLE `listing_images` (
+  `id` bigint(20) NOT NULL,
+  `listing_id` bigint(20) NOT NULL,
+  `image_path` varchar(255) NOT NULL,
+  `is_main` tinyint(1) DEFAULT 0,
+  `display_order` int(11) DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `listing_images`
+--
+
+INSERT INTO `listing_images` (`id`, `listing_id`, `image_path`, `is_main`, `display_order`, `created_at`) VALUES
+(1, 101, 'uploads/listings/listing_1762340709_690b2f6569f6e.jpg', 1, 0, '2025-11-05 12:13:13');
 
 -- --------------------------------------------------------
 
@@ -882,6 +906,19 @@ INSERT INTO `recycled_statuses` (`status`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `saved_listings`
+--
+
+CREATE TABLE `saved_listings` (
+  `id` bigint(20) NOT NULL,
+  `user_id` bigint(20) NOT NULL,
+  `listing_id` bigint(20) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `subscriptions`
 --
 
@@ -1028,7 +1065,7 @@ INSERT INTO `users` (`id`, `company_id`, `created_by`, `email`, `avatar`, `email
 (62, 50, NULL, 'trial49@trial.test', NULL, NULL, '$2y$12$XJxjvj/XoUFtaFWhR7JgFuf7JmfgpSSEH9Ii7e6RpF0pmCAfvyfG6', NULL, 'Trial User 49', NULL, NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-11-05 10:09:35', NULL, 1, 1, 0, 0, 0),
 (63, 51, NULL, 'trial50@trial.test', NULL, NULL, '$2y$12$D1gP.NMwUBNAblRnWG/51OPTzma7O4qnZKv5gAcgjG86WA0CvQeoK', NULL, 'Trial User 50', NULL, NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-11-05 10:09:36', NULL, 1, 1, 0, 0, 0),
 (64, NULL, NULL, 'jarrin@dmg.nu', NULL, '2025-11-05 10:25:39', '$2y$10$qBsoQVo5NG2JL6W2V1rNpe06EwLaAR/3WucJrlZshy.Q1lFd09h8C', NULL, 'Zeker', 'Je moeder', NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-11-05 10:25:39', NULL, 1, 1, 0, 0, 0),
-(65, NULL, NULL, 'testjarrin@gmail.com', NULL, '2025-11-05 10:27:20', '$2y$10$Fhg/SeqyYBavJ7aTtmYC2eY0gQyFg1l0Qs.n2y2dJkYjL4jU2Wfpq', NULL, 'Zeker', 'Je moeder', NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-11-05 10:27:20', NULL, 1, 1, 0, 0, 0);
+(65, NULL, NULL, 'testjarrin@gmail.com', NULL, '2025-11-05 10:27:20', '$2y$10$BHuXPgqXXYExKh.SyOspKeaY/xOQ0hYp5tnDF6ztQqJc433Kd5gKK', NULL, 'Zeker!', 'Je moeder', NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-11-05 10:27:20', '2025-11-05 13:07:27', 1, 1, 0, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -1214,8 +1251,17 @@ ALTER TABLE `listings`
   ADD KEY `side` (`side`),
   ADD KEY `recycled` (`recycled`),
   ADD KEY `tested` (`tested`),
-  ADD KEY `currency` (`currency`);
+  ADD KEY `currency` (`currency`),
+  ADD KEY `idx_listings_user` (`user_id`);
 ALTER TABLE `listings` ADD FULLTEXT KEY `ft_search` (`glass_type`,`glass_type_other`,`storage_location`,`price_text`,`quality_notes`);
+
+--
+-- Indexes for table `listing_images`
+--
+ALTER TABLE `listing_images`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_listing_id` (`listing_id`),
+  ADD KEY `idx_is_main` (`is_main`);
 
 --
 -- Indexes for table `listing_sides`
@@ -1301,6 +1347,15 @@ ALTER TABLE `recycled_statuses`
   ADD PRIMARY KEY (`status`);
 
 --
+-- Indexes for table `saved_listings`
+--
+ALTER TABLE `saved_listings`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_user_listing` (`user_id`,`listing_id`),
+  ADD KEY `idx_user_id` (`user_id`),
+  ADD KEY `idx_listing_id` (`listing_id`);
+
+--
 -- Indexes for table `subscriptions`
 --
 ALTER TABLE `subscriptions`
@@ -1373,7 +1428,13 @@ ALTER TABLE `contracts`
 -- AUTO_INCREMENT for table `listings`
 --
 ALTER TABLE `listings`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=101;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=102;
+
+--
+-- AUTO_INCREMENT for table `listing_images`
+--
+ALTER TABLE `listing_images`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `locations`
@@ -1428,6 +1489,12 @@ ALTER TABLE `payment_errors`
 --
 ALTER TABLE `push_notifications`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `saved_listings`
+--
+ALTER TABLE `saved_listings`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `subscriptions`
@@ -1489,12 +1556,19 @@ ALTER TABLE `contracts`
 -- Constraints for table `listings`
 --
 ALTER TABLE `listings`
+  ADD CONSTRAINT `fk_listings_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `listings_ibfk_1` FOREIGN KEY (`location_id`) REFERENCES `locations` (`id`),
   ADD CONSTRAINT `listings_ibfk_2` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`),
   ADD CONSTRAINT `listings_ibfk_3` FOREIGN KEY (`side`) REFERENCES `listing_sides` (`side`),
   ADD CONSTRAINT `listings_ibfk_4` FOREIGN KEY (`recycled`) REFERENCES `recycled_statuses` (`status`),
   ADD CONSTRAINT `listings_ibfk_5` FOREIGN KEY (`tested`) REFERENCES `tested_statuses` (`status`),
   ADD CONSTRAINT `listings_ibfk_6` FOREIGN KEY (`currency`) REFERENCES `currency_iso` (`currency`);
+
+--
+-- Constraints for table `listing_images`
+--
+ALTER TABLE `listing_images`
+  ADD CONSTRAINT `listing_images_ibfk_1` FOREIGN KEY (`listing_id`) REFERENCES `listings` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `locations`
@@ -1531,6 +1605,13 @@ ALTER TABLE `page_sections`
 --
 ALTER TABLE `payment_errors`
   ADD CONSTRAINT `payment_errors_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `saved_listings`
+--
+ALTER TABLE `saved_listings`
+  ADD CONSTRAINT `fk_saved_listing` FOREIGN KEY (`listing_id`) REFERENCES `listings` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_saved_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `subscriptions`
