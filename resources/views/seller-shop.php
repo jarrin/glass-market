@@ -768,6 +768,65 @@
         </div>
     </section>
     
+    <!-- Tab Navigation -->
+    <div class="tab-navigation">
+        <div class="tab-nav">
+            <button class="tab-btn active" onclick="switchTab('about')">About</button>
+            <button class="tab-btn" onclick="switchTab('products')">Products (<?php echo count($listings); ?>)</button>
+        </div>
+
+        <!-- About Tab -->
+        <div id="tab-about" class="tab-content active">
+            <section class="products-section">
+                <div class="section-header">
+                    <h2 class="section-title">About <?php echo htmlspecialchars($seller['name'], ENT_QUOTES, 'UTF-8'); ?></h2>
+                </div>
+                
+                <div style="background: white; border-radius: 20px; padding: 40px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);">
+                    <?php if (!empty($seller['description'])): ?>
+                        <h3 style="font-size: 20px; font-weight: 700; color: #1f2937; margin: 0 0 16px;">Company Description</h3>
+                        <p style="font-size: 16px; line-height: 1.7; color: #4b5563; margin-bottom: 32px;">
+                            <?php echo nl2br(htmlspecialchars($seller['description'], ENT_QUOTES, 'UTF-8')); ?>
+                        </p>
+                    <?php endif; ?>
+
+                    <h3 style="font-size: 20px; font-weight: 700; color: #1f2937; margin: 0 0 16px;">Company Information</h3>
+                    <div style="display: grid; gap: 16px;">
+                        <div style="padding: 16px; background: #f9fafb; border-radius: 12px;">
+                            <strong style="color: #6b7280; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Company Type</strong>
+                            <p style="color: #1f2937; font-size: 16px; margin: 4px 0 0; font-weight: 600;"><?php echo htmlspecialchars($specialty, ENT_QUOTES, 'UTF-8'); ?></p>
+                        </div>
+                        <div style="padding: 16px; background: #f9fafb; border-radius: 12px;">
+                            <strong style="color: #6b7280; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Location</strong>
+                            <p style="color: #1f2937; font-size: 16px; margin: 4px 0 0; font-weight: 600;"><?php echo htmlspecialchars($location, ENT_QUOTES, 'UTF-8'); ?></p>
+                        </div>
+                        <?php if (!empty($seller['phone'])): ?>
+                        <div style="padding: 16px; background: #f9fafb; border-radius: 12px;">
+                            <strong style="color: #6b7280; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Phone</strong>
+                            <p style="color: #1f2937; font-size: 16px; margin: 4px 0 0; font-weight: 600;">
+                                <a href="tel:<?php echo htmlspecialchars($seller['phone'], ENT_QUOTES, 'UTF-8'); ?>" style="color: #667eea; text-decoration: none;">
+                                    <?php echo htmlspecialchars($seller['phone'], ENT_QUOTES, 'UTF-8'); ?>
+                                </a>
+                            </p>
+                        </div>
+                        <?php endif; ?>
+                        <?php if (!empty($seller['website'])): ?>
+                        <div style="padding: 16px; background: #f9fafb; border-radius: 12px;">
+                            <strong style="color: #6b7280; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Website</strong>
+                            <p style="color: #1f2937; font-size: 16px; margin: 4px 0 0; font-weight: 600;">
+                                <a href="<?php echo htmlspecialchars($seller['website'], ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer" style="color: #667eea; text-decoration: none;">
+                                    Visit Website →
+                                </a>
+                            </p>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Products Tab -->
+        <div id="tab-products" class="tab-content">
     <!-- Products Section -->
     <section class="products-section">
         <div class="section-header">
@@ -870,6 +929,8 @@
         </div>
         <?php endif; ?>
     </section>
+        </div><!-- End Products Tab -->
+    </div><!-- End Tab Navigation -->
     
     <?php include __DIR__ . '/../../includes/footer.php'; ?>
     
@@ -905,6 +966,25 @@
                 productCount.textContent = visibleCards.length + ' listing' + (visibleCards.length !== 1 ? 's' : '');
             });
         });
+        
+        // Tab switching functionality
+        function switchTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById('tab-' + tabName).classList.add('active');
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+        }
         
         // Contact seller functionality
         function contactSeller() {
