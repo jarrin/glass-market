@@ -44,7 +44,11 @@ $total_pages = ceil($total_company_listings / $per_page);
 
 <div class="tab-panel" id="tab-company">
     <h2 class="section-title">Company Information</h2>
-    
+
+    <?php if (!$subscription_status['has_access']): ?>
+        <?php include __DIR__ . '/../components/subscription-required-message.php'; ?>
+    <?php else: ?>
+
     <?php if ($company): ?>
         <!-- Company exists - show overview -->
         <div style="background: white; padding: 32px; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 32px;">
@@ -189,5 +193,7 @@ $total_pages = ceil($total_company_listings / $per_page);
                 Create Company
             </a>
         </div>
-    <?php endif; ?>
+    <?php endif; // End company check ?>
+
+    <?php endif; // End subscription check ?>
 </div>
