@@ -489,6 +489,7 @@
                     c.id,
                     c.name,
                     c.company_type,
+                    c.description,
                     c.phone,
                     c.website,
                     c.owner_user_id,
@@ -581,6 +582,12 @@
                 <h1 class="seller-name-large"><?php echo htmlspecialchars($seller['name'], ENT_QUOTES, 'UTF-8'); ?></h1>
                 
                 <span class="seller-specialty-large"><?php echo htmlspecialchars($specialty, ENT_QUOTES, 'UTF-8'); ?></span>
+                
+                <?php if (!empty($seller['description'])): ?>
+                <p class="seller-description">
+                    <?php echo nl2br(htmlspecialchars($seller['description'], ENT_QUOTES, 'UTF-8')); ?>
+                </p>
+                <?php endif; ?>
                 
                 <div class="seller-location-large">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
