@@ -167,8 +167,8 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
         /* Product Container */
         .product-container {
             max-width: 1280px;
-            margin: 0 auto 80px;
-            padding: 0 20px;
+            margin: 0 auto 120px;
+            padding: 0 20px 60px;
         }
 
         .product-layout {
@@ -180,8 +180,6 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
 
         /* Image Gallery */
         .image-gallery {
-            position: sticky;
-            top: 100px;
             height: fit-content;
         }
 
@@ -499,7 +497,7 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
 
         /* Related Products */
         .related-section {
-            padding-top: 40px;
+            padding: 40px 0 60px 0;
             border-top: 2px solid #e8e3dd;
         }
 
@@ -586,7 +584,7 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
     </style>
 </head>
 <body>
-
+    <main>
     <?php include __DIR__ . '/../../includes/navbar.php'; ?>
     <?php include __DIR__ . '/../../includes/subscription-notification.php'; ?>
 
@@ -843,9 +841,9 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
         <?php endif; ?>
     </div>
-
-    <?php include __DIR__ . '/../../includes/footer.php'; ?>
-
+    
+  </main>
+  <?php include __DIR__ . '/../../includes/footer.php'; ?>
     <script>
         function changeImage(src, element) {
             const mainImage = document.querySelector('#mainImage img');

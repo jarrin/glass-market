@@ -304,25 +304,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_publish'])) {
             const tabButtons = document.querySelectorAll('.tab-button');
             const tabPanels = document.querySelectorAll('.tab-panel');
 
+            // Check for tab parameter in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const tabParam = urlParams.get('tab');
+            
+            // Function to switch tabs
+            function switchToTab(targetTab) {
+                // Remove active class from all buttons and panels
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                tabPanels.forEach(panel => panel.classList.remove('active'));
+
+                // Add active class to target button and panel
+                const targetButton = document.querySelector(`[data-tab="${targetTab}"]`);
+                const targetPanel = document.getElementById('tab-' + targetTab);
+                
+                if (targetButton && targetPanel) {
+                    targetButton.classList.add('active');
+                    targetPanel.classList.add('active');
+                    targetPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }
+
+            // If tab parameter exists in URL, switch to that tab
+            if (tabParam) {
+                switchToTab(tabParam);
+            }
+
             tabButtons.forEach(button => {
                 button.addEventListener('click', function(e) {
                     e.preventDefault();
                     const targetTab = button.getAttribute('data-tab');
-
-                    // Remove active class from all buttons and panels
-                    tabButtons.forEach(btn => btn.classList.remove('active'));
-                    tabPanels.forEach(panel => panel.classList.remove('active'));
-
-                    // Add active class to clicked button and corresponding panel
-                    button.classList.add('active');
-                    const targetPanel = document.getElementById('tab-' + targetTab);
-                    if (targetPanel) {
-                        targetPanel.classList.add('active');
-                        console.log('Successfully switched to tab:', targetTab);
-                        
-                        // Scroll to top of content
-                        targetPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                    }
+                    switchToTab(targetTab);
                 });
             });
         });
