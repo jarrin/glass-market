@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 05, 2025 at 05:57 PM
+-- Generation Time: Nov 05, 2025 at 07:21 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -441,15 +441,25 @@ CREATE TABLE `mollie_payments` (
 --
 
 INSERT INTO `mollie_payments` (`id`, `user_id`, `payment_id`, `amount`, `status`, `months`, `created_at`, `updated_at`, `paid_at`) VALUES
-(1, 10, 'tr_Uw2jPryC4LCoRCeP82LGJ', 9.99, 'open', 1, '2025-10-31 09:09:16', NULL, NULL),
-(2, 10, 'tr_8gyXjjsWQ3Zhn2XaC2LGJ', 9.99, 'open', 1, '2025-10-31 09:10:00', NULL, NULL),
+(1, 10, 'tr_Uw2jPryC4LCoRCeP82LGJ', 9.99, 'expired', 1, '2025-10-31 09:09:16', '2025-11-05 18:11:47', NULL),
+(2, 10, 'tr_8gyXjjsWQ3Zhn2XaC2LGJ', 9.99, 'expired', 1, '2025-10-31 09:10:00', '2025-11-05 18:11:47', NULL),
 (3, 10, 'tr_L2Fa4kHzTS6UtpynC2LGJ', 9.99, 'paid', 1, '2025-10-31 09:10:02', '2025-10-31 09:22:15', '2025-10-31 09:22:15'),
 (4, 11, 'tr_HoaNUqcvAgr6cSzER5LGJ', 9.99, 'paid', 1, '2025-10-31 09:41:27', '2025-10-31 09:42:51', '2025-10-31 09:42:51'),
-(5, 10, 'tr_HwHjPAt8YXQsH2AotGUGJ', 9.99, 'open', 1, '2025-11-03 13:42:41', NULL, NULL),
-(6, 65, 'tr_T2ywwKTcf2zjjpMtM7ZGJ', 9.99, 'open', 1, '2025-11-05 10:30:24', NULL, NULL),
-(7, 65, 'tr_eBrACDSnBdv6eUUBN7ZGJ', 9.99, 'open', 1, '2025-11-05 10:30:26', NULL, NULL),
+(5, 10, 'tr_HwHjPAt8YXQsH2AotGUGJ', 9.99, 'expired', 1, '2025-11-03 13:42:41', '2025-11-05 18:11:47', NULL),
+(6, 65, 'tr_T2ywwKTcf2zjjpMtM7ZGJ', 9.99, 'expired', 1, '2025-11-05 10:30:24', '2025-11-05 18:11:47', NULL),
+(7, 65, 'tr_eBrACDSnBdv6eUUBN7ZGJ', 9.99, 'expired', 1, '2025-11-05 10:30:26', '2025-11-05 18:11:47', NULL),
 (8, 65, 'tr_KjrgAk34uZHJGHsYN7ZGJ', 9.99, 'paid', 1, '2025-11-05 10:30:31', '2025-11-05 10:32:15', '2025-11-05 10:32:15'),
-(9, 65, 'tr_crMErBgHvFpRcrW9a7ZGJ', 9.99, 'open', 1, '2025-11-05 10:32:29', NULL, NULL);
+(9, 65, 'tr_crMErBgHvFpRcrW9a7ZGJ', 9.99, 'expired', 1, '2025-11-05 10:32:29', '2025-11-05 18:11:48', NULL),
+(10, 66, 'tr_hoyBk3cxidMtHMwoQpZGJ', 9.99, 'paid', 1, '2025-11-05 17:10:54', '2025-11-05 17:13:50', '2025-11-05 17:13:50'),
+(11, 66, 'tr_NGzGnZCLUpDYyw9YmsZGJ', 9.99, 'expired', 1, '2025-11-05 17:43:43', '2025-11-05 18:11:48', NULL),
+(12, 66, 'tr_kDTjK2KWJ7gEZ6BmmsZGJ', 9.99, 'expired', 1, '2025-11-05 17:43:44', '2025-11-05 18:11:48', NULL),
+(13, 66, 'tr_L77dWvmAYtKPFEssmsZGJ', 9.99, 'expired', 1, '2025-11-05 17:43:46', '2025-11-05 18:11:48', NULL),
+(14, 66, 'tr_iXEn9wyhoW9xguzVStZGJ', 9.99, 'expired', 1, '2025-11-05 17:50:13', '2025-11-05 18:11:48', NULL),
+(15, 66, 'tr_aFKy3yktHgCGN6JcAuZGJ', 9.99, 'open', 1, '2025-11-05 17:57:14', '2025-11-05 18:11:49', NULL),
+(16, 66, 'tr_f2BTwMJcVjgw9LqQnuZGJ', 9.99, 'open', 1, '2025-11-05 18:03:23', '2025-11-05 18:11:49', NULL),
+(17, 4, 'tr_xW3RZ6npL9RdtpbMvuZGJ', 9.99, 'open', 1, '2025-11-05 18:04:44', '2025-11-05 18:11:49', NULL),
+(18, 4, 'tr_tMAbKJmS2GhCR5oaHvZGJ', 9.99, 'open', 1, '2025-11-05 18:08:11', '2025-11-05 18:11:49', NULL),
+(19, 66, 'tr_UmqCtKHHYe9snvcCXvZGJ', 9.99, 'open', 1, '2025-11-05 18:10:32', '2025-11-05 18:11:50', NULL);
 
 -- --------------------------------------------------------
 
@@ -1199,7 +1209,7 @@ INSERT INTO `user_subscriptions` (`id`, `user_id`, `start_date`, `end_date`, `is
 (60, 63, '2025-11-05', '2025-11-19', 1, 1, '2025-11-05 10:09:36', NULL),
 (61, 64, '2025-11-05', '2026-02-05', 1, 1, '2025-11-05 10:25:39', NULL),
 (62, 65, '2025-11-05', '2026-03-05', 0, 1, '2025-11-05 10:27:20', '2025-11-05 10:32:15'),
-(63, 66, '2025-11-05', '2026-02-05', 1, 1, '2025-11-05 13:45:04', NULL);
+(64, 66, '2025-11-05', '2026-02-05', 1, 1, '2025-11-05 17:13:50', '2025-11-05 18:12:30');
 
 -- --------------------------------------------------------
 
@@ -1470,7 +1480,7 @@ ALTER TABLE `maintenance_events`
 -- AUTO_INCREMENT for table `mollie_payments`
 --
 ALTER TABLE `mollie_payments`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `pages`
@@ -1536,7 +1546,7 @@ ALTER TABLE `user_emails`
 -- AUTO_INCREMENT for table `user_subscriptions`
 --
 ALTER TABLE `user_subscriptions`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=65;
 
 --
 -- Constraints for dumped tables
