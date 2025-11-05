@@ -491,11 +491,14 @@
                     c.company_type,
                     c.phone,
                     c.website,
+                    c.user_id,
+                    u.email as seller_email,
                     COUNT(l.id) as listing_count
                 FROM companies c
+                LEFT JOIN users u ON c.user_id = u.id
                 LEFT JOIN listings l ON c.id = l.company_id AND l.published = 1
                 WHERE c.id = ?
-                GROUP BY c.id, c.name, c.company_type, c.phone, c.website
+                GROUP BY c.id, c.name, c.company_type, c.phone, c.website, c.user_id, u.email
             ");
             $stmt->execute([$sellerId]);
             $seller = $stmt->fetch();
@@ -641,7 +644,7 @@
                         </div>
                     </div>
                     
-                    <button class="contact-btn" onclick="alert('Contact functionality coming soon!')">
+                    <button class="contact-btn" onclick="contactSeller()">
                         Send Message
                     </button>
                 </div>
@@ -786,6 +789,19 @@
                 productCount.textContent = visibleCards.length + ' listing' + (visibleCards.length !== 1 ? 's' : '');
             });
         });
+        
+        // Contact seller functionality
+        function contactSeller() {
+            <?php if (!empty($seller['seller_email'])): ?>
+                const sellerName = <?php echo json_encode($seller['name']); ?>;
+                const subject = encodeURIComponent('Inquiry about: ' + sellerName);
+                const body = encodeURIComponent('Hello,\n\nI am interested in your company listings on Glass Market.\n\nCompany: ' + sellerName + '\n\nShop URL: ' + window.location.href + '\n\nThank you.');
+                
+                window.location.href = 'mailto:<?= htmlspecialchars($seller['seller_email']) ?>?subject=' + subject + '&body=' + body;
+            <?php else: ?>
+                alert('Contact information for this seller is not available.');
+            <?php endif; ?>
+        }
     </script>
 </body>
 </html>
