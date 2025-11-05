@@ -666,24 +666,24 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
                 <div class="features-grid">
                     <div class="feature-item">
                         <svg class="feature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                         </svg>
-                        <div class="feature-title">Free Shipping</div>
-                        <div class="feature-desc">3-5 business days</div>
+                        <div class="feature-title">Company Verified</div>
+                        <div class="feature-desc">Trusted seller</div>
                     </div>
                     <div class="feature-item">
                         <svg class="feature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
                         </svg>
-                        <div class="feature-title">Buyer Protection</div>
-                        <div class="feature-desc">Secure payment</div>
+                        <div class="feature-title">Quality Tested</div>
+                        <div class="feature-desc">Certified glass</div>
                     </div>
                     <div class="feature-item">
                         <svg class="feature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                         </svg>
-                        <div class="feature-title">Easy Returns</div>
-                        <div class="feature-desc">30-day policy</div>
+                        <div class="feature-title">Fast Response</div>
+                        <div class="feature-desc">Quick communication</div>
                     </div>
                 </div>
 
@@ -692,8 +692,7 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
                     <ul class="tab-list">
                         <li><button class="tab-button active" onclick="showTab('description')">Description</button></li>
                         <li><button class="tab-button" onclick="showTab('specifications')">Specifications</button></li>
-                        <li><button class="tab-button" onclick="showTab('shipping')">Shipping</button></li>
-                        <li><button class="tab-button" onclick="showTab('reviews')">Reviews (<?= $reviewCount ?>)</button></li>
+                        <li><button class="tab-button" onclick="showTab('seller')">About Seller</button></li>
                     </ul>
                 </div>
 
@@ -745,22 +744,29 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
                     </table>
                 </div>
 
-                <div class="tab-content" id="shipping-tab">
+                <div class="tab-content" id="seller-tab">
                     <div class="description-text">
-                        <h3 style="margin-top:0">Shipping Information</h3>
-                        <p><strong>Processing Time:</strong> 1-2 business days</p>
-                        <p><strong>Shipping Time:</strong> 3-5 business days</p>
-                        <p><strong>Free Shipping:</strong> On orders over $100</p>
-                        <p><strong>International Shipping:</strong> Available to select countries</p>
+                        <h3 style="margin-top:0">About <?= htmlspecialchars($listing['company_name']) ?></h3>
+                        <p><strong>Company Type:</strong> <?= htmlspecialchars($listing['company_type']) ?></p>
                         
-                        <h3>Return Policy</h3>
-                        <p>We offer a 30-day return policy for all items. Items must be returned in original condition with all packaging materials. Contact seller for return authorization.</p>
-                    </div>
-                </div>
-
-                <div class="tab-content" id="reviews-tab">
-                    <div class="description-text">
-                        <p style="color: #6b6460; font-style: italic;">Customer reviews and ratings will be displayed here. This feature is coming soon!</p>
+                        <?php if (!empty($listing['phone'])): ?>
+                        <p><strong>Phone:</strong> <?= htmlspecialchars($listing['phone']) ?></p>
+                        <?php endif; ?>
+                        
+                        <?php if (!empty($listing['website'])): ?>
+                        <p><strong>Website:</strong> <a href="<?= htmlspecialchars($listing['website']) ?>" target="_blank" style="color: #2f6df5;"><?= htmlspecialchars($listing['website']) ?></a></p>
+                        <?php endif; ?>
+                        
+                        <p style="margin-top: 24px;">
+                            <?= htmlspecialchars($listing['company_name']) ?> is a professional glass supplier specializing in quality glass materials. 
+                            We maintain high standards for all our products and ensure timely delivery to our customers.
+                        </p>
+                        
+                        <p style="margin-top: 16px;">
+                            <a href="seller-shop.php?company_id=<?= $listing['company_id'] ?>" style="display: inline-block; padding: 12px 24px; background: #2f6df5; color: white; text-decoration: none; border-radius: 8px; font-weight: 600;">
+                                View All Products from This Seller
+                            </a>
+                        </p>
                     </div>
                 </div>
             </div>
