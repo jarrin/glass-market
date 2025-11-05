@@ -192,6 +192,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_listing'])) {
                 $pdo->rollBack();
             }
             $error_message = 'Failed to create listing: ' . $e->getMessage();
+            error_log('Listing creation error: ' . $e->getMessage());
+        } catch (Exception $e) {
+            if (isset($pdo)) {
+                $pdo->rollBack();
+            }
+            $error_message = 'Error: ' . $e->getMessage();
+            error_log('Listing creation exception: ' . $e->getMessage());
         }
     }
 }
