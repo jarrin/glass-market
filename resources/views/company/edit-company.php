@@ -78,8 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_company'])) {
                     postal_code = :postal_code,
                     country = :country,
                     phone = :phone,
-                    website = :website,
-                    updated_at = NOW()
+                    website = :website
                 WHERE owner_user_id = :owner_user_id
             ');
             
