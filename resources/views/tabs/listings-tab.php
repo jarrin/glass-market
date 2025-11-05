@@ -29,6 +29,10 @@ try {
 ?>
 <div class="tab-panel" id="tab-listings">
     <h2 class="section-title">My Listings</h2>
+
+    <?php if (!$subscription_status['has_access']): ?>
+        <?php include __DIR__ . '/../components/subscription-required-message.php'; ?>
+    <?php else: ?>
     
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
         <p style="margin: 0; font-size: 14px; color: #6b7280;">
@@ -173,5 +177,7 @@ try {
                 ➕ Create Your First Listing
             </a>
         </div>
-    <?php endif; ?>
+    <?php endif; // End subscription check ?>
+
+    <?php endif; // End foreach listings ?>
 </div>
