@@ -142,12 +142,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <p>Best regards,<br>Glass Market Team</p>
                     ';
                     
-                    $emailResult = $rustMailer->sendEmail(
+                    $emailResult = $rustMailer->send(
                         $notification_email,
-                        $name,
                         'Glass Market - Registration Pending Approval',
                         $emailBody,
-                        true
+                        true,
+                        $name
                     );
                     
                     if ($emailResult['success']) {
