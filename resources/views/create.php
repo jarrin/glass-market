@@ -134,6 +134,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_listing'])) {
             
             $listing_id = $pdo->lastInsertId();
             
+            error_log("Created listing ID: " . $listing_id . " for user_id: " . $user_id . " with company_id: " . ($company_id ?? 'NULL'));
+            
             // Handle multiple image uploads
             if (isset($_FILES['product_images']) && !empty($_FILES['product_images']['name'][0])) {
                 $upload_dir = __DIR__ . '/../../public/uploads/listings/';
