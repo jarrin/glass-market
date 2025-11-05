@@ -819,6 +819,23 @@ try {
             transform: translateY(0);
         }
 
+        @media (max-width: 768px) {
+            .images-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            #bulk-actions {
+                width: 100%;
+                justify-content: stretch;
+            }
+
+            .btn-bulk {
+                flex: 1;
+                justify-content: center;
+            }
+        }
+
         .images-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
