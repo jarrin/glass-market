@@ -1269,129 +1269,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_listing'])) {
                             <div>
                                 <h3 style="margin: 0 0 8px 0; font-size: 20px; font-weight: 700;">Product Images</h3>
                                 <p style="margin: 0; color: var(--profile-muted); font-size: 14px;">
-                                    <span id="image-count-text"><?php echo count($listing_images); ?> of 20 images</span>
-                                    <span id="selection-count" style="display: none; color: var(--profile-primary); font-weight: 600;"></span>
+                                    Upload up to 20 images for your listing
                                 </p>
                             </div>
-                            <div id="bulk-actions" style="display: none; gap: 8px;">
-                                <button type="button" class="btn-bulk" onclick="selectAll()" style="background: var(--profile-primary);">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M9 11l3 3L22 4"/>
-                                        <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
-                                    </svg>
-                                    Select All
-                                </button>
-                                <button type="button" class="btn-bulk" onclick="bulkDelete()" style="background: #ef4444;">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
-                                    </svg>
-                                    Delete Selected
-                                </button>
-                                <button type="button" class="btn-bulk" onclick="deselectAll()" style="background: #6b7280;">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M6 18L18 6M6 6l12 12"/>
-                                    </svg>
-                                    Cancel
-                                </button>
-                            </div>
                         </div>
-
-                        <!-- Selection Hint -->
-                        <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 12px 16px; border-radius: 8px; margin-bottom: 24px; font-size: 13px; color: #1e40af;">
-                            💡 <strong>Quick tips:</strong> Click on any image to select it, or use checkboxes. 
-                            Press <kbd style="background: white; padding: 2px 6px; border-radius: 4px; border: 1px solid #cbd5e1;">Ctrl+A</kbd> to select all, 
-                            <kbd style="background: white; padding: 2px 6px; border-radius: 4px; border: 1px solid #cbd5e1;">Delete</kbd> to remove selected, 
-                            <kbd style="background: white; padding: 2px 6px; border-radius: 4px; border: 1px solid #cbd5e1;">Esc</kbd> to deselect.
-                        </div>
-
-                        <!-- Current Images -->
-                        <?php if (!empty($listing_images)): ?>
-                            <div class="images-grid">
-                                <?php foreach ($listing_images as $img): ?>
-                                    <div class="image-card <?php echo $img['is_main'] ? 'is-main' : ''; ?>" data-image-id="<?php echo $img['id']; ?>">
-                                        <div class="image-card-checkbox">
-                                            <input type="checkbox" class="image-select-cb" value="<?php echo $img['id']; ?>" 
-                                                   onchange="updateSelection()" <?php echo $img['is_main'] ? 'disabled title="Cannot select main image"' : ''; ?>>
-                                        </div>
-                                        <div class="image-card-img" onclick="toggleImageSelection(this)">
-                                            <img src="<?php echo PUBLIC_URL . '/' . $img['image_path']; ?>" alt="Product image">
-                                            <?php if ($img['is_main']): ?>
-                                                <div class="main-badge">
-                                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                                                    </svg>
-                                                    Main
-                                                </div>
-                                            <?php endif; ?>
-                                        </div>
-                                        <div class="image-card-actions">
-                                            <?php if (!$img['is_main']): ?>
-                                                <button type="button" class="image-card-btn" onclick="setMainImage(<?php echo $img['id']; ?>)">
-                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                                                    </svg>
-                                                    Set Main
-                                                </button>
-                                            <?php endif; ?>
-                                            <button type="button" class="image-card-btn delete-btn" onclick="deleteImage(<?php echo $img['id']; ?>)">
-                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                    <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
-                                                </svg>
-                                                Delete
-                                            </button>
-                                        </div>
-                                    </div>
-                                <?php endforeach; ?>
-                            </div>
-                        <?php else: ?>
-                            <div class="empty-state">
-                                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                                    <circle cx="8.5" cy="8.5" r="1.5"/>
-                                    <path d="M21 15l-5-5L5 21"/>
-                                </svg>
-                                <h4>No images yet</h4>
-                                <p>Upload at least one image to showcase your product</p>
-                            </div>
-                        <?php endif; ?>
 
                         <!-- Upload New Images -->
-                        <?php if (count($listing_images) < 20): ?>
-                            <div class="upload-section">
-                                <label for="product_images" class="upload-box">
-                                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
-                                    </svg>
-                                    <strong>Click to upload images</strong>
-                                    <span>JPG, PNG, WebP (Max 5MB each)</span>
-                                    <input
-                                        type="file"
-                                        id="product_images"
-                                        name="product_images[]"
-                                        accept="image/jpeg,image/jpg,image/png,image/webp"
-                                        multiple
-                                        style="display: none;"
-                                        onchange="previewImages(this)"
-                                    >
-                                </label>
-                                <div id="preview-container"></div>
-                            </div>
-                        <?php else: ?>
-                            <div class="alert alert-danger">
-                                Maximum 20 images reached. Delete some images to upload new ones.
-                            </div>
-                        <?php endif; ?>
+                        <div class="upload-section">
+                            <label for="product_images" class="upload-box">
+                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                                </svg>
+                                <strong>Click to upload images</strong>
+                                <span>JPG, PNG, WebP (Max 5MB each) • First image will be the main image</span>
+                                <input
+                                    type="file"
+                                    id="product_images"
+                                    name="product_images[]"
+                                    accept="image/jpeg,image/jpg,image/png,image/webp"
+                                    multiple
+                                    style="display: none;"
+                                    onchange="previewImages(this)"
+                                >
+                            </label>
+                            <div id="preview-container"></div>
+                        </div>
 
                         <!-- Save Button -->
                         <div class="button-group">
-                            <button type="submit" name="update_listing" class="btn btn-primary" style="width: 100%;">
-                                💾 Save Changes
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">
+                                ✅ Create Listing
                             </button>
                         </div>
                     </div>
                 </div>
-
-                <!-- Tab: Danger Zone -->
 
             </div>
         </form>
