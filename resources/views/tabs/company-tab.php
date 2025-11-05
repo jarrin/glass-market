@@ -135,7 +135,7 @@ $total_pages = ceil($total_company_listings / $per_page);
                                     <a href="<?php echo VIEWS_URL; ?>/listings.php?id=<?php echo $listing['id']; ?>" style="padding: 6px 12px; background: #3b82f6; color: white; text-decoration: none; border-radius: 6px; font-size: 12px; font-weight: 600;">
                                         View
                                     </a>
-                                    <a href="<?php echo VIEWS_URL; ?>/edit-listing.php?id=<?php echo $listing['id']; ?>" style="padding: 6px 12px; background: #6b7280; color: white; text-decoration: none; border-radius: 6px; font-size: 12px; font-weight: 600;">
+                                    <a href="<?php echo VIEWS_URL; ?>/company/edit-company-listing.php?id=<?php echo $listing['id']; ?>" style="padding: 6px 12px; background: #6b7280; color: white; text-decoration: none; border-radius: 6px; font-size: 12px; font-weight: 600;">
                                         Edit
                                     </a>
                                 </div>
