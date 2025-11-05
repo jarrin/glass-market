@@ -188,14 +188,25 @@ try {
 
                 error_log("Payment $payment_id expired for user $user_id");
 
-            } else {
-                // Payment is still open/pending
+            } elseif ($payment->isOpen()) {
+                // Payment is still open/pending (user hasn't completed it yet)
                 $status = 'processing';
-                error_log("Payment $payment_id still pending for user $user_id");
+                error_log("Payment $payment_id still open for user $user_id");
+
+            } elseif ($payment->isPending()) {
+                // Payment is pending (awaiting confirmation)
+                $status = 'processing';
+                error_log("Payment $payment_id is pending for user $user_id");
+
+            } else {
+                // Unknown status
+                $status = 'processing';
+                error_log("Payment $payment_id has unknown status: " . $payment->status . " for user $user_id");
             }
         } else {
             $status = 'error';
-            error_log("Could not get payment $payment_id from Mollie");
+            $message = 'Failed to retrieve payment from Mollie API';
+            error_log("Could not get payment $payment_id from Mollie - API returned null/false");
         }
     } else {
         $status = 'error';
