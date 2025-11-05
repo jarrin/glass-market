@@ -1060,16 +1060,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_listing'])) {
         <div class="page-header">
             <div class="page-header-top">
                 <h1 class="page-title">
-                    Edit Listing
-                    <span class="status-badge <?php echo $listing['published'] == 1 ? 'published' : 'draft'; ?>">
-                        <?php echo $listing['published'] == 1 ? 'Published' : 'Draft'; ?>
-                    </span>
+                    Create New Listing
                 </h1>
                 <a href="<?php echo VIEWS_URL; ?>/profile.php?tab=listings" class="back-link">
                     ← Back to My Listings
                 </a>
             </div>
-            <p class="page-subtitle">Update your listing details and manage product images</p>
+            <p class="page-subtitle">Add a new glass product to your listings</p>
         </div>
 
         <?php if ($error_message): ?>
