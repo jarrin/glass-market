@@ -217,14 +217,6 @@ try {
             box-shadow: 0 24px 50px -40px rgba(15, 23, 42, 0.35);
         }
 
-        .home-value-card::before {
-            content: '';
-            position: absolute;
-            inset: -40% 50% 60% -40%;
-            background: radial-gradient(circle at top right, rgba(47, 109, 245, 0.18), transparent 60%);
-            opacity: 0.8;
-        }
-
         .home-value-icon {
             font-size: 36px;
             margin-bottom: 16px;

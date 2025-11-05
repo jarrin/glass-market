@@ -9,7 +9,6 @@ if (!defined('BASE_URL')) {
 .modern-footer {
     background: linear-gradient(180deg, #f5f5f7 0%, #e8e9ed 100%);
     border-top: 1px solid rgba(15, 23, 42, 0.08);
-    margin-top: 80px;
 }
 
 .footer-container {
@@ -275,7 +274,6 @@ if (!defined('BASE_URL')) {
                     <li><a href="<?php echo BASE_URL; ?>/resources/views/pricing.php">Start Selling</a></li>
                     <li><a href="<?php echo BASE_URL; ?>/resources/views/my-listings.php">My Listings</a></li>
                     <li><a href="<?php echo PUBLIC_URL; ?>/seller-guidelines.php">Seller Guidelines</a></li>
-                    <li><a href="<?php echo BASE_URL; ?>/resources/views/pricing.php">Pricing & Fees</a></li>
                 </ul>
             </div>
 
@@ -285,8 +283,6 @@ if (!defined('BASE_URL')) {
                 <ul>
                     <li><a href="<?php echo PUBLIC_URL; ?>/help.php">Help Center</a></li>
                     <li><a href="<?php echo PUBLIC_URL; ?>/contact.php">Contact Us</a></li>
-                    <li><a href="<?php echo PUBLIC_URL; ?>/shipping.php">Shipping Info</a></li>
-                    <li><a href="<?php echo PUBLIC_URL; ?>/returns.php">Returns Policy</a></li>
                 </ul>
             </div>
         </div>

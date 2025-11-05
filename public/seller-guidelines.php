@@ -16,7 +16,7 @@ require_once __DIR__ . '/../config.php';
         }
         
         .guidelines-hero {
-            background: linear-gradient(135deg, #2f6df5 0%, #1e4db8 100%);
+            background: #f8f9fa;
             color: white;
             padding: 80px 0;
             text-align: center;
@@ -26,6 +26,7 @@ require_once __DIR__ . '/../config.php';
         .guidelines-hero h1 {
             font-size: 48px;
             margin-bottom: 20px;
+            color: black;
         }
         
         .guidelines-hero p {
@@ -33,6 +34,7 @@ require_once __DIR__ . '/../config.php';
             opacity: 0.9;
             max-width: 700px;
             margin: 0 auto;
+            color: black;
         }
         
         .guidelines-container {

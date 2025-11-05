@@ -241,14 +241,6 @@ require_once __DIR__ . '/../../config.php';
       overflow: hidden;
     }
 
-    .about-value-card::before {
-      content: '';
-      position: absolute;
-      inset: -40% 50% 60% -40%;
-      background: radial-gradient(circle at top right, rgba(47, 109, 245, 0.18), transparent 60%);
-      opacity: 0.8;
-    }
-
     .about-value-title {
       font-size: 22px;
       font-weight: 600;
