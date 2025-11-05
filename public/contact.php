@@ -28,7 +28,7 @@ require_once __DIR__ . '/../config.php';
         }
         
         .contact-hero {
-            background: linear-gradient(135deg, #2f6df5 0%, #1e4db8 100%);
+            background: #f5f5f7;
             color: white;
             padding: 100px 0 80px;
             text-align: center;
@@ -40,6 +40,7 @@ require_once __DIR__ . '/../config.php';
             font-weight: 700;
             margin-bottom: 16px;
             letter-spacing: -0.02em;
+            color: black;
         }
         
         .contact-hero p {
@@ -47,6 +48,7 @@ require_once __DIR__ . '/../config.php';
             opacity: 0.9;
             max-width: 600px;
             margin: 0 auto;
+            color: black;
         }
         
         .contact-container {
@@ -178,7 +180,7 @@ require_once __DIR__ . '/../config.php';
         .contact-icon svg {
             width: 24px;
             height: 24px;
-            color: var(--contact-accent);
+            color: black;
         }
 
         .contact-method h3 {

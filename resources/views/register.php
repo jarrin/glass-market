@@ -114,10 +114,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 require_once __DIR__ . '/../../database/classes/subscriptions.php';
                 $subscription_created = Subscription::createTrialSubscription($pdo, $user_id);
 
+                // Send welcome email
+                try {
+                    require_once __DIR__ . '/../../app/Services/EmailService.php';
+                    $emailService = new EmailService();
+                    $emailService->sendWelcomeEmail($notification_email, $name);
+                } catch (Exception $e) {
+                    error_log("Welcome email failed: " . $e->getMessage());
+                }
+
                 if ($subscription_created) {
-                    $success_message = 'Registration successful! You have been granted a 3-month free trial. You can now log in to your account.';
+                    $success_message = 'Registration successful! You have been granted a 3-month free trial. Check your email for details. You can now log in to your account.';
                 } else {
-                    $success_message = 'Registration successful! However, there was an issue creating your trial subscription. Please contact support.';
+                    $success_message = 'Registration successful! However, there was an issue creating your trial subscription. Check your email and contact support if needed.';
                     error_log("Trial subscription creation failed for user_id: $user_id");
                 }
             }
