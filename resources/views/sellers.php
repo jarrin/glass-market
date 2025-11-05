@@ -451,8 +451,7 @@
                     LEFT JOIN listings l ON c.id = l.company_id AND l.published = 1
                     WHERE c.owner_user_id IS NOT NULL
                     GROUP BY c.id, c.name, c.company_type, c.phone, c.website, c.city, c.country, u.name
-                    HAVING listing_count > 0
-                    ORDER BY listing_count DESC
+                    ORDER BY listing_count DESC, c.created_at DESC
                 ");
                 
                 $dbSellers = $stmt->fetchAll();
