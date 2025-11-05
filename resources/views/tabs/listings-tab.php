@@ -14,7 +14,7 @@ try {
         FROM listings l
         LEFT JOIN companies c ON l.company_id = c.id
         LEFT JOIN listing_images li ON l.id = li.listing_id AND li.is_main = 1
-        WHERE l.user_id = :user_id
+        WHERE l.user_id = :user_id AND l.company_id IS NULL
         ORDER BY l.created_at DESC
     ');
     $stmt->execute(['user_id' => $user['id']]);
