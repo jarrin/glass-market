@@ -17,6 +17,29 @@ class Subscription
     }
 
     /**
+     * Check if user has ever had a trial subscription (active or expired)
+     * @param PDO $pdo Database connection
+     * @param int $user_id User ID
+     * @return bool Has ever had trial
+     */
+    public static function hasEverHadTrial($pdo, $user_id)
+    {
+        try {
+            $stmt = $pdo->prepare("
+                SELECT COUNT(*) 
+                FROM user_subscriptions 
+                WHERE user_id = :user_id 
+                AND is_trial = 1
+            ");
+            $stmt->execute(['user_id' => $user_id]);
+            return $stmt->fetchColumn() > 0;
+        } catch (PDOException $e) {
+            error_log("Failed to check trial history: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Create a 3-month free trial subscription for a new user
      * @param PDO $pdo Database connection
      * @param int $user_id User ID
@@ -27,6 +50,12 @@ class Subscription
     public static function createTrialSubscription($pdo, $user_id, $user_email = null, $user_name = null)
     {
         try {
+            // Check if user has EVER had a trial subscription
+            if (self::hasEverHadTrial($pdo, $user_id)) {
+                error_log("Trial subscription denied for user_id: $user_id - user has already had a trial");
+                return false;
+            }
+            
             $start_date = date('Y-m-d');
             $end_date = date('Y-m-d', strtotime('+3 months'));
             
