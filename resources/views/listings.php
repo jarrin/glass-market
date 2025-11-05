@@ -44,6 +44,14 @@ if ($listing['published'] != 1 && !$is_owner) {
     exit;
 }
 
+// Check if user has saved this listing
+$is_saved = false;
+if ($user_id) {
+    $stmt = $pdo->prepare("SELECT id FROM saved_listings WHERE user_id = ? AND listing_id = ?");
+    $stmt->execute([$user_id, $id]);
+    $is_saved = (bool)$stmt->fetch();
+}
+
 // Determine title and subtitle
 $title = $listing['quantity_note'] ?: ($listing['glass_type_other'] ?: $listing['glass_type']);
 $subtitle = $listing['glass_type_other'] ?: $listing['glass_type'];
@@ -684,11 +692,18 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
                         Contact Seller
                     </button>
                     <div class="secondary-actions">
-                        <button class="secondary-btn" onclick="saveListing()">
-                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-                            </svg>
-                            Save
+                        <button class="secondary-btn" onclick="saveListing()" <?php echo $is_saved ? 'style="color: #ef4444;"' : ''; ?>>
+                            <?php if ($is_saved): ?>
+                                <svg width="18" height="18" fill="#ef4444" viewBox="0 0 24 24">
+                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                </svg>
+                                Saved
+                            <?php else: ?>
+                                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                                </svg>
+                                Save
+                            <?php endif; ?>
                         </button>
                         <button class="secondary-btn" onclick="shareProduct()">
                             <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -873,15 +888,48 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
         function contactSeller() {
-            <?php if (!empty($listing['company_name'])): ?>
-                window.location.href = '<?php echo VIEWS_URL; ?>/seller-shop.php?seller=<?= $listing['company_id'] ?>';
+            <?php if (!empty($listing['seller_email'])): ?>
+                const subject = encodeURIComponent('Inquiry about: <?= htmlspecialchars($title, ENT_QUOTES, 'UTF-8') ?>');
+                const body = encodeURIComponent('Hello,\n\nI am interested in your listing: <?= htmlspecialchars($title, ENT_QUOTES, 'UTF-8') ?>\n\nListing URL: ' + window.location.href + '\n\nThank you.');
+                window.location.href = 'mailto:<?= htmlspecialchars($listing['seller_email']) ?>?subject=' + subject + '&body=' + body;
             <?php else: ?>
                 alert('Contact information for this seller is not available.');
             <?php endif; ?>
         }
 
         function saveListing() {
-            alert('Save functionality coming soon!');
+            <?php if (isset($_SESSION['user_logged_in']) && $_SESSION['user_logged_in']): ?>
+                fetch('<?php echo VIEWS_URL; ?>/../includes/save-listing.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        listing_id: <?php echo $id; ?>
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const saveBtn = document.querySelector('.secondary-btn');
+                        if (data.saved) {
+                            saveBtn.innerHTML = '<svg width="18" height="18" fill="#ef4444" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg> Saved';
+                            saveBtn.style.color = '#ef4444';
+                        } else {
+                            saveBtn.innerHTML = '<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg> Save';
+                            saveBtn.style.color = '';
+                        }
+                        alert(data.message);
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => {
+                    alert('Error saving listing. Please try again.');
+                });
+            <?php else: ?>
+                window.location.href = '<?php echo VIEWS_URL; ?>/login.php';
+            <?php endif; ?>
         }
 
         function shareProduct() {

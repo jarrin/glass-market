@@ -283,6 +283,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_publish'])) {
         <div class="profile-tabs">
             <button class="tab-button active" data-tab="overview">Overview</button>
             <button class="tab-button" data-tab="listings">My Listings</button>
+            <button class="tab-button" data-tab="saved">Saved</button>
             <button class="tab-button" data-tab="company">Company</button>
             <button class="tab-button" data-tab="edit">Edit Profile</button>
             <button class="tab-button" data-tab="subscription">Subscriptions</button>
@@ -296,6 +297,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_publish'])) {
 
         <!-- Listings Tab -->
         <?php include __DIR__ . '/tabs/listings-tab.php'; ?>
+
+        <!-- Saved Tab -->
+        <?php include __DIR__ . '/tabs/saved-tab.php'; ?>
 
         <!-- Company Tab -->
         <?php include __DIR__ . '/tabs/company-tab.php'; ?>
