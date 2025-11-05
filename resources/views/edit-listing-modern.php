@@ -543,14 +543,27 @@ try {
             aspect-ratio: 1;
             border-radius: 12px;
             overflow: hidden;
-            border: 3px solid transparent;
-            transition: all 0.2s;
+            border: 3px solid #e5e7eb;
+            transition: all 0.3s ease;
             cursor: pointer;
+            background: #f9fafb;
+        }
+
+        .image-item:hover {
+            border-color: #cbd5e1;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .image-item.main {
             border-color: var(--profile-primary);
             box-shadow: 0 0 0 4px rgba(47, 109, 245, 0.1);
+            background: linear-gradient(135deg, rgba(47, 109, 245, 0.05) 0%, rgba(47, 109, 245, 0.02) 100%);
+        }
+        
+        .image-item.main:hover {
+            border-color: #1e5ce6;
+            box-shadow: 0 0 0 4px rgba(47, 109, 245, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .image-item img {
@@ -570,6 +583,8 @@ try {
             font-size: 11px;
             font-weight: 700;
             text-transform: uppercase;
+            box-shadow: 0 2px 8px rgba(47, 109, 245, 0.3);
+            z-index: 2;
         }
 
         .image-item-actions {
@@ -577,12 +592,12 @@ try {
             bottom: 0;
             left: 0;
             right: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-            padding: 32px 8px 8px;
+            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.7) 70%, transparent 100%);
+            padding: 40px 8px 8px;
             display: flex;
-            gap: 4px;
+            gap: 6px;
             opacity: 0;
-            transition: opacity 0.2s;
+            transition: opacity 0.3s ease;
         }
 
         .image-item:hover .image-item-actions {
@@ -593,21 +608,27 @@ try {
             flex: 1;
             background: white;
             border: none;
-            padding: 6px;
+            padding: 8px 6px;
             border-radius: 6px;
             cursor: pointer;
             font-size: 11px;
-            font-weight: 600;
+            font-weight: 700;
             transition: all 0.2s;
+            color: #1f2937;
         }
 
         .image-action-btn:hover {
             transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
 
         .image-action-btn.delete {
             background: #ef4444;
             color: white;
+        }
+        
+        .image-action-btn.delete:hover {
+            background: #dc2626;
         }
 
         .upload-zone {
@@ -677,6 +698,9 @@ try {
 <body>
     <?php include __DIR__ . '/../../includes/navbar.php'; ?>
     <?php include __DIR__ . '/../../includes/subscription-notification.php'; ?>
+
+    <!-- Toast Container -->
+    <div id="toast-container" style="position: fixed; top: 100px; right: 20px; z-index: 99999;"></div>
 
     <main class="edit-container">
         <div class="page-header">
@@ -878,6 +902,15 @@ try {
                 <div>
                     <div class="card">
                         <h2 class="card-title">📸 Product Images</h2>
+                        
+                        <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 13px; color: #1e40af;">
+                            <strong>💡 How it works:</strong><br>
+                            • Upload up to 20 images<br>
+                            • The <strong>Main</strong> image shows first on listings<br>
+                            • Click "Set Main" to change the main display image<br>
+                            • Hover over images to delete or set as main
+                        </div>
+                        
                         <p class="image-count">
                             <?php echo count($listing_images); ?> / 20 images
                         </p>
@@ -888,21 +921,26 @@ try {
                                 <?php foreach ($listing_images as $img): ?>
                                     <div class="image-item <?php echo $img['is_main'] ? 'main' : ''; ?>" data-image-id="<?php echo $img['id']; ?>">
                                         <?php if ($img['is_main']): ?>
-                                            <div class="image-item-badge">Main</div>
+                                            <div class="image-item-badge">⭐ Main</div>
                                         <?php endif; ?>
                                         <img src="<?php echo PUBLIC_URL . '/' . $img['image_path']; ?>" alt="Product image">
                                         <div class="image-item-actions">
                                             <?php if (!$img['is_main']): ?>
                                                 <button type="button" class="image-action-btn" onclick="setMainImage(<?php echo $img['id']; ?>)">
-                                                    Set Main
+                                                    ⭐ Set Main
                                                 </button>
                                             <?php endif; ?>
                                             <button type="button" class="image-action-btn delete" onclick="deleteImage(<?php echo $img['id']; ?>)">
-                                                Delete
+                                                🗑️ Delete
                                             </button>
                                         </div>
                                     </div>
                                 <?php endforeach; ?>
+                            </div>
+                        <?php else: ?>
+                            <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 13px; color: #92400e;">
+                                <strong>⚠️ No images yet</strong><br>
+                                Upload at least one image to make your listing more attractive to buyers!
                             </div>
                         <?php endif; ?>
 
@@ -993,8 +1031,15 @@ try {
     }
 
     async function deleteImage(imageId) {
-        if (!confirm('Are you sure you want to delete this image?')) {
+        if (!confirm('Are you sure you want to delete this image?\n\nThis action cannot be undone.')) {
             return;
+        }
+        
+        // Show loading state
+        const imageItem = document.querySelector(`[data-image-id="${imageId}"]`);
+        if (imageItem) {
+            imageItem.style.opacity = '0.5';
+            imageItem.style.pointerEvents = 'none';
         }
         
         try {
@@ -1010,16 +1055,32 @@ try {
             const result = await response.json();
             
             if (result.success) {
-                location.reload();
+                showToast('Image deleted successfully!', 'success');
+                setTimeout(() => location.reload(), 500);
             } else {
-                alert('Error: ' + (result.error || 'Failed to delete image'));
+                showToast('Error: ' + (result.error || 'Failed to delete image'), 'error');
+                if (imageItem) {
+                    imageItem.style.opacity = '1';
+                    imageItem.style.pointerEvents = 'auto';
+                }
             }
         } catch (error) {
-            alert('Error deleting image: ' + error.message);
+            showToast('Error deleting image: ' + error.message, 'error');
+            if (imageItem) {
+                imageItem.style.opacity = '1';
+                imageItem.style.pointerEvents = 'auto';
+            }
         }
     }
 
     async function setMainImage(imageId) {
+        // Show loading state
+        const allItems = document.querySelectorAll('.image-item');
+        allItems.forEach(item => {
+            item.style.pointerEvents = 'none';
+            item.style.opacity = '0.6';
+        });
+        
         try {
             const formData = new FormData();
             formData.append('set_main_image', '1');
@@ -1033,14 +1094,106 @@ try {
             const result = await response.json();
             
             if (result.success) {
-                location.reload();
+                showToast('Main image updated!', 'success');
+                setTimeout(() => location.reload(), 500);
             } else {
-                alert('Error: ' + (result.error || 'Failed to set main image'));
+                showToast('Error: ' + (result.error || 'Failed to set main image'), 'error');
+                allItems.forEach(item => {
+                    item.style.pointerEvents = 'auto';
+                    item.style.opacity = '1';
+                });
             }
         } catch (error) {
-            alert('Error setting main image: ' + error.message);
+            showToast('Error setting main image: ' + error.message, 'error');
+            allItems.forEach(item => {
+                item.style.pointerEvents = 'auto';
+                item.style.opacity = '1';
+            });
         }
     }
+    
+    // Toast Notification System
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        
+        const icons = {
+            success: '✓',
+            error: '✕',
+            info: 'ℹ'
+        };
+        
+        const colors = {
+            success: '#10b981',
+            error: '#ef4444',
+            info: '#3b82f6'
+        };
+        
+        toast.style.cssText = `
+            background: white;
+            border-left: 4px solid ${colors[type] || colors.info};
+            padding: 16px 20px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 300px;
+            max-width: 400px;
+            animation: slideIn 0.3s ease-out;
+        `;
+        
+        toast.innerHTML = `
+            <span style="
+                background: ${colors[type] || colors.info};
+                color: white;
+                width: 24px;
+                height: 24px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+                flex-shrink: 0;
+            ">${icons[type] || icons.info}</span>
+            <span style="flex: 1; color: #1f2937; font-size: 14px;">${message}</span>
+        `;
+        
+        container.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.style.animation = 'slideOut 0.3s ease-in';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+    
+    // Add animation styles
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(style);
     </script>
 </body>
 </html>
