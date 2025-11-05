@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 05, 2025 at 02:14 PM
+-- Generation Time: Nov 05, 2025 at 02:35 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -330,7 +330,7 @@ INSERT INTO `listings` (`id`, `location_id`, `company_id`, `user_id`, `side`, `g
 (98, NULL, 1, 4, 'WTB', 'Green Glass', NULL, 1533.00, 'One-time bulk sale', 'not_recycled', 'unknown', NULL, '£427/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'Certified recycled content', 'image.png', 0),
 (99, NULL, 1, 4, 'WTS', 'Brown Glass', NULL, 4403.00, 'Ongoing contract', 'recycled', 'unknown', NULL, '£330/ton', 'GBP', '2025-11-05 10:09:15', '2026-02-03', 1, 'High-quality recycled glass', 'image.png', 0),
 (100, NULL, 1, 4, 'WTS', 'Green Glass', NULL, 1276.00, 'Big bags available', 'recycled', 'untested', NULL, '$118/ton', 'USD', '2025-11-05 10:09:15', '2026-02-03', 1, 'Premium grade glass material', 'image.png', 0),
-(101, NULL, NULL, 65, 'WTS', 'Green', NULL, 120.00, 'Premium Green Bottle Glass Cullet – Clean and Ready for Melt!', 'recycled', 'tested', '', '€145/ton', 'EUR', '2025-11-05 11:05:09', NULL, 1, 'Clean green bottle glass cullet sourced from post-consumer recycling. Material is fully washed, magnetically separated, and screened to 10–50 mm particle size. Contamination level below 1%. Suitable for container glass production.', 'uploads/listings/listing_1762340709_690b2f6569f6e.jpg', 0);
+(102, NULL, NULL, 65, 'WTS', 'Green Glass', NULL, 23.00, 'Premium Green Bottle Glass Cullet – Clean and Ready for Melt', 'recycled', 'tested', NULL, '€145/ton', 'EUR', '2025-11-05 13:22:17', NULL, 1, 'ASAP', 'image.png', 0);
 
 -- --------------------------------------------------------
 
@@ -352,7 +352,7 @@ CREATE TABLE `listing_images` (
 --
 
 INSERT INTO `listing_images` (`id`, `listing_id`, `image_path`, `is_main`, `display_order`, `created_at`) VALUES
-(1, 101, 'uploads/listings/listing_1762340709_690b2f6569f6e.jpg', 1, 0, '2025-11-05 12:13:13');
+(20, 102, 'uploads/listings/listing_102_1762348937_0.jpg', 1, 0, '2025-11-05 13:22:17');
 
 -- --------------------------------------------------------
 
@@ -916,6 +916,13 @@ CREATE TABLE `saved_listings` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `saved_listings`
+--
+
+INSERT INTO `saved_listings` (`id`, `user_id`, `listing_id`, `created_at`) VALUES
+(2, 65, 1, '2025-11-05 13:22:33');
+
 -- --------------------------------------------------------
 
 --
@@ -1065,7 +1072,7 @@ INSERT INTO `users` (`id`, `company_id`, `created_by`, `email`, `avatar`, `email
 (62, 50, NULL, 'trial49@trial.test', NULL, NULL, '$2y$12$XJxjvj/XoUFtaFWhR7JgFuf7JmfgpSSEH9Ii7e6RpF0pmCAfvyfG6', NULL, 'Trial User 49', NULL, NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-11-05 10:09:35', NULL, 1, 1, 0, 0, 0),
 (63, 51, NULL, 'trial50@trial.test', NULL, NULL, '$2y$12$D1gP.NMwUBNAblRnWG/51OPTzma7O4qnZKv5gAcgjG86WA0CvQeoK', NULL, 'Trial User 50', NULL, NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-11-05 10:09:36', NULL, 1, 1, 0, 0, 0),
 (64, NULL, NULL, 'jarrin@dmg.nu', NULL, '2025-11-05 10:25:39', '$2y$10$qBsoQVo5NG2JL6W2V1rNpe06EwLaAR/3WucJrlZshy.Q1lFd09h8C', NULL, 'Zeker', 'Je moeder', NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-11-05 10:25:39', NULL, 1, 1, 0, 0, 0),
-(65, NULL, NULL, 'testjarrin@gmail.com', NULL, '2025-11-05 10:27:20', '$2y$10$BHuXPgqXXYExKh.SyOspKeaY/xOQ0hYp5tnDF6ztQqJc433Kd5gKK', NULL, 'Zeker!', 'Je moeder', NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-11-05 10:27:20', '2025-11-05 13:07:27', 1, 1, 0, 0, 0);
+(65, NULL, NULL, 'testjarrin@gmail.com', '/uploads/avatars/avatar_65_1762349169.jpg', '2025-11-05 10:27:20', '$2y$10$BHuXPgqXXYExKh.SyOspKeaY/xOQ0hYp5tnDF6ztQqJc433Kd5gKK', NULL, 'Zeker!', 'Je moeder', NULL, NULL, 0, 0, NULL, NULL, NULL, '2025-11-05 10:27:20', '2025-11-05 13:26:09', 1, 1, 0, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -1428,13 +1435,13 @@ ALTER TABLE `contracts`
 -- AUTO_INCREMENT for table `listings`
 --
 ALTER TABLE `listings`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=102;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=103;
 
 --
 -- AUTO_INCREMENT for table `listing_images`
 --
 ALTER TABLE `listing_images`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `locations`
@@ -1494,7 +1501,7 @@ ALTER TABLE `push_notifications`
 -- AUTO_INCREMENT for table `saved_listings`
 --
 ALTER TABLE `saved_listings`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `subscriptions`
