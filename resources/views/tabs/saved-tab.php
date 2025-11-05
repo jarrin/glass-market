@@ -44,7 +44,11 @@ $total_pages = ceil($total_saved / $per_page);
 ?>
 <div class="tab-panel" id="tab-saved">
     <h2 class="section-title">Saved Listings</h2>
-    
+
+    <?php if (!$subscription_status['has_access']): ?>
+        <?php include __DIR__ . '/../components/subscription-required-message.php'; ?>
+    <?php else: ?>
+
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
         <p style="margin: 0; font-size: 14px; color: #6b7280;">
             You have <strong style="color: #2f6df5;"><?php echo $total_saved; ?></strong> saved listing(s)
@@ -182,5 +186,6 @@ $total_pages = ceil($total_saved / $per_page);
                 Browse Listings
             </a>
         </div>
-    <?php endif; ?>
+
+    <?php endif; // End subscription check ?>
 </div>
