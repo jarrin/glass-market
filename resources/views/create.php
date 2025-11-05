@@ -1084,6 +1084,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_listing'])) {
         <?php endif; ?>
 
         <form method="POST" action="" enctype="multipart/form-data">
+            <input type="hidden" name="create_listing" value="1">
             <!-- Tab System -->
             <div class="tabs-container">
                 <div class="tabs-header">
