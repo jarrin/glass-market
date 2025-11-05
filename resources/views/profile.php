@@ -24,6 +24,43 @@ require_once __DIR__ . '/loaders/user-data-loader.php';
 // Handle form submissions
 require_once __DIR__ . '/handlers/profile-update-handler.php';
 require_once __DIR__ . '/handlers/subscription-handler.php';
+require_once __DIR__ . '/handlers/notification-handler.php';
+
+// Handle listing publish/unpublish toggle from listings tab
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_publish'])) {
+    $listing_id = $_POST['listing_id'] ?? 0;
+    $new_status = $_POST['new_status'] ?? 0;
+    
+    try {
+        $pdo = new PDO("mysql:host=$db_host;dbname=$db_name", $db_user, $db_pass);
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        
+        // Verify the listing belongs to the user's company
+        $stmt = $pdo->prepare('
+            SELECT l.id FROM listings l
+            LEFT JOIN companies c ON l.company_id = c.id
+            LEFT JOIN users u ON c.id = u.company_id
+            WHERE l.id = :listing_id AND u.id = :user_id
+        ');
+        $stmt->execute(['listing_id' => $listing_id, 'user_id' => $user['id']]);
+        
+        if ($stmt->fetch()) {
+            $stmt = $pdo->prepare('UPDATE listings SET published = :status WHERE id = :id');
+            $stmt->execute(['status' => $new_status, 'id' => $listing_id]);
+            
+            $status_text = $new_status == 1 ? 'published' : 'unpublished';
+            $success_message = "Listing {$status_text} successfully!";
+        } else {
+            $error_message = 'You do not have permission to modify this listing.';
+        }
+    } catch (PDOException $e) {
+        $error_message = 'Failed to update listing: ' . $e->getMessage();
+    }
+    
+    // Redirect to prevent form resubmission
+    header('Location: ' . VIEWS_URL . '/profile.php?tab=listings');
+    exit;
+}
 
 ?>
 <!DOCTYPE html>
@@ -237,6 +274,7 @@ require_once __DIR__ . '/handlers/subscription-handler.php';
             <button class="tab-button" data-tab="company">Company</button>
             <button class="tab-button" data-tab="edit">Edit Profile</button>
             <button class="tab-button" data-tab="subscription">Subscriptions</button>
+            <button class="tab-button" data-tab="notifications">Notifications</button>
         </div>
 
         <!-- Tab Panels -->
@@ -255,6 +293,9 @@ require_once __DIR__ . '/handlers/subscription-handler.php';
 
         <!-- Subscription Tab -->
         <?php include __DIR__ . '/tabs/subscription-tab.php'; ?>
+
+        <!-- Notifications Tab -->
+        <?php include __DIR__ . '/tabs/notifications-tab.php'; ?>
     </div>
 
     <!-- Tab Switching Script -->
