@@ -17,6 +17,17 @@ class EmailService {
     private $smtp_encryption = 'tls';
     
     public function __construct() {
+        // Load config if not already loaded
+        if (!defined('BASE_URL')) {
+            $config_path = __DIR__ . '/../../config.php';
+            if (file_exists($config_path)) {
+                require_once $config_path;
+            } else {
+                // Fallback if config not found
+                define('BASE_URL', '');
+            }
+        }
+        
         // Load from environment file
         $this->loadEnvVariables();
         

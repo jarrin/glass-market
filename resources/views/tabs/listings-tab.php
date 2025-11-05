@@ -30,7 +30,7 @@ try {
             You have <strong style="color: #2f6df5;"><?php echo count($user_listings); ?></strong> listing(s)
         </p>
         <a 
-            href="<?php echo VIEWS_URL; ?>/my-listings.php" 
+            href="<?php echo VIEWS_URL; ?>/create.php" 
             style="
                 padding: 10px 20px;
                 background: #2f6df5;
@@ -44,7 +44,7 @@ try {
                 gap: 8px;
             "
         >
-            <span>📦</span> View All Listings
+            <span>➕</span> Create New Listing
         </a>
     </div>
 
@@ -135,23 +135,11 @@ try {
             <?php endforeach; ?>
         </div>
         
-        <?php if (count($user_listings) > 3): ?>
+        <?php if (count($user_listings) > 5): ?>
         <div style="text-align: center; margin-top: 24px;">
-            <a 
-                href="<?php echo VIEWS_URL; ?>/my-listings.php" 
-                style="
-                    display: inline-block;
-                    padding: 10px 24px;
-                    background: #f3f4f6;
-                    color: #1f2937;
-                    text-decoration: none;
-                    border-radius: 8px;
-                    font-weight: 600;
-                    font-size: 14px;
-                "
-            >
-                View All <?php echo count($user_listings); ?> Listings →
-            </a>
+            <p style="font-size: 14px; color: #6b7280; margin: 0;">
+                Showing first 5 listings. Total: <?php echo count($user_listings); ?>
+            </p>
         </div>
         <?php endif; ?>
     <?php else: ?>
@@ -165,7 +153,7 @@ try {
                 Start selling by creating your first glass listing.
             </p>
             <a 
-                href="<?php echo VIEWS_URL; ?>/my-listings.php" 
+                href="<?php echo VIEWS_URL; ?>/create.php" 
                 style="
                     display: inline-block;
                     padding: 12px 24px;
@@ -177,7 +165,7 @@ try {
                     font-size: 14px;
                 "
             >
-                Go to My Listings
+                ➕ Create Your First Listing
             </a>
         </div>
     <?php endif; ?>

@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feature Test Suite - Glass Market</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #1f2937;
+            margin-bottom: 40px;
+            font-size: 32px;
+        }
+
+        .test-section {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .test-section h2 {
+            color: #374151;
+            margin-bottom: 16px;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .test-item {
+            background: #f9fafb;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .test-item h3 {
+            font-size: 16px;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+
+        .test-item p {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .info-box {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 16px;
+            margin: 16px 0;
+            border-radius: 4px;
+        }
+
+        .info-box p {
+            margin: 0;
+            color: #1e40af;
+            font-size: 14px;
+        }
+
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+
+        .checklist li {
+            padding: 8px 0;
+            color: #374151;
+            font-size: 14px;
+        }
+
+        .checklist li::before {
+            content: "✓ ";
+            color: #10b981;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        code {
+            background: #1f2937;
+            color: #10b981;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .links {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Glass Market Feature Test Suite</h1>
+
+        <!-- Test 1: Avatar Upload -->
+        <div class="test-section">
+            <h2>
+                📸 Avatar Upload Test
+                <span class="status-badge status-success">READY</span>
+            </h2>
+            
+            <div class="info-box">
+                <p><strong>Directory Created:</strong> <code>public/uploads/avatars/</code> ✅</p>
+            </div>
+
+            <div class="test-item">
+                <h3>Manual Test Steps</h3>
+                <ul class="checklist">
+                    <li>Log in to your account</li>
+                    <li>Go to Profile → Edit tab</li>
+                    <li>Click the camera icon on your avatar</li>
+                    <li>Select an image file (jpg, png, gif, webp - max 5MB)</li>
+                    <li>Click "Save Changes"</li>
+                    <li>Verify the new avatar appears</li>
+                </ul>
+            </div>
+
+            <div class="test-item">
+                <h3>Expected Behavior</h3>
+                <p>✓ File uploaded to <code>public/uploads/avatars/avatar_{user_id}_{timestamp}.{ext}</code></p>
+                <p>✓ Old avatar deleted (if exists)</p>
+                <p>✓ Database updated with new avatar path</p>
+                <p>✓ Session updated with new avatar</p>
+                <p>✓ New avatar displays immediately</p>
+            </div>
+
+            <div class="test-item">
+                <h3>Troubleshooting</h3>
+                <p><strong>If upload fails:</strong></p>
+                <ul class="checklist">
+                    <li>Check directory permissions: <code>chmod 777 public/uploads/avatars</code> (Linux/Mac)</li>
+                    <li>Verify PHP upload limits in <code>php.ini</code>: upload_max_filesize=10M, post_max_size=10M</li>
+                    <li>Check browser console for JavaScript errors</li>
+                    <li>Verify form has <code>enctype="multipart/form-data"</code></li>
+                </ul>
+            </div>
+
+            <div class="links">
+                <a href="/resources/views/profile.php?tab=edit" class="btn btn-primary">Test Avatar Upload →</a>
+            </div>
+        </div>
+
+        <!-- Test 2: Push Notifications -->
+        <div class="test-section">
+            <h2>
+                🔔 Push Notifications Test
+                <span class="status-badge status-success">IMPLEMENTED</span>
+            </h2>
+
+            <div class="info-box">
+                <p><strong>System Status:</strong> Push notification system is fully implemented with browser notification API</p>
+            </div>
+
+            <div class="test-item">
+                <h3>Features Implemented</h3>
+                <ul class="checklist">
+                    <li>Browser notification permission handling</li>
+                    <li>Real-time notification checking (every 30 seconds)</li>
+                    <li>Database table: <code>push_notifications</code></li>
+                    <li>API endpoint: <code>includes/get-push-notifications.php</code></li>
+                    <li>Notification UI in profile page</li>
+                    <li>Mark as read functionality</li>
+                </ul>
+            </div>
+
+            <div class="test-item">
+                <h3>Manual Test Steps</h3>
+                <ul class="checklist">
+                    <li>Log in to your account</li>
+                    <li>Go to Profile → Notifications tab</li>
+                    <li>Click "Enable Push Notifications"</li>
+                    <li>Allow browser notification permission</li>
+                    <li>Verify status shows "✅ Push notifications are enabled"</li>
+                    <li>Create a test notification in database</li>
+                    <li>Wait 30 seconds or refresh page</li>
+                    <li>Verify browser notification appears</li>
+                </ul>
+            </div>
+
+            <div class="test-item">
+                <h3>Test Notification SQL</h3>
+                <p>Run this in your database to create a test notification:</p>
+                <code style="display: block; white-space: pre; padding: 12px; margin-top: 8px;">
+INSERT INTO push_notifications (user_id, title, message, type, is_read, created_at)
+VALUES (YOUR_USER_ID, 'Test Notification', 'This is a test push notification!', 'info', 0, NOW());
+                </code>
+            </div>
+
+            <div class="links">
+                <a href="/resources/views/profile.php?tab=notifications" class="btn btn-primary">Test Push Notifications →</a>
+                <button class="btn btn-success" onclick="testNotification()">Send Test Notification</button>
+            </div>
+        </div>
+
+        <!-- Test 3: Password Change Email -->
+        <div class="test-section">
+            <h2>
+                🔐 Password Change Email Test
+                <span class="status-badge status-success">NEW FEATURE</span>
+            </h2>
+
+            <div class="info-box">
+                <p><strong>Status:</strong> Password change page created + Email notification integrated with Rust mailer</p>
+            </div>
+
+            <div class="test-item">
+                <h3>Features Added</h3>
+                <ul class="checklist">
+                    <li>Password change page: <code>/resources/views/change-password.php</code></li>
+                    <li>Email method: <code>RustMailer::sendPasswordChangedEmail()</code></li>
+                    <li>Professional email template with security warning</li>
+                    <li>Current password verification</li>
+                    <li>Password strength validation (min 8 characters)</li>
+                    <li>Confirmation email sent via Rust email service</li>
+                </ul>
+            </div>
+
+            <div class="test-item">
+                <h3>Manual Test Steps</h3>
+                <ul class="checklist">
+                    <li>Log in to your account</li>
+                    <li>Go to Profile → Edit tab</li>
+                    <li>Click "Change Password" button</li>
+                    <li>Enter your current password</li>
+                    <li>Enter a new password (min 8 characters)</li>
+                    <li>Confirm the new password</li>
+                    <li>Click "Update Password"</li>
+                    <li>Check your email for confirmation</li>
+                    <li>Log out and log back in with new password</li>
+                </ul>
+            </div>
+
+            <div class="test-item">
+                <h3>Email Content Preview</h3>
+                <p>The email includes:</p>
+                <ul class="checklist">
+                    <li>Confirmation of password change</li>
+                    <li>Timestamp of the change</li>
+                    <li>Security warning if user didn't make the change</li>
+                    <li>Password security tips</li>
+                    <li>Link back to profile</li>
+                </ul>
+            </div>
+
+            <div class="links">
+                <a href="/resources/views/change-password.php" class="btn btn-primary">Test Password Change →</a>
+            </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="test-section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+            <h2 style="color: white;">📋 Test Summary</h2>
+            
+            <div class="test-item" style="background: rgba(255,255,255,0.1);">
+                <h3 style="color: white;">All Features Status</h3>
+                <p style="color: rgba(255,255,255,0.9);">
+                    ✅ Avatar Upload - Directory created, ready to test<br>
+                    ✅ Push Notifications - Fully implemented, ready to verify<br>
+                    ✅ Password Change Email - New feature added, ready to test
+                </p>
+            </div>
+
+            <div class="test-item" style="background: rgba(255,255,255,0.1);">
+                <h3 style="color: white;">Quick Access Links</h3>
+                <div class="links">
+                    <a href="/resources/views/profile.php?tab=edit" class="btn btn-primary" style="background: white; color: #667eea;">Profile Edit →</a>
+                    <a href="/resources/views/profile.php?tab=notifications" class="btn btn-primary" style="background: white; color: #667eea;">Notifications →</a>
+                    <a href="/resources/views/change-password.php" class="btn btn-primary" style="background: white; color: #667eea;">Change Password →</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function testNotification() {
+            if ('Notification' in window) {
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        new Notification('🧪 Test Notification', {
+                            body: 'This is a test notification from Glass Market!',
+                            icon: '/favicon.ico',
+                            badge: '/favicon.ico'
+                        });
+                        alert('Test notification sent! Check your system notifications.');
+                    } else {
+                        alert('Please enable notifications in your browser settings.');
+                    }
+                });
+            } else {
+                alert('Your browser does not support notifications.');
+            }
+        }
+    </script>
+</body>
+</html>

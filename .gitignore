@@ -17,3 +17,9 @@ yarn-error.log
 /.idea
 /.vscode
 .claude
+
+# Rust / Cargo
+email-service/target/
+email-service/Cargo.lock
+**/*.rs.bk
+**/*.pdb
