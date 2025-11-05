@@ -70,7 +70,7 @@ switch ($plan) {
         die('Invalid plan selected');
 }
 
-// If free trial, just create subscription directly
+// If free trial, check eligibility and create subscription
 if ($amount == 0) {
     try {
         $db_host = '127.0.0.1';
@@ -81,38 +81,36 @@ if ($amount == 0) {
         $pdo = new PDO("mysql:host=$db_host;dbname=$db_name", $db_user, $db_pass);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         
-        // Create free trial subscription
-        $start_date = date('Y-m-d H:i:s');
-        $end_date = date('Y-m-d H:i:s', strtotime('+3 months'));
-        
-        // Check if subscription already exists
-        $stmt = $pdo->prepare("SELECT id FROM user_subscriptions WHERE user_id = :user_id");
-        $stmt->execute(['user_id' => $user_id]);
-        
-        if ($stmt->fetch()) {
-            // Update existing
-            $stmt = $pdo->prepare("
-                UPDATE user_subscriptions 
-                SET start_date = :start_date, end_date = :end_date, is_trial = 1, is_active = 1
-                WHERE user_id = :user_id
-            ");
-        } else {
-            // Insert new
-            $stmt = $pdo->prepare("
-                INSERT INTO user_subscriptions (user_id, start_date, end_date, is_trial, is_active)
-                VALUES (:user_id, :start_date, :end_date, 1, 1)
-            ");
+        // Check if user has EVER had a trial subscription
+        require_once __DIR__ . '/../../database/classes/subscriptions.php';
+        if (Subscription::hasEverHadTrial($pdo, $user_id)) {
+            die('
+                <h2>Free Trial Already Used</h2>
+                <p>You have already used your 3-month free trial. Free trials can only be activated once per account.</p>
+                <p>
+                    <a href="/glass-market/resources/views/pricing.php">View Paid Plans</a> |
+                    <a href="/glass-market/public/index.php">Go Home</a>
+                </p>
+            ');
         }
         
-        $stmt->execute([
-            'user_id' => $user_id,
-            'start_date' => $start_date,
-            'end_date' => $end_date
-        ]);
+        // Create free trial subscription (this will double-check eligibility)
+        $trialCreated = Subscription::createTrialSubscription($pdo, $user_id);
         
-        // Redirect to success page
-        header('Location: /glass-market/public/index.php?trial_activated=1');
-        exit;
+        if ($trialCreated) {
+            // Redirect to success page
+            header('Location: /glass-market/public/index.php?trial_activated=1');
+            exit;
+        } else {
+            die('
+                <h2>Trial Activation Failed</h2>
+                <p>Unable to activate free trial. You may have already used your trial.</p>
+                <p>
+                    <a href="/glass-market/resources/views/pricing.php">View Paid Plans</a> |
+                    <a href="/glass-market/public/index.php">Go Home</a>
+                </p>
+            ');
+        }
         
     } catch (PDOException $e) {
         die('Database error: ' . $e->getMessage());
