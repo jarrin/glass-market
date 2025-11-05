@@ -41,12 +41,12 @@ try {
     
     if (!$listing) {
         $_SESSION['listing_error'] = 'Listing not found or you do not have permission to edit it.';
-        header('Location: ' . VIEWS_URL . '/my-listings.php');
+        header('Location: ' . VIEWS_URL . '/profile.php?tab=listings');
         exit;
     }
 } catch (PDOException $e) {
     $_SESSION['listing_error'] = 'Failed to load listing: ' . $e->getMessage();
-    header('Location: ' . VIEWS_URL . '/my-listings.php');
+    header('Location: ' . VIEWS_URL . '/profile.php?tab=listings');
     exit;
 }
 
@@ -119,7 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_listing'])) {
             ]);
             
             $_SESSION['listing_success'] = 'Listing updated successfully!';
-            header('Location: ' . VIEWS_URL . '/my-listings.php');
+            header('Location: ' . VIEWS_URL . '/profile.php?tab=listings');
             exit;
         } catch (PDOException $e) {
             $error_message = 'Failed to update listing: ' . $e->getMessage();
@@ -294,7 +294,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_listing'])) {
         <div class="container">
             <div class="page-header">
                 <h1>✏️ Edit Listing</h1>
-                <a href="<?php echo VIEWS_URL; ?>/my-listings.php" class="btn btn-secondary">Back to My Listings</a>
+                <a href="<?php echo VIEWS_URL; ?>/profile.php?tab=listings" class="btn btn-secondary">Back to My Listings</a>
             </div>
 
             <div class="section">
@@ -484,7 +484,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_listing'])) {
 
                     <div style="margin-top: 24px; display: flex; gap: 12px;">
                         <button type="submit" name="update_listing" class="btn btn-primary">Save Changes</button>
-                        <a href="<?php echo VIEWS_URL; ?>/my-listings.php" class="btn btn-secondary">Cancel</a>
+                        <a href="<?php echo VIEWS_URL; ?>/profile.php?tab=listings" class="btn btn-secondary">Cancel</a>
                     </div>
                 </form>
             </div>
