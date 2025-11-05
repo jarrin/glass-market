@@ -9,14 +9,30 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
 }
 
 $id = (int) $_GET['id'];
+$user_id = $_SESSION['user_id'] ?? null;
 
-// Haal de specifieke listing op
-$stmt = $pdo->prepare("SELECT l.*, u.company_name, u.email AS company_email FROM listings l LEFT JOIN users u ON (l.company_id = u.company_id) WHERE l.id = ? AND l.published = 1 LIMIT 1");
+// Haal de specifieke listing op - allow draft viewing if owner
+$stmt = $pdo->prepare("
+    SELECT l.*, 
+           u.company_name, 
+           u.email AS company_email,
+           u.id as user_id
+    FROM listings l 
+    LEFT JOIN users u ON (l.company_id = u.company_id) 
+    WHERE l.id = ? 
+    LIMIT 1
+");
 $stmt->execute([$id]);
 $listing = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$listing) {
     die('Listing niet gevonden.');
+}
+
+// Check if listing is published OR if current user owns it
+$is_owner = ($user_id && $listing['user_id'] == $user_id);
+if ($listing['published'] != 1 && !$is_owner) {
+    die('Listing niet gevonden of nog niet gepubliceerd.');
 }
 
 // Afbeelding bepalen
@@ -31,10 +47,30 @@ if (!empty($listing['image_path'])) {
     <meta charset="UTF-8">
     <title><?= htmlspecialchars($listing['quantity_note']) ?> - Glass Market</title>
     <link rel="stylesheet" href="../css/app.css">
+    <style>
+        .draft-banner {
+            background: #fef2f2;
+            border: 2px solid #dc2626;
+            color: #991b1b;
+            padding: 16px 24px;
+            text-align: center;
+            font-weight: 600;
+            margin: 20px auto;
+            max-width: 900px;
+            border-radius: 8px;
+        }
+    </style>
 </head>
 <body>
 
 <?php include __DIR__ . '/../../includes/navbar.php'; ?>
+
+<?php if ($listing['published'] != 1 && $is_owner): ?>
+<div class="draft-banner">
+    ⚠️ This listing is in DRAFT mode and not visible to other users. 
+    <a href="<?= VIEWS_URL ?>/edit-listing.php?id=<?= $listing['id'] ?>" style="color: #dc2626; text-decoration: underline;">Edit and publish it</a> to make it public.
+</div>
+<?php endif; ?>
 
 <!-- Hero -->
 <section class="hero hero-muted text-center">
