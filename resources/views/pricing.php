@@ -336,6 +336,18 @@ $selected_plan = $_SESSION['selected_plan'] ?? null;
 <body>
     <?php include __DIR__ . '/../../includes/navbar.php'; ?>
 
+
+    <!-- Pricing Header -->
+    <div class="pricing-header">
+        <div class="container">
+            <h1>Choose Your Plan</h1>
+            <p>Flexible pricing for artisans and collectors. Start with a free trial, no credit card required.</p>
+        </div>
+    </div>
+
+    <!-- Pricing Plans -->
+    <div class="container">
+        
     <?php if ($has_active_subscription): ?>
     <!-- Current Subscription Status Banner -->
     <div style="background: <?php echo $is_trial ? '#fef3c7' : '#d1fae5'; ?>; border-bottom: 1px solid <?php echo $is_trial ? '#fbbf24' : '#6ee7b7'; ?>; padding: 16px 0; text-align: center;">
@@ -354,18 +366,8 @@ $selected_plan = $_SESSION['selected_plan'] ?? null;
         </div>
     </div>
     <?php endif; ?>
-
-    <!-- Pricing Header -->
-    <div class="pricing-header">
-        <div class="container">
-            <h1>Choose Your Plan</h1>
-            <p>Flexible pricing for artisans and collectors. Start with a free trial, no credit card required.</p>
-        </div>
-    </div>
-
-    <!-- Pricing Plans -->
-    <div class="container">
         <div class="pricing-grid">
+            
             <!-- Trial Plan -->
             <div class="pricing-card">
                 <div class="plan-name">Free Trial</div>
@@ -508,35 +510,14 @@ $selected_plan = $_SESSION['selected_plan'] ?? null;
 
     <?php include __DIR__ . '/../../includes/footer.php'; ?>
 
-    <!-- Session Info (for testing) -->
-    <?php if (isset($_SESSION['flow_restarted']) && $_SESSION['flow_restarted']): ?>
-        <div class="session-info restarted" id="sessionInfo">
-            ⚠️ Session expired (10 min). Flow restarted.
+
+    <!-- Pricing Header -->
+    <div class="pricing-header">
+        <div class="container">
+            <h1>Choose Your Plan</h1>
+            <p>Flexible pricing for artisans and collectors. Start with a free trial, no credit card required.</p>
         </div>
-        <?php unset($_SESSION['flow_restarted']); ?>
-        <script>
-            setTimeout(() => {
-                const info = document.getElementById('sessionInfo');
-                if (info) {
-                    info.style.opacity = '0';
-                    setTimeout(() => info.remove(), 300);
-                }
-            }, 5000);
-        </script>
-    <?php elseif (isset($_SESSION['pricing_flow_started'])): ?>
-        <div class="session-info" id="sessionInfo">
-            ✓ Session active (expires in <?php echo floor(($session_timeout - (time() - $_SESSION['pricing_flow_started'])) / 60); ?> min)
-        </div>
-        <script>
-            setTimeout(() => {
-                const info = document.getElementById('sessionInfo');
-                if (info) {
-                    info.style.opacity = '0';
-                    setTimeout(() => info.remove(), 300);
-                }
-            }, 3000);
-        </script>
-    <?php endif; ?>
+    </div>
 
     <script>
         // Update session activity on user interaction
