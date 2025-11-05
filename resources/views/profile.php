@@ -72,6 +72,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_publish'])) {
     exit;
 }
 
+// Handle listing deletion from edit page
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_listing'])) {
+    $listing_id = $_POST['listing_id'] ?? 0;
+    
+    try {
+        $pdo = new PDO("mysql:host=$db_host;dbname=$db_name", $db_user, $db_pass);
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        
+        // Verify the listing belongs to the user and get image path
+        $stmt = $pdo->prepare('
+            SELECT id, image_path FROM listings 
+            WHERE id = :listing_id AND user_id = :user_id
+        ');
+        $stmt->execute(['listing_id' => $listing_id, 'user_id' => $user['id']]);
+        $listing_to_delete = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($listing_to_delete) {
+            // Delete the listing
+            $stmt = $pdo->prepare('DELETE FROM listings WHERE id = :id');
+            $stmt->execute(['id' => $listing_id]);
+            
+            // Delete associated image file if it exists
+            if (!empty($listing_to_delete['image_path'])) {
+                $image_file = __DIR__ . '/../../public/' . $listing_to_delete['image_path'];
+                if (file_exists($image_file)) {
+                    unlink($image_file);
+                }
+            }
+            
+            // Delete from saved listings
+            $stmt = $pdo->prepare('DELETE FROM saved_listings WHERE listing_id = :id');
+            $stmt->execute(['id' => $listing_id]);
+            
+            $_SESSION['profile_success'] = 'Listing deleted successfully!';
+        } else {
+            $_SESSION['profile_error'] = 'You do not have permission to delete this listing.';
+        }
+    } catch (PDOException $e) {
+        $_SESSION['profile_error'] = 'Failed to delete listing: ' . $e->getMessage();
+    }
+    
+    // Redirect to prevent form resubmission
+    header('Location: ' . VIEWS_URL . '/profile.php?tab=listings');
+    exit;
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">

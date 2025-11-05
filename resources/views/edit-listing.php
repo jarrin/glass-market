@@ -192,6 +192,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_listing'])) {
             font-size: 28px;
             font-weight: 800;
             margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .status-badge.published {
+            background: #10b981;
+            color: white;
+        }
+        
+        .status-badge.draft {
+            background: #f59e0b;
+            color: white;
         }
 
         .section {
@@ -325,7 +348,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_listing'])) {
     <main style="padding-top: 80px;">
         <div class="container">
             <div class="page-header">
-                <h1>✏️ Edit Listing</h1>
+                <h1>
+                    ✏️ Edit Listing
+                    <span class="status-badge <?php echo $listing['published'] == 1 ? 'published' : 'draft'; ?>">
+                        <?php echo $listing['published'] == 1 ? 'Published' : 'Draft'; ?>
+                    </span>
+                </h1>
                 <a href="<?php echo VIEWS_URL; ?>/profile.php?tab=listings" class="btn btn-secondary">Back to My Listings</a>
             </div>
 
@@ -529,10 +557,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_listing'])) {
                     </div>
 
                     <div style="margin-top: 24px; display: flex; gap: 12px;">
-                        <button type="submit" name="update_listing" class="btn btn-primary">Save Changes</button>
+                        <button type="submit" name="update_listing" class="btn btn-primary">💾 Save Changes</button>
                         <a href="<?php echo VIEWS_URL; ?>/profile.php?tab=listings" class="btn btn-secondary">Cancel</a>
                     </div>
                 </form>
+                
+                <!-- Danger Zone -->
+                <div style="margin-top: 40px; padding-top: 30px; border-top: 2px solid #fee2e2;">
+                    <h3 style="color: #dc2626; font-size: 16px; margin-bottom: 12px;">🗑️ Danger Zone</h3>
+                    <p style="font-size: 13px; color: #6b7280; margin-bottom: 16px;">
+                        Once you delete a listing, there is no going back. This action cannot be undone.
+                    </p>
+                    <form method="POST" action="<?php echo VIEWS_URL; ?>/profile.php?tab=listings" 
+                          onsubmit="return confirm('Are you sure you want to delete this listing? This action cannot be undone!');"
+                          style="display: inline;">
+                        <input type="hidden" name="delete_listing" value="1">
+                        <input type="hidden" name="listing_id" value="<?php echo $listing_id; ?>">
+                        <button type="submit" class="btn" style="background: #dc2626; color: white;">
+                            Delete Listing Permanently
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </main>
@@ -551,6 +596,72 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_listing'])) {
             otherInput.value = '';
         }
     }
+    
+    function previewImage(input) {
+        const file = input.files[0];
+        if (file) {
+            // Check file size (5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Image file size must be less than 5MB.');
+                input.value = '';
+                return;
+            }
+            
+            // Check file type
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+            if (!allowedTypes.includes(file.type)) {
+                alert('Please upload a valid image file (JPG, PNG, or WebP).');
+                input.value = '';
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('preview-img').src = e.target.result;
+                document.getElementById('image-preview').style.display = 'block';
+                
+                // Hide current image when new one is selected
+                const currentImage = document.getElementById('current-image');
+                if (currentImage) {
+                    currentImage.style.opacity = '0.3';
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+    
+    function clearImagePreview() {
+        document.getElementById('glass_image').value = '';
+        document.getElementById('image-preview').style.display = 'none';
+        
+        // Restore current image opacity
+        const currentImage = document.getElementById('current-image');
+        if (currentImage) {
+            currentImage.style.opacity = '1';
+        }
+    }
+    
+    // Form validation before submit
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const tons = parseFloat(document.getElementById('glass_tons').value);
+        if (isNaN(tons) || tons <= 0) {
+            e.preventDefault();
+            alert('Please enter a valid quantity in tons (must be greater than 0).');
+            document.getElementById('glass_tons').focus();
+            return false;
+        }
+        
+        const glassType = document.getElementById('glass_type').value;
+        if (glassType === 'other') {
+            const otherType = document.getElementById('glass_type_other').value.trim();
+            if (!otherType) {
+                e.preventDefault();
+                alert('Please specify the glass type.');
+                document.getElementById('glass_type_other').focus();
+                return false;
+            }
+        }
+    });
     </script>
 
     <?php include __DIR__ . '/../../includes/footer.php'; ?>
