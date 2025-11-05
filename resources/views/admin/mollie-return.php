@@ -20,7 +20,10 @@ $payment_months = 0;
 $is_trial_upgrade = false;
 
 // Log all GET parameters for debugging
+error_log('=== Mollie Return Page Loaded ===');
 error_log('Mollie Return - GET params: ' . print_r($_GET, true));
+error_log('Request URI: ' . $_SERVER['REQUEST_URI']);
+error_log('User ID from GET: ' . ($user_id ?: 'NOT SET'));
 
 try {
     $pdo = new PDO("mysql:host=$db_host;dbname=$db_name", $db_user, $db_pass);
@@ -215,9 +218,17 @@ try {
 
 } catch (Exception $e) {
     $status = 'error';
+    $message = $e->getMessage();
     error_log('Mollie Return Error: ' . $e->getMessage());
     error_log('Stack trace: ' . $e->getTraceAsString());
 }
+
+// Final status log before rendering page
+error_log("=== Final Status: $status ===");
+error_log("Payment Amount: €$payment_amount");
+error_log("Payment Months: $payment_months");
+error_log("Is Trial Upgrade: " . ($is_trial_upgrade ? 'YES' : 'NO'));
+error_log("About to render page with status: $status");
 ?>
 <!DOCTYPE html>
 <html lang="en">
