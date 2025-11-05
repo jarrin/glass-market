@@ -21,19 +21,19 @@ $success_message = '';
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim($_POST['name'] ?? '');
-    $company_name = trim($_POST['company_name'] ?? '');
-    $address = trim($_POST['address'] ?? '');
-    $city = trim($_POST['city'] ?? '');
-    $country = trim($_POST['country'] ?? '');
+    $company_name = trim($_POST['company_name'] ?? ''); // Optional
+    $address = trim($_POST['address'] ?? ''); // Optional
+    $city = trim($_POST['city'] ?? ''); // Optional
+    $country = trim($_POST['country'] ?? ''); // Optional
     $notification_email = trim($_POST['notification_email'] ?? '');
     $communication_email = trim($_POST['communication_email'] ?? '');
     $password = $_POST['password'] ?? '';
     $confirm_password = $_POST['confirm_password'] ?? '';
 
-    // Validation
-    if (empty($name) || empty($company_name) || empty($address) || empty($city) || empty($country) ||
-        empty($notification_email) || empty($communication_email) || empty($password) || empty($confirm_password)) {
-        $error_message = 'All fields are required.';
+    // Validation - only required fields: name, emails, password
+    if (empty($name) || empty($notification_email) || empty($communication_email) || 
+        empty($password) || empty($confirm_password)) {
+        $error_message = 'Please fill in all required fields (name, emails, and password).';
     } elseif (!filter_var($notification_email, FILTER_VALIDATE_EMAIL)) {
         $error_message = 'Please enter a valid notification email address.';
     } elseif (!filter_var($communication_email, FILTER_VALIDATE_EMAIL)) {
@@ -63,15 +63,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // Column already exists, ignore error
                 }
 
-                // Insert user with email_verified_at as NULL (pending approval)
+                // Insert user with email_verified_at set to NOW() (auto-verified for regular users)
                 $stmt = $pdo->prepare('
                     INSERT INTO users (name, company_name, email, password, email_verified_at)
-                    VALUES (:name, :company_name, :email, :password, NULL)
+                    VALUES (:name, :company_name, :email, :password, NOW())
                 ');
 
                 $stmt->execute([
                     'name' => $name,
-                    'company_name' => $company_name,
+                    'company_name' => !empty($company_name) ? $company_name : null,
                     'email' => $notification_email,
                     'password' => $hashed_password,
                 ]);
@@ -79,14 +79,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Get the newly created user ID
                 $user_id = $pdo->lastInsertId();
 
+                // If company details provided, create a company record
+                if (!empty($company_name)) {
+                    try {
+                        // Check if companies table exists and create company
+                        $stmt = $pdo->prepare('
+                            INSERT INTO companies (name, address, city, country, contact_email, created_at, updated_at)
+                            VALUES (:name, :address, :city, :country, :email, NOW(), NOW())
+                        ');
+                        
+                        $stmt->execute([
+                            'name' => $company_name,
+                            'address' => !empty($address) ? $address : null,
+                            'city' => !empty($city) ? $city : null,
+                            'country' => !empty($country) ? $country : null,
+                            'email' => $communication_email,
+                        ]);
+                        
+                        $company_id = $pdo->lastInsertId();
+                        
+                        // Link user to company
+                        $stmt = $pdo->prepare('UPDATE users SET company_id = :company_id WHERE id = :user_id');
+                        $stmt->execute([
+                            'company_id' => $company_id,
+                            'user_id' => $user_id
+                        ]);
+                    } catch (PDOException $e) {
+                        // Company creation failed, but user is still created
+                        error_log("Company creation failed: " . $e->getMessage());
+                    }
+                }
+
                 // Create 3-month free trial subscription
                 require_once __DIR__ . '/../../database/classes/subscriptions.php';
-                Subscription::createTrialSubscription($pdo, $user_id);
+                $subscription_created = Subscription::createTrialSubscription($pdo, $user_id);
 
-                $success_message = 'Registration successful! You have been granted a 3-month free trial. Your account is pending approval. You will be able to access the platform once an administrator verifies your account.';
+                if ($subscription_created) {
+                    $success_message = 'Registration successful! You have been granted a 3-month free trial. You can now log in to your account.';
+                } else {
+                    $success_message = 'Registration successful! However, there was an issue creating your trial subscription. Please contact support.';
+                    error_log("Trial subscription creation failed for user_id: $user_id");
+                }
             }
         } catch (PDOException $e) {
             $error_message = 'Registration failed: ' . $e->getMessage();
+            error_log("Registration error: " . $e->getMessage());
         }
     }
 }
@@ -355,50 +392,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <div class="form-group">
-                    <label for="company_name">Company name <span class="required">*</span></label>
+                    <label for="company_name">Company name <span style="color: #999; font-size: 11px;">(Optional)</span></label>
                     <input
                         type="text"
                         id="company_name"
                         name="company_name"
                         value="<?php echo htmlspecialchars($_POST['company_name'] ?? ''); ?>"
-                        placeholder="Company name..."
-                        required
+                        placeholder="Company name (optional)..."
                     >
                 </div>
 
                 <div class="form-group">
-                    <label for="address">Address <span class="required">*</span></label>
+                    <label for="address">Address <span style="color: #999; font-size: 11px;">(Optional)</span></label>
                     <input
                         type="text"
                         id="address"
                         name="address"
                         value="<?php echo htmlspecialchars($_POST['address'] ?? ''); ?>"
-                        placeholder="Address"
-                        required
+                        placeholder="Address (optional)"
                     >
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="city">City <span class="required">*</span></label>
+                        <label for="city">City <span style="color: #999; font-size: 11px;">(Optional)</span></label>
                         <input
                             type="text"
                             id="city"
                             name="city"
                             value="<?php echo htmlspecialchars($_POST['city'] ?? ''); ?>"
-                            placeholder="City"
-                            required
+                            placeholder="City (optional)"
                         >
                     </div>
                     <div class="form-group">
-                        <label for="country">Country <span class="required">*</span></label>
+                        <label for="country">Country <span style="color: #999; font-size: 11px;">(Optional)</span></label>
                         <input
                             type="text"
                             id="country"
                             name="country"
                             value="<?php echo htmlspecialchars($_POST['country'] ?? ''); ?>"
-                            placeholder="Country"
-                            required
+                            placeholder="Country (optional)"
                         >
                     </div>
                 </div>
