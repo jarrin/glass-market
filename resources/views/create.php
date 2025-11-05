@@ -21,19 +21,9 @@ $success_message = '';
 // Get user info
 $user_id = $_SESSION['user_id'] ?? null;
 
-// Get user's company ID (optional - can be null for personal listings)
+// This page creates PERSONAL listings only (company_id = NULL)
+// For company listings, use company/create-company-listing.php
 $company_id = null;
-try {
-    $pdo = new PDO("mysql:host=$db_host;dbname=$db_name", $db_user, $db_pass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
-    $stmt = $pdo->prepare('SELECT company_id FROM users WHERE id = :user_id');
-    $stmt->execute(['user_id' => $user_id]);
-    $user_data = $stmt->fetch(PDO::FETCH_ASSOC);
-    $company_id = $user_data['company_id'] ?? null;
-} catch (PDOException $e) {
-    $error_message = 'Database error: ' . $e->getMessage();
-}
 
 // Initialize default values for new listing
 $listing = [
