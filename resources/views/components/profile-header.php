@@ -5,9 +5,11 @@
 <div class="profile-header">
     <div class="profile-avatar">
         <?php if (!empty($user['avatar'])): ?>
-            <img src="<?php echo PUBLIC_URL . '/' . htmlspecialchars($user['avatar']); ?>" alt="<?php echo htmlspecialchars($user['name']); ?>">
+            <img src="<?php echo PUBLIC_URL . '/' . htmlspecialchars($user['avatar']); ?>" 
+                 alt="<?php echo htmlspecialchars($user['name']); ?>"
+                 style="width: 75px !important; height: 75px !important; border-radius: 50% !important; object-fit: cover !important; display: block;">
         <?php else: ?>
-            <div class="avatar-placeholder">
+            <div class="avatar-placeholder" style="width: 75px; height: 75px;">
                 <?php echo strtoupper(substr($user['name'], 0, 1)); ?>
             </div>
         <?php endif; ?>
