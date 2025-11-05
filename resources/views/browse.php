@@ -135,10 +135,11 @@
                     l.tested,
                     l.storage_location,
                     l.quality_notes,
-                    l.image_path,
+                    li.image_path,
                     c.name as company_name
                 FROM listings l
                 LEFT JOIN companies c ON l.company_id = c.id
+                LEFT JOIN listing_images li ON l.id = li.listing_id AND li.is_main = 1
                 WHERE l.published = 1
                 ORDER BY l.created_at DESC
             ");
@@ -191,7 +192,8 @@
                 // Determine image URL - use uploaded image if available, otherwise placeholder
                 $imageUrl = "https://picsum.photos/seed/glass{$listing['id']}/800/800";
                 if (!empty($listing['image_path'])) {
-                    $imageUrl = PUBLIC_URL . '/' . $listing['image_path'];
+                    // Image path is relative from public folder (e.g., uploads/listings/xxx.jpg)
+                    $imageUrl = PUBLIC_URL . '/' . ltrim($listing['image_path'], '/');
                 }
                 
                 $products[] = [
@@ -422,7 +424,7 @@
                 });
             }
             
-            const glassTypeCheckboxes = Array.from(document.querySelectorAll('.glass-type-filter'));
+            const glassTypeCheckboxes = Array.from(document.querySelectorAll('.glass-filter'));
             const recycledCheckboxes = Array.from(document.querySelectorAll('.recycled-filter'));
             const minRange = document.getElementById('minRange');
             const maxRange = document.getElementById('maxRange');
