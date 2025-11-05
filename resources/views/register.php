@@ -82,10 +82,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // If company details provided, create a company record
                 if (!empty($company_name)) {
                     try {
-                        // Check if companies table exists and create company
+                        // Create company with owner_user_id set and default company_type
                         $stmt = $pdo->prepare('
-                            INSERT INTO companies (name, address, city, country, contact_email, created_at, updated_at)
-                            VALUES (:name, :address, :city, :country, :email, NOW(), NOW())
+                            INSERT INTO companies (
+                                name, 
+                                address_line1, 
+                                city, 
+                                country, 
+                                owner_user_id,
+                                company_type,
+                                created_at
+                            )
+                            VALUES (:name, :address, :city, :country, :owner_user_id, :company_type, NOW())
                         ');
                         
                         $stmt->execute([
@@ -93,7 +101,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             'address' => !empty($address) ? $address : null,
                             'city' => !empty($city) ? $city : null,
                             'country' => !empty($country) ? $country : null,
-                            'email' => $communication_email,
+                            'owner_user_id' => $user_id,
+                            'company_type' => 'Other', // Default type, user can update later
                         ]);
                         
                         $company_id = $pdo->lastInsertId();
@@ -104,6 +113,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             'company_id' => $company_id,
                             'user_id' => $user_id
                         ]);
+                        
+                        error_log("Company created successfully: ID $company_id for user $user_id");
                     } catch (PDOException $e) {
                         // Company creation failed, but user is still created
                         error_log("Company creation failed: " . $e->getMessage());
