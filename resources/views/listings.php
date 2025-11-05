@@ -32,7 +32,9 @@ $stmt = $pdo->prepare("
 $stmt->execute([$id]);
 $listing = $stmt->fetch(PDO::FETCH_ASSOC);
 
+// Check if listing exists
 if (!$listing) {
+    $_SESSION['browse_error'] = 'Listing not found. It may have been removed or never existed.';
     header('Location: ' . VIEWS_URL . '/browse.php');
     exit;
 }
@@ -40,6 +42,7 @@ if (!$listing) {
 // Check if listing is published OR if current user owns it
 $is_owner = ($user_id && $listing['owner_user_id'] == $user_id);
 if ($listing['published'] != 1 && !$is_owner) {
+    $_SESSION['browse_error'] = 'This listing is not currently available for viewing.';
     header('Location: ' . VIEWS_URL . '/browse.php');
     exit;
 }

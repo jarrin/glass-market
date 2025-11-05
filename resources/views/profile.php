@@ -47,12 +47,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_publish'])) {
         $pdo = new PDO("mysql:host=$db_host;dbname=$db_name", $db_user, $db_pass);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         
-        // Verify the listing belongs to the user's company
+        // Verify the listing belongs to the user
         $stmt = $pdo->prepare('
-            SELECT l.id FROM listings l
-            LEFT JOIN companies c ON l.company_id = c.id
-            LEFT JOIN users u ON c.id = u.company_id
-            WHERE l.id = :listing_id AND u.id = :user_id
+            SELECT id FROM listings 
+            WHERE id = :listing_id AND user_id = :user_id
         ');
         $stmt->execute(['listing_id' => $listing_id, 'user_id' => $user['id']]);
         
@@ -61,12 +59,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_publish'])) {
             $stmt->execute(['status' => $new_status, 'id' => $listing_id]);
             
             $status_text = $new_status == 1 ? 'published' : 'unpublished';
-            $success_message = "Listing {$status_text} successfully!";
+            $_SESSION['profile_success'] = "Listing {$status_text} successfully!";
         } else {
-            $error_message = 'You do not have permission to modify this listing.';
+            $_SESSION['profile_error'] = 'You do not have permission to modify this listing.';
         }
     } catch (PDOException $e) {
-        $error_message = 'Failed to update listing: ' . $e->getMessage();
+        $_SESSION['profile_error'] = 'Failed to update listing: ' . $e->getMessage();
     }
     
     // Redirect to prevent form resubmission

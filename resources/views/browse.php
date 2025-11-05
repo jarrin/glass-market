@@ -96,6 +96,19 @@
 <body>
     <?php include __DIR__ . '/../../includes/navbar.php'; ?>
     <?php include __DIR__ . '/../../includes/subscription-notification.php'; ?>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" style="position: fixed; top: 80px; right: 20px; z-index: 99999;"></div>
+
+    <?php if (isset($_SESSION['browse_error'])): ?>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                showToast('<?php echo addslashes($_SESSION['browse_error']); ?>', 'error');
+            });
+        </script>
+        <?php unset($_SESSION['browse_error']); ?>
+    <?php endif; ?>
+
 <main class="container" style="padding-top: 70px;">
     <h1 class="page-title">Browse Collection</h1>
 
@@ -771,6 +784,88 @@
             syncRanges();
             applyFilters();
         })();
+
+        // Toast Notification System
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const icons = {
+                success: '✓',
+                error: '✕',
+                info: 'ℹ'
+            };
+            
+            const colors = {
+                success: '#10b981',
+                error: '#ef4444',
+                info: '#3b82f6'
+            };
+            
+            toast.style.cssText = `
+                background: white;
+                border-left: 4px solid ${colors[type] || colors.info};
+                padding: 16px 20px;
+                margin-bottom: 10px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                min-width: 300px;
+                max-width: 400px;
+                animation: slideIn 0.3s ease-out;
+            `;
+            
+            toast.innerHTML = `
+                <span style="
+                    background: ${colors[type] || colors.info};
+                    color: white;
+                    width: 24px;
+                    height: 24px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: bold;
+                    flex-shrink: 0;
+                ">${icons[type] || icons.info}</span>
+                <span style="flex: 1; color: #1f2937; font-size: 14px;">${message}</span>
+            `;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease-in';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+        
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from {
+                    transform: translateX(400px);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            
+            @keyframes slideOut {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(400px);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 
 </main>

@@ -33,8 +33,7 @@ try {
         SELECT l.*, c.name as company_name
         FROM listings l
         LEFT JOIN companies c ON l.company_id = c.id
-        LEFT JOIN users u ON c.id = u.company_id
-        WHERE l.id = :listing_id AND u.id = :user_id
+        WHERE l.id = :listing_id AND l.user_id = :user_id
     ');
     $stmt->execute(['listing_id' => $listing_id, 'user_id' => $user_id]);
     $listing = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -54,10 +53,20 @@ try {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_listing'])) {
     $title = trim($_POST['glass_title'] ?? '');
     $glass_type = trim($_POST['glass_type'] ?? '');
+    $glass_type_other = trim($_POST['glass_type_other'] ?? '');
     $tons = $_POST['glass_tons'] ?? '';
     $description = trim($_POST['glass_description'] ?? '');
     $side = $_POST['side'] ?? 'WTS';
     $price_text = trim($_POST['price_text'] ?? '');
+    $recycled = $_POST['recycled'] ?? 'unknown';
+    $tested = $_POST['tested'] ?? 'unknown';
+    $storage_location = trim($_POST['storage_location'] ?? '');
+    $currency = $_POST['currency'] ?? 'EUR';
+    
+    // Handle "other" glass type
+    if ($glass_type === 'other' && !empty($glass_type_other)) {
+        $glass_type = $glass_type_other;
+    }
     
     if (empty($title) || empty($glass_type) || empty($tons)) {
         $error_message = 'Title, glass type and tonnage are required.';
@@ -82,45 +91,68 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_listing'])) {
                 $allowed_extensions = ['jpg', 'jpeg', 'png', 'webp'];
                 
                 if (in_array($file_extension, $allowed_extensions)) {
-                    $new_filename = 'listing_' . $listing_id . '_' . time() . '.' . $file_extension;
-                    $upload_path = $upload_dir . $new_filename;
-                    
-                    if (move_uploaded_file($_FILES['glass_image']['tmp_name'], $upload_path)) {
-                        $image_path = 'uploads/listings/' . $new_filename;
+                    // Check file size (5MB max)
+                    if ($_FILES['glass_image']['size'] > 5 * 1024 * 1024) {
+                        $error_message = 'Image file size must be less than 5MB.';
+                    } else {
+                        $new_filename = 'listing_' . $listing_id . '_' . time() . '.' . $file_extension;
+                        $upload_path = $upload_dir . $new_filename;
+                        
+                        if (move_uploaded_file($_FILES['glass_image']['tmp_name'], $upload_path)) {
+                            // Delete old image if it exists
+                            if (!empty($listing['image_path'])) {
+                                $old_image = __DIR__ . '/../../public/' . $listing['image_path'];
+                                if (file_exists($old_image)) {
+                                    unlink($old_image);
+                                }
+                            }
+                            $image_path = 'uploads/listings/' . $new_filename;
+                        }
                     }
+                } else {
+                    $error_message = 'Invalid file type. Please upload JPG, PNG, or WebP image.';
                 }
             }
             
-            // Map glass type to proper format
-            $glass_type_mapped = ucfirst($glass_type) . ' Glass';
-            
-            // Update listing
-            $stmt = $pdo->prepare('
-                UPDATE listings SET
-                    side = :side,
-                    glass_type = :glass_type,
-                    quantity_tons = :quantity_tons,
-                    quantity_note = :quantity_note,
-                    quality_notes = :quality_notes,
-                    price_text = :price_text,
-                    image_path = :image_path
-                WHERE id = :id
-            ');
-            
-            $stmt->execute([
-                'side' => $side,
-                'glass_type' => $glass_type_mapped,
-                'quantity_tons' => $tons,
-                'quantity_note' => $title,
-                'quality_notes' => $description,
-                'price_text' => $price_text,
-                'image_path' => $image_path,
-                'id' => $listing_id
-            ]);
-            
-            $_SESSION['listing_success'] = 'Listing updated successfully!';
-            header('Location: ' . VIEWS_URL . '/profile.php?tab=listings');
-            exit;
+            // Only proceed with update if no errors
+            if (empty($error_message)) {
+                // Update listing
+                $stmt = $pdo->prepare('
+                    UPDATE listings SET
+                        side = :side,
+                        glass_type = :glass_type,
+                        quantity_tons = :quantity_tons,
+                        quantity_note = :quantity_note,
+                        quality_notes = :quality_notes,
+                        price_text = :price_text,
+                        recycled = :recycled,
+                        tested = :tested,
+                        storage_location = :storage_location,
+                        currency = :currency,
+                        image_path = :image_path,
+                        updated_at = NOW()
+                    WHERE id = :id
+                ');
+                
+                $stmt->execute([
+                    'side' => $side,
+                    'glass_type' => $glass_type,
+                    'quantity_tons' => $tons,
+                    'quantity_note' => $title,
+                    'quality_notes' => $description,
+                    'price_text' => $price_text,
+                    'recycled' => $recycled,
+                    'tested' => $tested,
+                    'storage_location' => $storage_location,
+                    'currency' => $currency,
+                    'image_path' => $image_path,
+                    'id' => $listing_id
+                ]);
+                
+                $_SESSION['listing_success'] = 'Listing updated successfully!';
+                header('Location: ' . VIEWS_URL . '/profile.php?tab=listings');
+                exit;
+            }
         } catch (PDOException $e) {
             $error_message = 'Failed to update listing: ' . $e->getMessage();
         }
@@ -344,7 +376,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_listing'])) {
                                     'Mixed Cullet',
                                     'Flint Cullet'
                                 ];
-                                $current_type = $listing['glass_type'] ?? '';
+                                $current_type = str_replace(' Glass', '', $listing['glass_type'] ?? '');
                                 $is_other = !in_array($current_type, $glass_types) && !empty($current_type);
                                 
                                 foreach ($glass_types as $type) {
@@ -464,7 +496,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_listing'])) {
                         <?php if (!empty($listing['image_path'])): ?>
                             <div style="margin-bottom: 12px;">
                                 <p style="font-size: 13px; color: #666; margin-bottom: 8px;">Current image:</p>
-                                <img src="<?php echo htmlspecialchars(PUBLIC_URL . '/' . $listing['image_path']); ?>" 
+                                <img id="current-image" 
+                                     src="<?php echo htmlspecialchars(PUBLIC_URL . '/' . $listing['image_path']); ?>" 
                                      alt="Current listing image" 
                                      class="current-image">
                             </div>
@@ -474,8 +507,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_listing'])) {
                             id="glass_image"
                             name="glass_image"
                             accept="image/jpeg,image/jpg,image/png,image/webp"
+                            onchange="previewImage(this)"
                         >
                         <small>Upload a new photo to replace the current one (JPG, PNG, or WebP - Max 5MB)</small>
+                        
+                        <!-- Image preview container -->
+                        <div id="image-preview" style="display: none; margin-top: 12px;">
+                            <p style="font-size: 13px; color: #059669; margin-bottom: 8px;">
+                                ✓ New image preview:
+                            </p>
+                            <img id="preview-img" src="" alt="New image preview" class="current-image">
+                            <button type="button" onclick="clearImagePreview()" 
+                                    style="margin-top: 8px; padding: 6px 12px; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                                Remove new image
+                            </button>
+                        </div>
                     </div>
 
                     <div class="info-box">
