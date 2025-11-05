@@ -546,7 +546,8 @@
                     l.tested,
                     l.storage_location,
                     l.quality_notes,
-                    l.created_at
+                    l.created_at,
+                    l.image_path
                 FROM listings l
                 WHERE l.company_id = ? AND l.published = 1
                 ORDER BY l.created_at DESC
@@ -726,8 +727,12 @@
             <?php foreach ($listings as $listing): 
                 $glassType = $listing['glass_type_other'] ?: $listing['glass_type'];
                 $title = $listing['quantity_note'] ?: $glassType;
-                // Use placeholder image since image_path doesn't exist in your database yet
-                $imageUrl = "https://picsum.photos/seed/glass{$listing['id']}/800/800";
+                // Use actual uploaded image if available, otherwise use placeholder
+                if (!empty($listing['image_path'])) {
+                    $imageUrl = PUBLIC_URL . '/' . $listing['image_path'];
+                } else {
+                    $imageUrl = "https://picsum.photos/seed/glass{$listing['id']}/800/800";
+                }
             ?>
             <article class="product-card" 
                      data-side="<?php echo htmlspecialchars($listing['side'], ENT_QUOTES, 'UTF-8'); ?>"
