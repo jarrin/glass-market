@@ -58,28 +58,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_listing'])) {
             $pdo = new PDO("mysql:host=$db_host;dbname=$db_name", $db_user, $db_pass);
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             
-            $image_path = 'image.png'; // Default image
+            $pdo->beginTransaction();
             
-            // Handle image upload
-            if (isset($_FILES['glass_image']) && $_FILES['glass_image']['error'] === UPLOAD_ERR_OK) {
-                $upload_dir = __DIR__ . '/../../public/uploads/listings/';
-                
-                if (!is_dir($upload_dir)) {
-                    mkdir($upload_dir, 0755, true);
-                }
-                
-                $file_extension = strtolower(pathinfo($_FILES['glass_image']['name'], PATHINFO_EXTENSION));
-                $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-                
-                if (in_array($file_extension, $allowed_extensions)) {
-                    $new_filename = 'listing_' . time() . '_' . uniqid() . '.' . $file_extension;
-                    $upload_path = $upload_dir . $new_filename;
-                    
-                    if (move_uploaded_file($_FILES['glass_image']['tmp_name'], $upload_path)) {
-                        $image_path = 'uploads/listings/' . $new_filename;
-                    }
-                }
-            }
+            $image_path = 'image.png'; // Default image - kept for backwards compatibility
             
             // Map glass type to proper format
             $glass_type_mapped = ucfirst($glass_type) . ' Glass';
@@ -135,10 +116,65 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_listing'])) {
                 'currency' => 'EUR'
             ]);
             
-            $_SESSION['listing_success'] = 'Listing created successfully!';
+            $listing_id = $pdo->lastInsertId();
+            
+            // Handle multiple image uploads
+            if (isset($_FILES['product_images']) && !empty($_FILES['product_images']['name'][0])) {
+                $upload_dir = __DIR__ . '/../../public/uploads/listings/';
+                
+                if (!is_dir($upload_dir)) {
+                    mkdir($upload_dir, 0755, true);
+                }
+                
+                $uploaded_count = 0;
+                foreach ($_FILES['product_images']['name'] as $key => $filename) {
+                    if ($uploaded_count >= 20) break; // Max 20 images
+                    
+                    if ($_FILES['product_images']['error'][$key] === UPLOAD_ERR_OK) {
+                        $file_extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+                        $allowed_extensions = ['jpg', 'jpeg', 'png', 'webp'];
+                        
+                        if (!in_array($file_extension, $allowed_extensions)) {
+                            continue;
+                        }
+                        
+                        if ($_FILES['product_images']['size'][$key] > 5 * 1024 * 1024) {
+                            continue; // Skip files over 5MB
+                        }
+                        
+                        $new_filename = 'listing_' . $listing_id . '_' . time() . '_' . $key . '.' . $file_extension;
+                        $upload_path = $upload_dir . $new_filename;
+                        
+                        if (move_uploaded_file($_FILES['product_images']['tmp_name'][$key], $upload_path)) {
+                            $image_path_db = 'uploads/listings/' . $new_filename;
+                            $is_main = ($uploaded_count == 0) ? 1 : 0; // First image is main
+                            
+                            $stmt = $pdo->prepare('
+                                INSERT INTO listing_images (listing_id, image_path, is_main, display_order)
+                                VALUES (:listing_id, :image_path, :is_main, :display_order)
+                            ');
+                            $stmt->execute([
+                                'listing_id' => $listing_id,
+                                'image_path' => $image_path_db,
+                                'is_main' => $is_main,
+                                'display_order' => $uploaded_count
+                            ]);
+                            
+                            $uploaded_count++;
+                        }
+                    }
+                }
+            }
+            
+            $pdo->commit();
+            
+            $_SESSION['listing_success' ] = 'Listing created successfully!';
             header('Location: ' . VIEWS_URL . '/profile.php?tab=listings');
             exit;
         } catch (PDOException $e) {
+            if (isset($pdo)) {
+                $pdo->rollBack();
+            }
             $error_message = 'Failed to create listing: ' . $e->getMessage();
         }
     }
@@ -485,16 +521,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_listing'])) {
             </div>
 
             <div class="section">
-                <h2>📸 Image</h2>
+                <h2>📸 Product Images</h2>
                 
                 <div class="form-group">
-                    <label for="glass_image">Upload Image (optional)</label>
-                    <div class="file-upload" onclick="document.getElementById('glass_image').click()">
+                    <label for="product_images">Upload Images (up to 20 images)</label>
+                    <div class="file-upload" onclick="document.getElementById('product_images').click()">
                         <div style="font-size: 48px; margin-bottom: 12px;">📷</div>
-                        <p style="margin: 0; font-weight: 600; color: #374151;">Click to upload image</p>
-                        <p style="margin: 4px 0 0; font-size: 13px; color: #6b7280;">JPG, PNG, GIF, or WEBP (max 10MB)</p>
-                        <input type="file" id="glass_image" name="glass_image" accept="image/*">
+                        <p style="margin: 0; font-weight: 600; color: #374151;">Click to upload images</p>
+                        <p style="margin: 4px 0 0; font-size: 13px; color: #6b7280;">JPG, PNG, or WEBP (max 5MB each, up to 20 images)</p>
+                        <input type="file" id="product_images" name="product_images[]" accept="image/jpeg,image/jpg,image/png,image/webp" multiple onchange="previewProductImages(this)">
                     </div>
+                    <div id="image-preview-container" style="margin-top: 16px; display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 12px;"></div>
                 </div>
             </div>
 
@@ -511,6 +548,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_listing'])) {
             </div>
         </form>
     </div>
+
+    <script>
+    function previewProductImages(input) {
+        const container = document.getElementById('image-preview-container');
+        container.innerHTML = '';
+        
+        if (input.files && input.files.length > 0) {
+            if (input.files.length > 20) {
+                alert('Maximum 20 images allowed. Only the first 20 will be uploaded.');
+            }
+            
+            const filesToProcess = Math.min(input.files.length, 20);
+            
+            for (let i = 0; i < filesToProcess; i++) {
+                const file = input.files[i];
+                
+                if (file.size > 5 * 1024 * 1024) {
+                    alert(`File "${file.name}" is too large. Maximum size is 5MB.`);
+                    continue;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.createElement('div');
+                    preview.style.cssText = 'position: relative; aspect-ratio: 1; border-radius: 8px; overflow: hidden; border: 2px solid #e5e7eb;';
+                    
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.style.cssText = 'width: 100%; height: 100%; object-fit: cover;';
+                    
+                    const badge = document.createElement('div');
+                    badge.style.cssText = 'position: absolute; top: 4px; left: 4px; background: #2f6df5; color: white; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700;';
+                    badge.textContent = i === 0 ? 'MAIN' : `#${i + 1}`;
+                    
+                    preview.appendChild(img);
+                    preview.appendChild(badge);
+                    container.appendChild(preview);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+    }
+    </script>
 
     <?php include __DIR__ . '/../../includes/footer.php'; ?>
 </body>

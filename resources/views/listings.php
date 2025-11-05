@@ -55,32 +55,52 @@ if ($user_id) {
     $is_saved = (bool)$stmt->fetch();
 }
 
+// Load all images for this listing
+$listing_images = [];
+$stmt = $pdo->prepare("
+    SELECT * FROM listing_images 
+    WHERE listing_id = ? 
+    ORDER BY is_main DESC, display_order ASC
+");
+$stmt->execute([$id]);
+$listing_images = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Determine main image and additional images
+if (!empty($listing_images)) {
+    $main_image = null;
+    $additional_images = [];
+    
+    foreach ($listing_images as $img) {
+        if ($img['is_main']) {
+            $main_image = PUBLIC_URL . '/' . $img['image_path'];
+        }
+        $additional_images[] = PUBLIC_URL . '/' . $img['image_path'];
+    }
+    
+    // If no main image is set, use the first one
+    if (!$main_image && !empty($additional_images)) {
+        $main_image = $additional_images[0];
+    }
+    
+    $imageUrl = $main_image ?: "https://picsum.photos/seed/glass{$listing['id']}/800/800";
+} else {
+    // Fallback to old image_path or placeholder
+    if (!empty($listing['image_path'])) {
+        $imageUrl = PUBLIC_URL . '/' . ltrim($listing['image_path'], '/');
+        $additional_images = [$imageUrl];
+    } else {
+        $imageUrl = "https://picsum.photos/seed/glass{$listing['id']}/800/800";
+        $additional_images = [
+            $imageUrl,
+            "https://picsum.photos/seed/glass" . ($listing['id'] + 100) . "/800/800",
+            "https://picsum.photos/seed/glass" . ($listing['id'] + 200) . "/800/800"
+        ];
+    }
+}
+
 // Determine title and subtitle
 $title = $listing['quantity_note'] ?: ($listing['glass_type_other'] ?: $listing['glass_type']);
 $subtitle = $listing['glass_type_other'] ?: $listing['glass_type'];
-
-// Generate image URL - use actual uploaded image if available
-if (!empty($listing['image_path'])) {
-    $imageUrl = PUBLIC_URL . '/' . ltrim($listing['image_path'], '/');
-} else {
-    $imageUrl = "https://picsum.photos/seed/glass{$listing['id']}/800/800";
-}
-
-// Generate additional product images for gallery
-// If actual image exists, use it for all three thumbnails, otherwise use placeholders
-if (!empty($listing['image_path'])) {
-    $additionalImages = [
-        PUBLIC_URL . '/' . ltrim($listing['image_path'], '/'),
-        PUBLIC_URL . '/' . ltrim($listing['image_path'], '/'),
-        PUBLIC_URL . '/' . ltrim($listing['image_path'], '/')
-    ];
-} else {
-    $additionalImages = [
-        "https://picsum.photos/seed/glass{$listing['id']}/800/800",
-        "https://picsum.photos/seed/glass" . ($listing['id'] + 100) . "/800/800",
-        "https://picsum.photos/seed/glass" . ($listing['id'] + 200) . "/800/800"
-    ];
-}
 
 // Format price
 $priceDisplay = !empty($listing['price_text']) ? $listing['price_text'] : 'Contact for Price';
@@ -265,6 +285,7 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
             overflow: hidden;
             margin-bottom: 16px;
             box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            position: relative;
         }
 
         .main-image img {
@@ -274,10 +295,59 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
             display: block;
         }
 
+        .gallery-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            border: none;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            font-size: 32px;
+            font-weight: 300;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            z-index: 10;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+            color: #1d1d1f;
+        }
+
+        .gallery-nav:hover {
+            background: white;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .gallery-nav-prev {
+            left: 16px;
+        }
+
+        .gallery-nav-next {
+            right: 16px;
+        }
+
+        .gallery-counter {
+            position: absolute;
+            bottom: 16px;
+            right: 16px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
         .thumbnail-gallery {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
             gap: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
         }
 
         .thumbnail {
@@ -689,18 +759,30 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
             <!-- Image Gallery -->
             <div class="image-gallery">
                 <div class="main-image" id="mainImage">
+                    <?php if (count($additional_images) > 1): ?>
+                    <button class="gallery-nav gallery-nav-prev" onclick="changeImageNav(-1)">‹</button>
+                    <button class="gallery-nav gallery-nav-next" onclick="changeImageNav(1)">›</button>
+                    <?php endif; ?>
                     <img src="<?= htmlspecialchars($imageUrl, ENT_QUOTES, 'UTF-8') ?>" 
-                         alt="<?= htmlspecialchars($title, ENT_QUOTES, 'UTF-8') ?>">
+                         alt="<?= htmlspecialchars($title, ENT_QUOTES, 'UTF-8') ?>"
+                         id="mainImageEl">
+                    <?php if (count($additional_images) > 1): ?>
+                    <div class="gallery-counter">
+                        <span id="currentImageIndex">1</span> / <?= count($additional_images) ?>
+                    </div>
+                    <?php endif; ?>
                 </div>
+                <?php if (!empty($additional_images) && count($additional_images) > 1): ?>
                 <div class="thumbnail-gallery">
-                    <?php foreach ($additionalImages as $index => $img): ?>
+                    <?php foreach ($additional_images as $index => $img): ?>
                     <div class="thumbnail <?= $index === 0 ? 'active' : '' ?>" 
-                         onclick="changeImage('<?= htmlspecialchars($img, ENT_QUOTES, 'UTF-8') ?>', this)">
+                         onclick="changeImage('<?= htmlspecialchars($img, ENT_QUOTES, 'UTF-8') ?>', this, <?= $index ?>)">
                         <img src="<?= htmlspecialchars($img, ENT_QUOTES, 'UTF-8') ?>" 
                              alt="Product view <?= $index + 1 ?>">
                     </div>
                     <?php endforeach; ?>
                 </div>
+                <?php endif; ?>
             </div>
 
             <!-- Product Info -->
@@ -996,16 +1078,69 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
             }, 3000);
         }
 
-        function changeImage(src, element) {
+        // Modern Image Gallery with Navigation
+        let currentImageIndex = 0;
+        const galleryImages = <?= json_encode($additional_images) ?>;
+
+        function changeImage(src, element, index) {
             const mainImage = document.querySelector('#mainImage img');
             mainImage.src = src;
+            currentImageIndex = index;
+            
+            // Update counter
+            const counter = document.getElementById('currentImageIndex');
+            if (counter) {
+                counter.textContent = index + 1;
+            }
             
             // Update active thumbnail
             document.querySelectorAll('.thumbnail').forEach(thumb => {
                 thumb.classList.remove('active');
             });
-            element.classList.add('active');
+            if (element) {
+                element.classList.add('active');
+            }
         }
+
+        function changeImageNav(direction) {
+            currentImageIndex += direction;
+            
+            // Loop around
+            if (currentImageIndex < 0) {
+                currentImageIndex = galleryImages.length - 1;
+            } else if (currentImageIndex >= galleryImages.length) {
+                currentImageIndex = 0;
+            }
+            
+            const mainImage = document.querySelector('#mainImage img');
+            mainImage.src = galleryImages[currentImageIndex];
+            
+            // Update counter
+            const counter = document.getElementById('currentImageIndex');
+            if (counter) {
+                counter.textContent = currentImageIndex + 1;
+            }
+            
+            // Update active thumbnail
+            const thumbnails = document.querySelectorAll('.thumbnail');
+            thumbnails.forEach((thumb, index) => {
+                if (index === currentImageIndex) {
+                    thumb.classList.add('active');
+                    thumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                } else {
+                    thumb.classList.remove('active');
+                }
+            });
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') {
+                changeImageNav(-1);
+            } else if (e.key === 'ArrowRight') {
+                changeImageNav(1);
+            }
+        });
 
         function showTab(tabName) {
             // Hide all tabs

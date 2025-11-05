@@ -104,7 +104,7 @@ try {
                                 👁 View
                             </a>
                             <a 
-                                href="<?php echo VIEWS_URL; ?>/edit-listing.php?id=<?php echo $listing['id']; ?>" 
+                                href="<?php echo VIEWS_URL; ?>/edit-listing-modern.php?id=<?php echo $listing['id']; ?>" 
                                 style="padding: 6px 12px; background: #2f6df5; color: white; text-decoration: none; border-radius: 6px; font-size: 12px; font-weight: 600;"
                             >
                                 ✏️ Edit
