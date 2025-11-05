@@ -466,11 +466,12 @@
                 cards.forEach(c=>{
                     const glassType = c.getAttribute('data-glass-type');
                     const isRecycled = c.getAttribute('data-recycled') === '1';
+                    const condition = c.getAttribute('data-condition') || 'Unknown';
                     const tons = parseFloat(c.getAttribute('data-tons') || 0);
                     const tonsMatch = tons >= min && tons <= max;
                     const glassTypeMatch = activeGlassTypes.length === 0 || activeGlassTypes.includes(glassType);
                     let matchesRecycled = true;
-                    
+
                     if (activeRecycled.length > 0) {
                         matchesRecycled = activeRecycled.some(option => {
                             if (option === 'Recycled') return isRecycled;
@@ -478,12 +479,12 @@
                             return false;
                         });
                     }
-                    
+
                     if(tonsMatch && glassTypeMatch && matchesRecycled){
                         if(!(glassType in glassTypeCounts)) glassTypeCounts[glassType]=0;
                         glassTypeCounts[glassType]++;
                     }
-                    if(tonsMatch && glassTypeMatch){
+                    if(tonsMatch && glassTypeMatch && matchesRecycled){
                         if(!(condition in conditionCounts)) conditionCounts[condition]=0;
                         conditionCounts[condition]++;
                     }
