@@ -1094,9 +1094,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_listing'])) {
                     <button type="button" class="tab-button" onclick="switchTab('images')">
                         📸 Product Images
                     </button>
-                    <button type="button" class="tab-button" onclick="switchTab('danger')">
-                        �️ Delete Listing
-                    </button>
                 </div>
 
                 <!-- Tab: Listing Details -->
