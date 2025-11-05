@@ -82,18 +82,6 @@ if (!empty($listing['image_path'])) {
 // Format price
 $priceDisplay = !empty($listing['price_text']) ? $listing['price_text'] : 'Contact for Price';
 
-// Calculate original price (for demo - 30% markup)
-if (!empty($listing['price_text']) && preg_match('/[\d,]+/', $listing['price_text'], $matches)) {
-    $currentPrice = (float)str_replace(',', '', $matches[0]);
-    $originalPrice = number_format($currentPrice * 1.3, 2);
-} else {
-    $originalPrice = null;
-}
-
-// Generate random rating for demo
-$rating = number_format(4.5 + (rand(0, 4) / 10), 1);
-$reviewCount = rand(50, 200);
-
 // Related products (fetch similar items)
 $relatedStmt = $pdo->prepare("
     SELECT l.id, l.quantity_note, l.glass_type, l.glass_type_other, l.price_text, l.quantity_tons, l.image_path
@@ -728,17 +716,11 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
                     <a href="<?php echo VIEWS_URL; ?>/seller-shop.php?seller=<?= $listing['company_id'] ?>" class="seller-link">
                         <?= htmlspecialchars($listing['company_name']) ?>
                     </a>
+                    <?php elseif (!empty($listing['seller_name'])): ?>
+                    <span class="seller-link" style="cursor: default;">
+                        Sold by <?= htmlspecialchars($listing['seller_name']) ?>
+                    </span>
                     <?php endif; ?>
-                </div>
-
-                <div class="rating-section">
-                    <div class="rating-stars">
-                        <?php for($i = 0; $i < 5; $i++): ?>
-                            <span class="star">★</span>
-                        <?php endfor; ?>
-                    </div>
-                    <span class="rating-text"><?= $rating ?></span>
-                    <span class="review-count">(<?= number_format($reviewCount) ?> sales)</span>
                 </div>
 
                 <div class="price-section">
@@ -750,52 +732,81 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
                                 Contact for Price
                             <?php endif; ?>
                         </span>
-                        <?php if ($originalPrice): ?>
-                            <span class="original-price">$<?= $originalPrice ?></span>
-                        <?php endif; ?>
                     </div>
                 </div>
 
                 <!-- Action Buttons -->
-                <div class="action-section">
-                    <button class="contact-btn" onclick="contactSeller()">
-                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                        </svg>
-                        Contact Seller
-                    </button>
-                    <div class="secondary-actions">
-                        <button class="secondary-btn" onclick="saveListing()" <?php echo $is_saved ? 'style="color: #ef4444;"' : ''; ?>>
-                            <?php if ($is_saved): ?>
-                                <svg width="18" height="18" fill="#ef4444" viewBox="0 0 24 24">
-                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                                </svg>
-                                Saved
-                            <?php else: ?>
-                                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-                                </svg>
-                                Save
-                            <?php endif; ?>
-                        </button>
-                        <button class="secondary-btn" onclick="shareProduct()">
-                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                <?php if ($is_owner): ?>
+                    <!-- Owner Actions -->
+                    <div class="action-section">
+                        <a href="<?php echo VIEWS_URL; ?>/edit-listing.php?id=<?= $listing['id'] ?>" class="contact-btn" style="text-decoration: none; text-align: center;">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                             </svg>
-                            Share
-                        </button>
+                            Edit Listing
+                        </a>
+                        <div class="secondary-actions">
+                            <button class="secondary-btn" onclick="window.location.href='<?php echo VIEWS_URL; ?>/profile.php?tab=listings'">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                                </svg>
+                                My Listings
+                            </button>
+                            <button class="secondary-btn" onclick="shareProduct()">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                                </svg>
+                                Share
+                            </button>
+                        </div>
                     </div>
-                </div>
+                <?php else: ?>
+                    <!-- Visitor Actions -->
+                    <div class="action-section">
+                        <button class="contact-btn" onclick="contactSeller()">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                            </svg>
+                            Contact Seller
+                        </button>
+                        <div class="secondary-actions">
+                            <button class="secondary-btn" onclick="saveListing()" <?php echo $is_saved ? 'style="color: #ef4444;"' : ''; ?>>
+                                <?php if ($is_saved): ?>
+                                    <svg width="18" height="18" fill="#ef4444" viewBox="0 0 24 24">
+                                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                    </svg>
+                                    Saved
+                                <?php else: ?>
+                                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                                    </svg>
+                                    Save
+                                <?php endif; ?>
+                            </button>
+                            <button class="secondary-btn" onclick="shareProduct()">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                                </svg>
+                                Share
+                            </button>
+                        </div>
+                    </div>
+                <?php endif; ?>
 
-                <!-- Features -->
+                <!-- Features - Only show if company exists and is verified -->
+                <?php if (!empty($listing['company_id'])): ?>
                 <div class="features-grid">
+                    <?php if (!empty($listing['company_name'])): ?>
                     <div class="feature-item">
                         <svg class="feature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                         </svg>
-                        <div class="feature-title">Company Verified</div>
-                        <div class="feature-desc">Trusted seller</div>
+                        <div class="feature-title">Company Listing</div>
+                        <div class="feature-desc"><?= htmlspecialchars($listing['company_name']) ?></div>
                     </div>
+                    <?php endif; ?>
+                    
+                    <?php if ($listing['tested'] === 'tested'): ?>
                     <div class="feature-item">
                         <svg class="feature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
@@ -803,14 +814,17 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
                         <div class="feature-title">Quality Tested</div>
                         <div class="feature-desc">Certified glass</div>
                     </div>
+                    <?php endif; ?>
+                    
                     <div class="feature-item">
                         <svg class="feature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                         </svg>
-                        <div class="feature-title">Fast Response</div>
-                        <div class="feature-desc">Quick communication</div>
+                        <div class="feature-title">Direct Contact</div>
+                        <div class="feature-desc">Quick response</div>
                     </div>
                 </div>
+                <?php endif; ?>
 
               
                 <!-- Tabs -->
@@ -819,7 +833,6 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
                         <li><button class="tab-button active" onclick="showTab('description')">Description</button></li>
                         <li><button class="tab-button" onclick="showTab('specifications')">Specifications</button></li>
                         <li><button class="tab-button" onclick="showTab('seller')">About Seller</button></li>
-                        <li><button class="tab-button" onclick="showTab('reviews')">Reviews (<?= $reviewCount ?>)</button></li>
                     </ul>
                 </div>
 
@@ -829,9 +842,7 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
                         <?php if (!empty($listing['quality_notes'])): ?>
                             <?= nl2br(htmlspecialchars($listing['quality_notes'])) ?>
                         <?php else: ?>
-                            <p>This exquisite <?= htmlspecialchars($subtitle) ?> is a masterpiece of traditional glassmaking. Hand-crafted by skilled artisans using centuries-old techniques, each piece features intricate details and exceptional clarity. The elegant design makes it perfect for displaying fresh flowers or as a standalone decorative piece.</p>
-                            
-                            <p>Crafted with meticulous attention to detail, this vase showcases the finest quality glass materials. The recycled and tested glass ensures both environmental sustainability and lasting durability. Each piece undergoes rigorous quality control to meet industry standards and quality requirements.</p>
+                            <p>No description provided for this listing.</p>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -873,32 +884,47 @@ $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
 
                 <div class="tab-content" id="seller-tab">
                     <div class="description-text">
-                        <h3 style="margin-top:0">About <?= htmlspecialchars($listing['company_name']) ?></h3>
-                        <p><strong>Company Type:</strong> <?= htmlspecialchars($listing['company_type']) ?></p>
-                        
-                        <?php if (!empty($listing['phone'])): ?>
-                        <p><strong>Phone:</strong> <?= htmlspecialchars($listing['phone']) ?></p>
+                        <?php if (!empty($listing['company_name'])): ?>
+                            <!-- Company Seller -->
+                            <h3 style="margin-top:0">About <?= htmlspecialchars($listing['company_name']) ?></h3>
+                            
+                            <?php if (!empty($listing['company_type'])): ?>
+                            <p><strong>Company Type:</strong> <?= htmlspecialchars($listing['company_type']) ?></p>
+                            <?php endif; ?>
+                            
+                            <?php if (!empty($listing['phone'])): ?>
+                            <p><strong>Phone:</strong> <?= htmlspecialchars($listing['phone']) ?></p>
+                            <?php endif; ?>
+                            
+                            <?php if (!empty($listing['website'])): ?>
+                            <p><strong>Website:</strong> <a href="<?= htmlspecialchars($listing['website']) ?>" target="_blank" style="color: #2f6df5;"><?= htmlspecialchars($listing['website']) ?></a></p>
+                            <?php endif; ?>
+                            
+                            <?php if (!empty($listing['seller_email'])): ?>
+                            <p><strong>Email:</strong> <a href="mailto:<?= htmlspecialchars($listing['seller_email']) ?>" style="color: #2f6df5;"><?= htmlspecialchars($listing['seller_email']) ?></a></p>
+                            <?php endif; ?>
+                            
+                            <p style="margin-top: 16px;">
+                                <a href="<?php echo VIEWS_URL; ?>/seller-shop.php?company_id=<?= $listing['company_id'] ?>" style="display: inline-block; padding: 12px 24px; background: #2f6df5; color: white; text-decoration: none; border-radius: 8px; font-weight: 600;">
+                                    View All Products from This Seller
+                                </a>
+                            </p>
+                        <?php else: ?>
+                            <!-- Individual Seller -->
+                            <h3 style="margin-top:0">About the Seller</h3>
+                            
+                            <?php if (!empty($listing['seller_name'])): ?>
+                            <p><strong>Seller:</strong> <?= htmlspecialchars($listing['seller_name']) ?></p>
+                            <?php endif; ?>
+                            
+                            <?php if (!empty($listing['seller_email'])): ?>
+                            <p><strong>Email:</strong> <a href="mailto:<?= htmlspecialchars($listing['seller_email']) ?>" style="color: #2f6df5;"><?= htmlspecialchars($listing['seller_email']) ?></a></p>
+                            <?php endif; ?>
+                            
+                            <p style="margin-top: 24px; color: #6b6460;">
+                                This is a personal listing. Contact the seller directly for inquiries about this product.
+                            </p>
                         <?php endif; ?>
-                        
-                        <?php if (!empty($listing['website'])): ?>
-                        <p><strong>Website:</strong> <a href="<?= htmlspecialchars($listing['website']) ?>" target="_blank" style="color: #2f6df5;"><?= htmlspecialchars($listing['website']) ?></a></p>
-                        <?php endif; ?>
-                        
-                        <p style="margin-top: 24px;">
-                            <?= htmlspecialchars($listing['company_name']) ?> is a professional glass supplier specializing in quality glass materials. 
-                            We maintain high standards for all our products and ensure timely delivery to our customers.
-                        </p>
-                        
-                        <p style="margin-top: 16px;">
-                            <a href="seller-shop.php?company_id=<?= $listing['company_id'] ?>" style="display: inline-block; padding: 12px 24px; background: #2f6df5; color: white; text-decoration: none; border-radius: 8px; font-weight: 600;">
-                                View All Products from This Seller
-                            </a>
-                        </p>
-               
-
-                <div class="tab-content" id="reviews-tab">
-                    <div class="description-text">
-                        <p style="color: #6b6460; font-style: italic;">Customer reviews and ratings will be displayed here. This feature is coming soon!</p>
                     </div>
                 </div>
             </div>
