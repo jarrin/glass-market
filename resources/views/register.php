@@ -60,13 +60,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-                // Add company_name column if it doesn't exist
-                try {
-                    $pdo->exec("ALTER TABLE users ADD COLUMN company_name VARCHAR(255) NULL AFTER name");
-                } catch (PDOException $e) {
-                    // Column already exists, ignore error
-                }
-
                 // Insert user WITHOUT verification (email_verified_at = NULL) - requires admin approval
                 $stmt = $pdo->prepare('
                     INSERT INTO users (name, company_name, email, password, email_verified_at)
