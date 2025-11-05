@@ -11,7 +11,7 @@
             <div style="text-align: center; margin-bottom: 32px;">
                 <div style="display: inline-block; position: relative;">
                     <?php if (!empty($user['avatar'])): ?>
-                        <img src="<?php echo htmlspecialchars($user['avatar']); ?>" alt="Avatar" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover;">
+                        <img src="<?php echo PUBLIC_URL . '/' . htmlspecialchars($user['avatar']); ?>" alt="Avatar" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover;">
                     <?php else: ?>
                         <div style="width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; display: flex; align-items: center; justify-content: center; font-size: 48px; font-weight: 700;">
                             <?php echo strtoupper(substr($user['name'], 0, 1)); ?>

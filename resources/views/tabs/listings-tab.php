@@ -9,9 +9,11 @@ try {
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
     $stmt = $pdo->prepare('
-        SELECT l.*, c.name as company_name
+        SELECT l.*, c.name as company_name,
+               COALESCE(li.image_path, l.image_path) as image_path
         FROM listings l
         LEFT JOIN companies c ON l.company_id = c.id
+        LEFT JOIN listing_images li ON l.id = li.listing_id AND li.is_main = 1
         WHERE l.user_id = :user_id
         ORDER BY l.created_at DESC
     ');
