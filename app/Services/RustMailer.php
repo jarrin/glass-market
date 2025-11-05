@@ -445,4 +445,150 @@ HTML;
 
         return $this->send($email, $subject, $body, true, $username);
     }
+
+    /**
+     * Send password change confirmation email
+     *
+     * @param string $email User email
+     * @param string $username User name
+     * @return array Response with success status
+     */
+    public function sendPasswordChangedEmail(string $email, string $username): array
+    {
+        $subject = "Password Changed - Glass Market";
+        $date = date('F j, Y \a\t g:i A');
+        
+        $body = <<<HTML
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .content {
+            padding: 30px;
+        }
+        .alert-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 20px 0;
+        }
+        .alert-box h3 {
+            margin: 0 0 8px 0;
+            color: #856404;
+            font-size: 16px;
+        }
+        .alert-box p {
+            margin: 0;
+            color: #856404;
+            font-size: 14px;
+        }
+        .info-box {
+            background: #e8f4fd;
+            border-left: 4px solid #2196F3;
+            padding: 16px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .info-box p {
+            margin: 0;
+            color: #1565c0;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+        }
+        .timestamp {
+            color: #666;
+            font-size: 13px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Password Changed</h1>
+        </div>
+        <div class="content">
+            <p>Hello <strong>{$username}</strong>,</p>
+            
+            <p>This email confirms that your Glass Market account password was successfully changed.</p>
+            
+            <div class="info-box">
+                <p><strong>Changed on:</strong> {$date}</p>
+            </div>
+            
+            <div class="alert-box">
+                <h3>⚠️ Didn't make this change?</h3>
+                <p>If you did not change your password, please contact our support team immediately at <strong>support@glassmarket.com</strong> to secure your account.</p>
+            </div>
+            
+            <p>For your security:</p>
+            <ul>
+                <li>Make sure you use a strong, unique password</li>
+                <li>Don't share your password with anyone</li>
+                <li>Enable two-factor authentication if available</li>
+                <li>Log out from devices you don't recognize</li>
+            </ul>
+            
+            <p>If you have any questions or concerns, our support team is here to help.</p>
+            
+            <a href="https://glassmarket.com/profile" class="btn">Go to Your Profile</a>
+            
+            <p style="font-size: 12px; color: #666; margin-top: 30px;">
+                <strong>Need help?</strong> Contact our support team at support@glassmarket.com
+            </p>
+        </div>
+        <div class="footer">
+            <p>&copy; 2025 Glass Market. All rights reserved.</p>
+            <p class="timestamp">Security notification sent on {$date}</p>
+        </div>
+    </div>
+</body>
+</html>
+HTML;
+
+        return $this->send($email, $subject, $body, true, $username);
+    }
 }
