@@ -2,6 +2,7 @@
 /**
  * Subscription Status Checker
  * Returns subscription status for the logged-in user
+ * Also handles automatic listing deactivation when subscription expires
  */
 
 if (!isset($_SESSION)) {
@@ -18,8 +19,19 @@ $subscription_status = [
     'notification_type' => null, // 'expired', 'expiring_soon', 'no_subscription'
 ];
 
+// Detect current page to allow public pages (about, support)
+$current_page = basename($_SERVER['PHP_SELF']);
+$allowed_public_pages = ['about.php', 'support.php', 'contact.php'];
+
 // Don't check subscription for admins
 if (isset($_SESSION['is_admin']) && ($_SESSION['is_admin'] === true || $_SESSION['is_admin'] == 1)) {
+    $subscription_status['has_access'] = true;
+    $subscription_status['show_notification'] = false;
+    return;
+}
+
+// Allow public pages without subscription
+if (in_array($current_page, $allowed_public_pages)) {
     $subscription_status['has_access'] = true;
     $subscription_status['show_notification'] = false;
     return;
@@ -74,7 +86,7 @@ if (isset($_SESSION['user_id'])) {
             
             if ($sub['status'] === 'active') {
                 $subscription_status['has_access'] = true;
-                
+
                 // Show warning if expiring soon (within 7 days)
                 // But only if not dismissed in last 24 hours
                 if ($subscription_status['days_remaining'] <= 7 && $subscription_status['days_remaining'] > 0) {
@@ -88,14 +100,63 @@ if (isset($_SESSION['user_id'])) {
                 $subscription_status['is_expired'] = true;
                 $subscription_status['show_notification'] = true;
                 $subscription_status['notification_type'] = 'expired';
+
+                // Deactivate all user listings when subscription expires
+                deactivateUserListings($pdo, $_SESSION['user_id']);
             }
         } else {
             // No subscription found
             $subscription_status['show_notification'] = true;
             $subscription_status['notification_type'] = 'no_subscription';
+
+            // Deactivate all user listings when no subscription
+            deactivateUserListings($pdo, $_SESSION['user_id']);
         }
         
     } catch (PDOException $e) {
         error_log('Subscription check error: ' . $e->getMessage());
+    }
+}
+
+/**
+ * Deactivate all user listings and company listings when subscription is inactive
+ * @param PDO $pdo Database connection
+ * @param int $user_id User ID
+ */
+function deactivateUserListings($pdo, $user_id) {
+    try {
+        // Check if already deactivated to avoid unnecessary queries
+        $stmt = $pdo->prepare("SELECT COUNT(*) as active_count FROM listings WHERE user_id = :user_id AND status = 'active'");
+        $stmt->execute(['user_id' => $user_id]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($result['active_count'] > 0) {
+            // Deactivate all user's personal listings
+            $stmt = $pdo->prepare("UPDATE listings SET status = 'inactive' WHERE user_id = :user_id AND status = 'active'");
+            $stmt->execute(['user_id' => $user_id]);
+
+            error_log("Deactivated {$result['active_count']} listings for user $user_id due to inactive subscription");
+        }
+
+        // Deactivate company listings if user owns a company
+        $stmt = $pdo->prepare("
+            SELECT c.id
+            FROM companies c
+            WHERE c.user_id = :user_id
+        ");
+        $stmt->execute(['user_id' => $user_id]);
+        $companies = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($companies as $company) {
+            $stmt = $pdo->prepare("
+                UPDATE listings
+                SET status = 'inactive'
+                WHERE company_id = :company_id AND status = 'active'
+            ");
+            $stmt->execute(['company_id' => $company['id']]);
+        }
+
+    } catch (PDOException $e) {
+        error_log('Error deactivating listings: ' . $e->getMessage());
     }
 }

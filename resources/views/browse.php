@@ -1,5 +1,6 @@
 <?php session_start(); ?>
 <?php require_once __DIR__ . '/../../config.php'; ?>
+<?php require_once __DIR__ . '/../../includes/subscription-check.php'; ?>
 <!-- Browse collection page - static mockup -->
 <!doctype html>
 <html lang="en">
@@ -134,10 +135,11 @@
                     l.tested,
                     l.storage_location,
                     l.quality_notes,
-                    l.image_path,
+                    li.image_path,
                     c.name as company_name
                 FROM listings l
                 LEFT JOIN companies c ON l.company_id = c.id
+                LEFT JOIN listing_images li ON l.id = li.listing_id AND li.is_main = 1
                 WHERE l.published = 1
                 ORDER BY l.created_at DESC
             ");
@@ -190,7 +192,8 @@
                 // Determine image URL - use uploaded image if available, otherwise placeholder
                 $imageUrl = "https://picsum.photos/seed/glass{$listing['id']}/800/800";
                 if (!empty($listing['image_path'])) {
-                    $imageUrl = PUBLIC_URL . '/' . $listing['image_path'];
+                    // Image path is relative from public folder (e.g., uploads/listings/xxx.jpg)
+                    $imageUrl = PUBLIC_URL . '/' . ltrim($listing['image_path'], '/');
                 }
                 
                 $products[] = [
@@ -421,7 +424,7 @@
                 });
             }
             
-            const glassTypeCheckboxes = Array.from(document.querySelectorAll('.glass-type-filter'));
+            const glassTypeCheckboxes = Array.from(document.querySelectorAll('.glass-filter'));
             const recycledCheckboxes = Array.from(document.querySelectorAll('.recycled-filter'));
             const minRange = document.getElementById('minRange');
             const maxRange = document.getElementById('maxRange');
@@ -465,11 +468,12 @@
                 cards.forEach(c=>{
                     const glassType = c.getAttribute('data-glass-type');
                     const isRecycled = c.getAttribute('data-recycled') === '1';
+                    const condition = c.getAttribute('data-condition') || 'Unknown';
                     const tons = parseFloat(c.getAttribute('data-tons') || 0);
                     const tonsMatch = tons >= min && tons <= max;
                     const glassTypeMatch = activeGlassTypes.length === 0 || activeGlassTypes.includes(glassType);
                     let matchesRecycled = true;
-                    
+
                     if (activeRecycled.length > 0) {
                         matchesRecycled = activeRecycled.some(option => {
                             if (option === 'Recycled') return isRecycled;
@@ -477,12 +481,12 @@
                             return false;
                         });
                     }
-                    
+
                     if(tonsMatch && glassTypeMatch && matchesRecycled){
                         if(!(glassType in glassTypeCounts)) glassTypeCounts[glassType]=0;
                         glassTypeCounts[glassType]++;
                     }
-                    if(tonsMatch && glassTypeMatch){
+                    if(tonsMatch && glassTypeMatch && matchesRecycled){
                         if(!(condition in conditionCounts)) conditionCounts[condition]=0;
                         conditionCounts[condition]++;
                     }
@@ -534,15 +538,19 @@
                 // update count labels in sidebar
                 document.querySelectorAll('#glass-types-list .count').forEach(el=>{
                     const li = el.closest('li');
-                    const input = li.querySelector('.glass-type-filter');
-                    const glassType = input.value;
-                    el.textContent = glassTypeCounts[glassType] !== undefined ? glassTypeCounts[glassType] : 0;
+                    const input = li.querySelector('.glass-filter');
+                    if (input) {
+                        const glassType = input.value;
+                        el.textContent = glassTypeCounts[glassType] !== undefined ? glassTypeCounts[glassType] : 0;
+                    }
                 });
                 document.querySelectorAll('#recycled-filter .count').forEach(el=>{
                     const li = el.closest('li');
                     const input = li.querySelector('.recycled-filter');
-                    const recycled = input.value;
-                    el.textContent = activeRecycled.includes(recycled) ? visibleCards.length : 0;
+                    if (input) {
+                        const recycled = input.value;
+                        el.textContent = activeRecycled.includes(recycled) ? visibleCards.length : 0;
+                    }
                 });
 
                 // Reset to page 1 when filters change

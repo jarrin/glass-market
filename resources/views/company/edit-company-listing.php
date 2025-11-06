@@ -1,18 +1,11 @@
 <?php
 session_start();
 
-require_once __DIR__ . '/../../config.php';
-require_once __DIR__ . '/../../includes/subscription-check.php';
+require_once __DIR__ . '/../../../config.php';
 
 // Require authentication
 if (!isset($_SESSION['user_logged_in']) || $_SESSION['user_logged_in'] !== true) {
     header('Location: ' . VIEWS_URL . '/login.php');
-    exit;
-}
-
-// Require active subscription
-if (!$subscription_status['has_access']) {
-    header('Location: ' . VIEWS_URL . '/pricing.php');
     exit;
 }
 
@@ -27,121 +20,111 @@ $success_message = '';
 
 // Get user info
 $user_id = $_SESSION['user_id'] ?? null;
+$listing_id = $_GET['id'] ?? 0;
 
-// This page creates PERSONAL listings only (company_id = NULL)
-// For company listings, use company/create-company-listing.php
-$company_id = null;
-
-// Initialize default values for new listing
-$listing = [
-    'glass_type' => '',
-    'glass_type_other' => '',
-    'quantity_tons' => '',
-    'quantity_note' => '',
-    'quality_notes' => '',
-    'price_text' => '',
-    'currency' => 'EUR',
-    'side' => 'WTS',
-    'recycled' => 'unknown',
-    'tested' => 'unknown',
-    'storage_location' => '',
-    'published' => 0
-];
+// Load the listing
+$listing = null;
 $listing_images = [];
+$company = null;
 
-// Handle listing creation
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_listing'])) {
+try {
+    $pdo = new PDO("mysql:host=$db_host;dbname=$db_name", $db_user, $db_pass);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    
+    // Get user's company first
+    $stmt = $pdo->prepare('SELECT * FROM companies WHERE owner_user_id = :user_id');
+    $stmt->execute(['user_id' => $user_id]);
+    $company = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if (!$company) {
+        $_SESSION['listing_error'] = 'You need a company to edit company listings.';
+        header('Location: ' . VIEWS_URL . '/profile.php?tab=company');
+        exit;
+    }
+    
+    // Get listing and verify it belongs to user's company
+    $stmt = $pdo->prepare('
+        SELECT l.*, c.name as company_name
+        FROM listings l
+        LEFT JOIN companies c ON l.company_id = c.id
+        WHERE l.id = :listing_id AND l.user_id = :user_id AND l.company_id = :company_id
+    ');
+    $stmt->execute([
+        'listing_id' => $listing_id, 
+        'user_id' => $user_id,
+        'company_id' => $company['id']
+    ]);
+    $listing = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if (!$listing) {
+        $_SESSION['listing_error'] = 'Company listing not found or you do not have permission to edit it.';
+        header('Location: ' . VIEWS_URL . '/profile.php?tab=company');
+        exit;
+    }
+    
+    // Get all images for this listing
+    $stmt = $pdo->prepare('
+        SELECT * FROM listing_images 
+        WHERE listing_id = :listing_id 
+        ORDER BY is_main DESC, display_order ASC
+    ');
+    $stmt->execute(['listing_id' => $listing_id]);
+    $listing_images = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // If no images in new table but old image_path exists, migrate it
+    if (empty($listing_images) && !empty($listing['image_path']) && $listing['image_path'] !== 'image.png') {
+        $stmt = $pdo->prepare('
+            INSERT INTO listing_images (listing_id, image_path, is_main, display_order)
+            VALUES (:listing_id, :image_path, 1, 0)
+        ');
+        $stmt->execute([
+            'listing_id' => $listing_id,
+            'image_path' => $listing['image_path']
+        ]);
+        
+        // Reload images
+        $stmt = $pdo->prepare('
+            SELECT * FROM listing_images 
+            WHERE listing_id = :listing_id 
+            ORDER BY is_main DESC, display_order ASC
+        ');
+        $stmt->execute(['listing_id' => $listing_id]);
+        $listing_images = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
+} catch (PDOException $e) {
+    $_SESSION['listing_error'] = 'Failed to load listing: ' . $e->getMessage();
+    header('Location: ' . VIEWS_URL . '/profile.php?tab=listings');
+    exit;
+}
+
+// Handle listing update
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_listing'])) {
+    $title = trim($_POST['glass_title'] ?? '');
     $glass_type = trim($_POST['glass_type'] ?? '');
     $glass_type_other = trim($_POST['glass_type_other'] ?? '');
-    $tons = $_POST['quantity_tons'] ?? '';
-    $quantity_note = trim($_POST['quantity_note'] ?? '');
-    $quality_notes = trim($_POST['quality_notes'] ?? '');
+    $tons = $_POST['glass_tons'] ?? '';
+    $description = trim($_POST['glass_description'] ?? '');
     $side = $_POST['side'] ?? 'WTS';
     $price_text = trim($_POST['price_text'] ?? '');
-    $currency = $_POST['currency'] ?? 'EUR';
-    $storage_location = trim($_POST['storage_location'] ?? '');
     $recycled = $_POST['recycled'] ?? 'unknown';
     $tested = $_POST['tested'] ?? 'unknown';
+    $storage_location = trim($_POST['storage_location'] ?? '');
+    $currency = $_POST['currency'] ?? 'EUR';
     $published = isset($_POST['published']) ? 1 : 0;
     
-    // Use other if glass_type is "Other"
-    if ($glass_type === 'Other' && !empty($glass_type_other)) {
+    // Handle "other" glass type
+    if ($glass_type === 'other' && !empty($glass_type_other)) {
         $glass_type = $glass_type_other;
     }
     
-    if (empty($glass_type) || empty($tons)) {
-        $error_message = 'Glass type and quantity are required.';
+    if (empty($title) || empty($glass_type) || empty($tons)) {
+        $error_message = 'Title, glass type and tonnage are required.';
     } elseif (!is_numeric($tons) || $tons <= 0) {
-        $error_message = 'Please enter a valid quantity.';
+        $error_message = 'Please enter a valid tonnage.';
     } else {
         try {
-            $pdo = new PDO("mysql:host=$db_host;dbname=$db_name", $db_user, $db_pass);
-            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            
             $pdo->beginTransaction();
-            
-            $image_path = 'image.png'; // Default image - kept for backwards compatibility
-            
-            // Insert new listing
-            $stmt = $pdo->prepare('
-                INSERT INTO listings (
-                    company_id,
-                    user_id,
-                    side,
-                    glass_type,
-                    glass_type_other,
-                    quantity_tons,
-                    quantity_note,
-                    quality_notes,
-                    price_text,
-                    currency,
-                    storage_location,
-                    image_path,
-                    recycled,
-                    tested,
-                    published,
-                    created_at
-                ) VALUES (
-                    :company_id,
-                    :user_id,
-                    :side,
-                    :glass_type,
-                    :glass_type_other,
-                    :quantity_tons,
-                    :quantity_note,
-                    :quality_notes,
-                    :price_text,
-                    :currency,
-                    :storage_location,
-                    :image_path,
-                    :recycled,
-                    :tested,
-                    :published,
-                    NOW()
-                )
-            ');
-            
-            $stmt->execute([
-                'company_id' => $company_id,
-                'user_id' => $user_id,
-                'side' => $side,
-                'glass_type' => $glass_type,
-                'glass_type_other' => $glass_type_other,
-                'quantity_tons' => $tons,
-                'quantity_note' => $quantity_note,
-                'quality_notes' => $quality_notes,
-                'price_text' => $price_text,
-                'currency' => $currency,
-                'storage_location' => $storage_location,
-                'image_path' => $image_path,
-                'recycled' => $recycled,
-                'tested' => $tested,
-                'published' => $published
-            ]);
-            
-            $listing_id = $pdo->lastInsertId();
-            
-            error_log("Created listing ID: " . $listing_id . " for user_id: " . $user_id . " with company_id: " . ($company_id ?? 'NULL'));
             
             // Handle multiple image uploads
             if (isset($_FILES['product_images']) && !empty($_FILES['product_images']['name'][0])) {
@@ -151,10 +134,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_listing'])) {
                     mkdir($upload_dir, 0755, true);
                 }
                 
-                $uploaded_count = 0;
+                $total_images = count($_FILES['product_images']['name']);
+                $current_image_count = count($listing_images);
+                
+                if ($current_image_count + $total_images > 20) {
+                    throw new Exception('Maximum 20 images allowed per listing');
+                }
+                
                 foreach ($_FILES['product_images']['name'] as $key => $filename) {
-                    if ($uploaded_count >= 20) break; // Max 20 images
-                    
                     if ($_FILES['product_images']['error'][$key] === UPLOAD_ERR_OK) {
                         $file_extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
                         $allowed_extensions = ['jpg', 'jpeg', 'png', 'webp'];
@@ -171,8 +158,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_listing'])) {
                         $upload_path = $upload_dir . $new_filename;
                         
                         if (move_uploaded_file($_FILES['product_images']['tmp_name'][$key], $upload_path)) {
-                            $image_path_db = 'uploads/listings/' . $new_filename;
-                            $is_main = ($uploaded_count == 0) ? 1 : 0; // First image is main
+                            $image_path = 'uploads/listings/' . $new_filename;
+                            $is_main = ($current_image_count == 0 && $key == 0) ? 1 : 0;
                             
                             $stmt = $pdo->prepare('
                                 INSERT INTO listing_images (listing_id, image_path, is_main, display_order)
@@ -180,50 +167,153 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_listing'])) {
                             ');
                             $stmt->execute([
                                 'listing_id' => $listing_id,
-                                'image_path' => $image_path_db,
+                                'image_path' => $image_path,
                                 'is_main' => $is_main,
-                                'display_order' => $uploaded_count
+                                'display_order' => $current_image_count + $key
                             ]);
-                            
-                            $uploaded_count++;
                         }
                     }
                 }
             }
             
+            // Update listing
+            $stmt = $pdo->prepare('
+                UPDATE listings SET
+                    side = :side,
+                    glass_type = :glass_type,
+                    quantity_tons = :quantity_tons,
+                    quantity_note = :quantity_note,
+                    quality_notes = :quality_notes,
+                    price_text = :price_text,
+                    recycled = :recycled,
+                    tested = :tested,
+                    storage_location = :storage_location,
+                    currency = :currency,
+                    published = :published
+                WHERE id = :id
+            ');
+            
+            $stmt->execute([
+                'side' => $side,
+                'glass_type' => $glass_type,
+                'quantity_tons' => $tons,
+                'quantity_note' => $title,
+                'quality_notes' => $description,
+                'price_text' => $price_text,
+                'recycled' => $recycled,
+                'tested' => $tested,
+                'storage_location' => $storage_location,
+                'currency' => $currency,
+                'published' => $published,
+                'id' => $listing_id
+            ]);
+            
             $pdo->commit();
             
-            // Send notifications to users who want to know about new listings
-            require_once __DIR__ . '/../../includes/notify-new-listing.php';
-            notifyUsersOfNewListing($listing_id);
-            
-            $_SESSION['listing_success'] = 'Listing created successfully!';
-            header('Location: ' . VIEWS_URL . '/profile.php?tab=listings');
+            // Use Post/Redirect/Get pattern to prevent form resubmission
+            $_SESSION['listing_success'] = 'Company listing updated successfully!';
+            header('Location: ' . VIEWS_URL . '/company/edit-company-listing.php?id=' . $listing_id);
             exit;
-        } catch (PDOException $e) {
-            if (isset($pdo)) {
-                $pdo->rollBack();
-            }
-            $error_message = 'Failed to create listing: ' . $e->getMessage();
-            error_log('Listing creation error: ' . $e->getMessage());
         } catch (Exception $e) {
-            if (isset($pdo)) {
-                $pdo->rollBack();
-            }
-            $error_message = 'Error: ' . $e->getMessage();
-            error_log('Listing creation exception: ' . $e->getMessage());
+            $pdo->rollBack();
+            $error_message = 'Failed to update listing: ' . $e->getMessage();
         }
     }
 }
 
-// Get success/error messages from session
+// Check for session success message
 if (isset($_SESSION['listing_success'])) {
     $success_message = $_SESSION['listing_success'];
     unset($_SESSION['listing_success']);
 }
-if (isset($_SESSION['listing_error'])) {
-    $error_message = $_SESSION['listing_error'];
-    unset($_SESSION['listing_error']);
+
+// Handle image deletion via AJAX
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_image'])) {
+    header('Content-Type: application/json');
+    $image_id = $_POST['image_id'] ?? 0;
+    
+    try {
+        $pdo = new PDO("mysql:host=$db_host;dbname=$db_name", $db_user, $db_pass);
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        
+        // Verify ownership and get image path
+        $stmt = $pdo->prepare('
+            SELECT li.* FROM listing_images li
+            JOIN listings l ON li.listing_id = l.id
+            WHERE li.id = :image_id AND l.user_id = :user_id
+        ');
+        $stmt->execute(['image_id' => $image_id, 'user_id' => $user_id]);
+        $image = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($image) {
+            // Delete file
+            $file_path = __DIR__ . '/../../public/' . $image['image_path'];
+            if (file_exists($file_path)) {
+                unlink($file_path);
+            }
+            
+            // Delete from database
+            $stmt = $pdo->prepare('DELETE FROM listing_images WHERE id = :id');
+            $stmt->execute(['id' => $image_id]);
+            
+            echo json_encode(['success' => true]);
+        } else {
+            echo json_encode(['success' => false, 'error' => 'Image not found']);
+        }
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+    }
+    exit;
+}
+
+// Handle set main image via AJAX
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['set_main_image'])) {
+    header('Content-Type: application/json');
+    $image_id = $_POST['image_id'] ?? 0;
+    
+    try {
+        $pdo = new PDO("mysql:host=$db_host;dbname=$db_name", $db_user, $db_pass);
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        
+        // Verify ownership
+        $stmt = $pdo->prepare('
+            SELECT li.listing_id FROM listing_images li
+            JOIN listings l ON li.listing_id = l.id
+            WHERE li.id = :image_id AND l.user_id = :user_id
+        ');
+        $stmt->execute(['image_id' => $image_id, 'user_id' => $user_id]);
+        $image = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($image) {
+            // Remove main from all images in this listing
+            $stmt = $pdo->prepare('UPDATE listing_images SET is_main = 0 WHERE listing_id = :listing_id');
+            $stmt->execute(['listing_id' => $image['listing_id']]);
+            
+            // Set new main image
+            $stmt = $pdo->prepare('UPDATE listing_images SET is_main = 1 WHERE id = :id');
+            $stmt->execute(['id' => $image_id]);
+            
+            echo json_encode(['success' => true]);
+        } else {
+            echo json_encode(['success' => false, 'error' => 'Image not found']);
+        }
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+    }
+    exit;
+}
+
+// Reload images after operations
+try {
+    $stmt = $pdo->prepare('
+        SELECT * FROM listing_images 
+        WHERE listing_id = :listing_id 
+        ORDER BY is_main DESC, display_order ASC
+    ');
+    $stmt->execute(['listing_id' => $listing_id]);
+    $listing_images = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    // Handle error silently
 }
 ?>
 <!DOCTYPE html>
@@ -231,7 +321,7 @@ if (isset($_SESSION['listing_error'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Listing - Glass Market</title>
+    <title>Edit Listing - Glass Market</title>
     <link rel="stylesheet" href="<?php echo CSS_URL; ?>/app.css">
     <style>
         :root {
@@ -1047,8 +1137,8 @@ if (isset($_SESSION['listing_error'])) {
     </style>
 </head>
 <body>
-    <?php include __DIR__ . '/../../includes/navbar.php'; ?>
-    <?php include __DIR__ . '/../../includes/subscription-notification.php'; ?>
+    <?php include __DIR__ . '/../../../includes/navbar.php'; ?>
+    <?php include __DIR__ . '/../../../includes/subscription-notification.php'; ?>
 
     <!-- Toast Container -->
     <div id="toast-container" style="position: fixed; top: 100px; right: 20px; z-index: 99999;"></div>
@@ -1057,13 +1147,16 @@ if (isset($_SESSION['listing_error'])) {
         <div class="page-header">
             <div class="page-header-top">
                 <h1 class="page-title">
-                    Create New Listing
+                    Edit Company Listing
+                    <span class="status-badge <?php echo $listing['published'] == 1 ? 'published' : 'draft'; ?>">
+                        <?php echo $listing['published'] == 1 ? 'Published' : 'Draft'; ?>
+                    </span>
                 </h1>
-                <a href="<?php echo VIEWS_URL; ?>/profile.php?tab=listings" class="back-link">
-                    ← Back to My Listings
+                <a href="<?php echo VIEWS_URL; ?>/profile.php?tab=company" class="back-link">
+                    ← Back to Company
                 </a>
             </div>
-            <p class="page-subtitle">Add a new glass product to your listings</p>
+            <p class="page-subtitle">Update your listing details and manage product images</p>
         </div>
 
         <?php if ($error_message): ?>
@@ -1081,7 +1174,6 @@ if (isset($_SESSION['listing_error'])) {
         <?php endif; ?>
 
         <form method="POST" action="" enctype="multipart/form-data">
-            <input type="hidden" name="create_listing" value="1">
             <!-- Tab System -->
             <div class="tabs-container">
                 <div class="tabs-header">
@@ -1090,6 +1182,9 @@ if (isset($_SESSION['listing_error'])) {
                     </button>
                     <button type="button" class="tab-button" onclick="switchTab('images')">
                         📸 Product Images
+                    </button>
+                    <button type="button" class="tab-button" onclick="switchTab('danger')">
+                        �️ Delete Listing
                     </button>
                 </div>
 
@@ -1171,13 +1266,13 @@ if (isset($_SESSION['listing_error'])) {
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label" for="quantity_tons">
+                            <label class="form-label" for="glass_tons">
                                 Quantity (in tons) <span class="required">*</span>
                             </label>
                             <input
                                 type="number"
-                                id="quantity_tons"
-                                name="quantity_tons"
+                                id="glass_tons"
+                                name="glass_tons"
                                 class="form-input"
                                 value="<?php echo htmlspecialchars($listing['quantity_tons'] ?? ''); ?>"
                                 placeholder="0.00"
@@ -1266,36 +1361,153 @@ if (isset($_SESSION['listing_error'])) {
                             <div>
                                 <h3 style="margin: 0 0 8px 0; font-size: 20px; font-weight: 700;">Product Images</h3>
                                 <p style="margin: 0; color: var(--profile-muted); font-size: 14px;">
-                                    Upload up to 20 images for your listing
+                                    <span id="image-count-text"><?php echo count($listing_images); ?> of 20 images</span>
+                                    <span id="selection-count" style="display: none; color: var(--profile-primary); font-weight: 600;"></span>
                                 </p>
+                            </div>
+                            <div id="bulk-actions" style="display: none; gap: 8px;">
+                                <button type="button" class="btn-bulk" onclick="selectAll()" style="background: var(--profile-primary);">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M9 11l3 3L22 4"/>
+                                        <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+                                    </svg>
+                                    Select All
+                                </button>
+                                <button type="button" class="btn-bulk" onclick="bulkDelete()" style="background: #ef4444;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                                    </svg>
+                                    Delete Selected
+                                </button>
+                                <button type="button" class="btn-bulk" onclick="deselectAll()" style="background: #6b7280;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                    Cancel
+                                </button>
                             </div>
                         </div>
 
-                        <!-- Upload New Images -->
-                        <div class="upload-section">
-                            <label for="product_images" class="upload-box">
-                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
-                                </svg>
-                                <strong>Click to upload images</strong>
-                                <span>JPG, PNG, WebP (Max 5MB each) • First image will be the main image</span>
-                                <input
-                                    type="file"
-                                    id="product_images"
-                                    name="product_images[]"
-                                    accept="image/jpeg,image/jpg,image/png,image/webp"
-                                    multiple
-                                    style="display: none;"
-                                    onchange="previewImages(this)"
-                                >
-                            </label>
-                            <div id="preview-container"></div>
+                        <!-- Selection Hint -->
+                        <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 12px 16px; border-radius: 8px; margin-bottom: 24px; font-size: 13px; color: #1e40af;">
+                            💡 <strong>Quick tips:</strong> Click on any image to select it, or use checkboxes. 
+                            Press <kbd style="background: white; padding: 2px 6px; border-radius: 4px; border: 1px solid #cbd5e1;">Ctrl+A</kbd> to select all, 
+                            <kbd style="background: white; padding: 2px 6px; border-radius: 4px; border: 1px solid #cbd5e1;">Delete</kbd> to remove selected, 
+                            <kbd style="background: white; padding: 2px 6px; border-radius: 4px; border: 1px solid #cbd5e1;">Esc</kbd> to deselect.
                         </div>
+
+                        <!-- Current Images -->
+                        <?php if (!empty($listing_images)): ?>
+                            <div class="images-grid">
+                                <?php foreach ($listing_images as $img): ?>
+                                    <div class="image-card <?php echo $img['is_main'] ? 'is-main' : ''; ?>" data-image-id="<?php echo $img['id']; ?>">
+                                        <div class="image-card-checkbox">
+                                            <input type="checkbox" class="image-select-cb" value="<?php echo $img['id']; ?>" 
+                                                   onchange="updateSelection()" <?php echo $img['is_main'] ? 'disabled title="Cannot select main image"' : ''; ?>>
+                                        </div>
+                                        <div class="image-card-img" onclick="toggleImageSelection(this)">
+                                            <img src="<?php echo PUBLIC_URL . '/' . $img['image_path']; ?>" alt="Product image">
+                                            <?php if ($img['is_main']): ?>
+                                                <div class="main-badge">
+                                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                                    </svg>
+                                                    Main
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                        <div class="image-card-actions">
+                                            <?php if (!$img['is_main']): ?>
+                                                <button type="button" class="image-card-btn" onclick="setMainImage(<?php echo $img['id']; ?>)">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                                    </svg>
+                                                    Set Main
+                                                </button>
+                                            <?php endif; ?>
+                                            <button type="button" class="image-card-btn delete-btn" onclick="deleteImage(<?php echo $img['id']; ?>)">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                                                </svg>
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php else: ?>
+                            <div class="empty-state">
+                                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                                    <path d="M21 15l-5-5L5 21"/>
+                                </svg>
+                                <h4>No images yet</h4>
+                                <p>Upload at least one image to showcase your product</p>
+                            </div>
+                        <?php endif; ?>
+
+                        <!-- Upload New Images -->
+                        <?php if (count($listing_images) < 20): ?>
+                            <div class="upload-section">
+                                <label for="product_images" class="upload-box">
+                                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                                    </svg>
+                                    <strong>Click to upload images</strong>
+                                    <span>JPG, PNG, WebP (Max 5MB each)</span>
+                                    <input
+                                        type="file"
+                                        id="product_images"
+                                        name="product_images[]"
+                                        accept="image/jpeg,image/jpg,image/png,image/webp"
+                                        multiple
+                                        style="display: none;"
+                                        onchange="previewImages(this)"
+                                    >
+                                </label>
+                                <div id="preview-container"></div>
+                            </div>
+                        <?php else: ?>
+                            <div class="alert alert-danger">
+                                Maximum 20 images reached. Delete some images to upload new ones.
+                            </div>
+                        <?php endif; ?>
 
                         <!-- Save Button -->
                         <div class="button-group">
-                            <button type="submit" class="btn btn-primary" style="width: 100%;">
-                                ✅ Create Listing
+                            <button type="submit" name="update_listing" class="btn btn-primary" style="width: 100%;">
+                                💾 Save Changes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Danger Zone -->
+                <div id="tab-danger" class="tab-content">
+                    <div style="max-width: 600px; margin: 0 auto;">
+                        <div style="background: #fef2f2; border-left: 4px solid #ef4444; padding: 20px; border-radius: 12px;">
+                            <h3 style="font-size: 24px; font-weight: 700; color: #dc2626; margin: 0 0 16px 0;">
+                                🗑️ Delete Listing
+                            </h3>
+                            <p style="font-size: 15px; color: #7f1d1d; margin-bottom: 20px; line-height: 1.6;">
+                                Deleting this listing will permanently remove it from Glass Market. This action <strong>cannot be undone</strong>.
+                            </p>
+                            <p style="font-size: 14px; color: #991b1b; margin-bottom: 24px;">
+                                <strong>What will be deleted:</strong><br>
+                                • The listing and all its details<br>
+                                • All uploaded product images<br>
+                                • Saved listings from other users<br>
+                                • Any associated data
+                            </p>
+                        </div>
+
+                        <div style="margin-top: 24px; padding: 20px; background: white; border-radius: 12px; border: 2px solid #fecaca;">
+                            <p style="font-size: 14px; color: #6b7280; margin-bottom: 16px;">
+                                Are you absolutely sure? This action is permanent and cannot be reversed.
+                            </p>
+                            <button type="button" onclick="confirmDelete()" class="btn btn-danger" style="width: 100%; padding: 16px; font-size: 16px;">
+                                🗑️ Delete Listing Permanently
                             </button>
                         </div>
                     </div>
@@ -1303,9 +1515,15 @@ if (isset($_SESSION['listing_error'])) {
 
             </div>
         </form>
+
+        <!-- Delete Form (Outside main form to avoid nesting) -->
+        <form id="delete-form" method="POST" action="<?php echo VIEWS_URL; ?>/profile.php?tab=company" style="display: none;">
+            <input type="hidden" name="delete_listing" value="1">
+            <input type="hidden" name="listing_id" value="<?php echo $listing_id; ?>">
+        </form>
     </main>
 
-    <?php include __DIR__ . '/../../includes/footer.php'; ?>
+    <?php include __DIR__ . '/../../../includes/footer.php'; ?>
 
     <script>
     // Update Status Text
@@ -1338,7 +1556,8 @@ if (isset($_SESSION['listing_error'])) {
         
         // Add active class to clicked button
         const clickedButton = Array.from(document.querySelectorAll('.tab-button')).find(btn => {
-            return btn.textContent.includes(tabName === 'details' ? 'Listing Details' : 'Product Images');
+            return btn.textContent.includes(tabName === 'details' ? 'Listing Details' : 
+                   tabName === 'images' ? 'Product Images' : 'Delete Listing');
         });
         if (clickedButton) {
             clickedButton.classList.add('active');
@@ -1368,37 +1587,133 @@ if (isset($_SESSION['listing_error'])) {
         }
     }
 
+    // Multi-select functions
+    function toggleImageSelection(imgElement) {
+        const card = imgElement.closest('.image-card');
+        const checkbox = card.querySelector('.image-select-cb');
+        
+        if (!checkbox.disabled) {
+            checkbox.checked = !checkbox.checked;
+            updateSelection();
+        }
+    }
+
+    function updateSelection() {
+        const checkboxes = document.querySelectorAll('.image-select-cb:checked');
+        const count = checkboxes.length;
+        const bulkActions = document.getElementById('bulk-actions');
+        const selectionCount = document.getElementById('selection-count');
+        const imageCountText = document.getElementById('image-count-text');
+
+        if (count > 0) {
+            bulkActions.style.display = 'flex';
+            selectionCount.style.display = 'inline';
+            selectionCount.textContent = `• ${count} selected`;
+            
+            // Add selected class to cards
+            checkboxes.forEach(cb => {
+                cb.closest('.image-card').classList.add('selected');
+            });
+        } else {
+            bulkActions.style.display = 'none';
+            selectionCount.style.display = 'none';
+        }
+
+        // Remove selected class from unchecked cards
+        document.querySelectorAll('.image-select-cb:not(:checked)').forEach(cb => {
+            cb.closest('.image-card').classList.remove('selected');
+        });
+    }
+
+    function deselectAll() {
+        document.querySelectorAll('.image-select-cb:checked').forEach(cb => {
+            cb.checked = false;
+        });
+        updateSelection();
+    }
+
+    function selectAll() {
+        document.querySelectorAll('.image-select-cb:not(:disabled)').forEach(cb => {
+            cb.checked = true;
+        });
+        updateSelection();
+    }
+
+    async function bulkDelete() {
+        const checkboxes = document.querySelectorAll('.image-select-cb:checked');
+        const count = checkboxes.length;
+        
+        if (count === 0) return;
+
+        if (!confirm(`Are you sure you want to delete ${count} image${count > 1 ? 's' : ''}?\n\nThis action cannot be undone.`)) {
+            return;
+        }
+
+        const imageIds = Array.from(checkboxes).map(cb => cb.value);
+        let successCount = 0;
+        let failCount = 0;
+
+        // Show progress
+        showToast(`Deleting ${count} images...`, 'info');
+
+        for (const imageId of imageIds) {
+            try {
+                const formData = new FormData();
+                formData.append('delete_image', '1');
+                formData.append('image_id', imageId);
+                
+                const response = await fetch(window.location.href, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    successCount++;
+                } else {
+                    failCount++;
+                }
+            } catch (error) {
+                failCount++;
+            }
+        }
+
+        if (successCount > 0) {
+            showToast(`Successfully deleted ${successCount} image${successCount > 1 ? 's' : ''}!`, 'success');
+            setTimeout(() => {
+                window.location.replace(window.location.pathname + '?id=<?php echo $listing_id; ?>&tab=images');
+            }, 800);
+        } else {
+            showToast('Failed to delete images', 'error');
+        }
+    }
+
     function previewImages(input) {
         const container = document.getElementById('preview-container');
         container.innerHTML = '';
         
         if (input.files) {
             const fileCount = input.files.length;
+            const currentCount = document.querySelectorAll('.image-item').length;
             
-            if (fileCount > 20) {
-                alert('Maximum 20 images allowed. Only the first 20 will be used.');
-                // Don't return, just limit to 20
+            if (currentCount + fileCount > 20) {
+                alert(`You can only upload ${20 - currentCount} more images. Maximum is 20 images per listing.`);
+                input.value = '';
+                return;
             }
             
-            Array.from(input.files).slice(0, 20).forEach((file, index) => {
+            Array.from(input.files).forEach((file, index) => {
                 if (file.size > 5 * 1024 * 1024) {
-                    const errorDiv = document.createElement('div');
-                    errorDiv.style.cssText = 'margin-top: 8px; padding: 12px; background: #fee2e2; border-radius: 8px; font-size: 13px; color: #991b1b;';
-                    errorDiv.textContent = `✗ ${file.name} is too large (max 5MB)`;
-                    container.appendChild(errorDiv);
+                    alert(`File "${file.name}" is too large. Maximum size is 5MB.`);
                     return;
                 }
                 
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const preview = document.createElement('div');
-                    preview.style.cssText = 'margin-top: 8px; padding: 12px; background: #f0fdf4; border-radius: 8px; font-size: 13px; color: #166534; display: flex; align-items: center; gap: 8px;';
-                    preview.innerHTML = `
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M5 13l4 4L19 7"/>
-                        </svg>
-                        <span>${index === 0 ? '⭐ ' : ''}${file.name}${index === 0 ? ' (Will be main image)' : ''}</span>
-                    `;
+                    preview.style.cssText = 'margin-top: 8px; padding: 12px; background: #f0fdf4; border-radius: 8px; font-size: 13px; color: #166534;';
+                    preview.textContent = `✓ ${file.name} ready to upload`;
                     container.appendChild(preview);
                 };
                 reader.readAsDataURL(file);
@@ -1406,11 +1721,97 @@ if (isset($_SESSION['listing_error'])) {
         }
     }
 
+    async function deleteImage(imageId) {
+        if (!confirm('Are you sure you want to delete this image?\n\nThis action cannot be undone.')) {
+            return;
+        }
+        
+        // Show loading state
+        const imageItem = document.querySelector(`[data-image-id="${imageId}"]`);
+        if (imageItem) {
+            imageItem.style.opacity = '0.5';
+            imageItem.style.pointerEvents = 'none';
+        }
+        
+        try {
+            const formData = new FormData();
+            formData.append('delete_image', '1');
+            formData.append('image_id', imageId);
+            
+            const response = await fetch(window.location.href, {
+                method: 'POST',
+                body: formData
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showToast('Image deleted successfully!', 'success');
+                // Use replace to prevent form resubmission
+                setTimeout(() => {
+                    window.location.replace(window.location.pathname + '?id=<?php echo $listing_id; ?>&tab=images');
+                }, 500);
+            } else {
+                showToast('Error: ' + (result.error || 'Failed to delete image'), 'error');
+                if (imageItem) {
+                    imageItem.style.opacity = '1';
+                    imageItem.style.pointerEvents = 'auto';
+                }
+            }
+        } catch (error) {
+            showToast('Error deleting image: ' + error.message, 'error');
+            if (imageItem) {
+                imageItem.style.opacity = '1';
+                imageItem.style.pointerEvents = 'auto';
+            }
+        }
+    }
+
+    async function setMainImage(imageId) {
+        // Show loading state
+        const allItems = document.querySelectorAll('.image-item');
+        allItems.forEach(item => {
+            item.style.pointerEvents = 'none';
+            item.style.opacity = '0.6';
+        });
+        
+        try {
+            const formData = new FormData();
+            formData.append('set_main_image', '1');
+            formData.append('image_id', imageId);
+            
+            const response = await fetch(window.location.href, {
+                method: 'POST',
+                body: formData
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showToast('Main image updated!', 'success');
+                // Use replace to prevent form resubmission
+                setTimeout(() => {
+                    window.location.replace(window.location.pathname + '?id=<?php echo $listing_id; ?>&tab=images');
+                }, 500);
+            } else {
+                showToast('Error: ' + (result.error || 'Failed to set main image'), 'error');
+                allItems.forEach(item => {
+                    item.style.pointerEvents = 'auto';
+                    item.style.opacity = '1';
+                });
+            }
+        } catch (error) {
+            showToast('Error setting main image: ' + error.message, 'error');
+            allItems.forEach(item => {
+                item.style.pointerEvents = 'auto';
+                item.style.opacity = '1';
+            });
+        }
+    }
+    
     // Toast Notification System
     function showToast(message, type = 'success') {
         const container = document.getElementById('toast-container');
-        if (!container) return;
-        
         const toast = document.createElement('div');
         
         const icons = {
@@ -1490,6 +1891,79 @@ if (isset($_SESSION['listing_error'])) {
         }
     `;
     document.head.appendChild(style);
+
+    // Check URL for tab parameter and switch to it
+    window.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const tab = urlParams.get('tab');
+        if (tab) {
+            switchTab(tab);
+        }
+
+        // Clear file input to prevent accidental resubmission
+        const fileInput = document.getElementById('product_images');
+        if (fileInput) {
+            fileInput.value = '';
+        }
+        const previewContainer = document.getElementById('preview-container');
+        if (previewContainer) {
+            previewContainer.innerHTML = '';
+        }
+
+        // Remove duplicate image cards (safety measure)
+        const imageCards = document.querySelectorAll('.image-card');
+        const seenIds = new Set();
+        imageCards.forEach(card => {
+            const imageId = card.getAttribute('data-image-id');
+            if (seenIds.has(imageId)) {
+                card.remove();
+            } else {
+                seenIds.add(imageId);
+            }
+        });
+
+        // Keyboard shortcuts for image management
+        document.addEventListener('keydown', function(e) {
+            // Only in images tab
+            const imagesTab = document.getElementById('tab-images');
+            if (!imagesTab || !imagesTab.classList.contains('active')) {
+                return;
+            }
+
+            // Ctrl/Cmd + A to select all
+            if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
+                e.preventDefault();
+                selectAll();
+            }
+
+            // Delete key to delete selected
+            if (e.key === 'Delete' || e.key === 'Backspace') {
+                const selected = document.querySelectorAll('.image-select-cb:checked');
+                if (selected.length > 0) {
+                    e.preventDefault();
+                    bulkDelete();
+                }
+            }
+
+            // Escape to deselect all
+            if (e.key === 'Escape') {
+                deselectAll();
+            }
+        });
+    });
+
+    // Confirm delete function
+    function confirmDelete() {
+        if (confirm('⚠️ FINAL WARNING ⚠️\n\nAre you absolutely sure you want to permanently delete this listing?\n\nThis action CANNOT be undone!\n\nClick OK to delete forever, or Cancel to keep the listing.')) {
+            const form = document.getElementById('delete-form');
+            if (form) {
+                form.submit();
+            } else {
+                console.error('Delete form not found');
+                alert('Error: Could not find delete form. Please refresh the page and try again.');
+            }
+        }
+    }
     </script>
 </body>
 </html>

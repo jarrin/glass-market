@@ -21,10 +21,6 @@ $success_message = '';
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim($_POST['name'] ?? '');
-    $company_name = trim($_POST['company_name'] ?? ''); // Optional
-    $address = trim($_POST['address'] ?? ''); // Optional
-    $city = trim($_POST['city'] ?? ''); // Optional
-    $country = trim($_POST['country'] ?? ''); // Optional
     $notification_email = trim($_POST['notification_email'] ?? '');
     $communication_email = trim($_POST['communication_email'] ?? '');
     $password = $_POST['password'] ?? '';
@@ -46,6 +42,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $pdo = new PDO("mysql:host=$db_host;dbname=$db_name", $db_user, $db_pass);
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            
+            // Start transaction
+            $pdo->beginTransaction();
 
             // Check if email already exists
             $stmt = $pdo->prepare('SELECT id FROM users WHERE email = :email OR email = :comm_email LIMIT 1');
@@ -53,25 +52,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($stmt->fetch()) {
                 $error_message = 'This email is already registered.';
+                $pdo->rollBack();
             } else {
                 $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-                // Add company_name column if it doesn't exist
-                try {
-                    $pdo->exec("ALTER TABLE users ADD COLUMN company_name VARCHAR(255) NULL AFTER name");
-                } catch (PDOException $e) {
-                    // Column already exists, ignore error
-                }
-
-                // Insert user with email_verified_at set to NOW() (auto-verified for regular users)
+                // Insert user WITHOUT verification (email_verified_at = NULL) - requires admin approval
                 $stmt = $pdo->prepare('
-                    INSERT INTO users (name, company_name, email, password, email_verified_at)
-                    VALUES (:name, :company_name, :email, :password, NOW())
+                    INSERT INTO users (name, email, password, email_verified_at)
+                    VALUES (:name, :email, :password, NULL)
                 ');
 
                 $stmt->execute([
                     'name' => $name,
-                    'company_name' => !empty($company_name) ? $company_name : null,
                     'email' => $notification_email,
                     'password' => $hashed_password,
                 ]);
@@ -79,75 +71,75 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Get the newly created user ID
                 $user_id = $pdo->lastInsertId();
 
-                // If company details provided, create a company record
-                if (!empty($company_name)) {
-                    try {
-                        // Create company with owner_user_id set and default company_type
-                        $stmt = $pdo->prepare('
-                            INSERT INTO companies (
-                                name, 
-                                address_line1, 
-                                city, 
-                                country, 
-                                owner_user_id,
-                                company_type,
-                                created_at
-                            )
-                            VALUES (:name, :address, :city, :country, :owner_user_id, :company_type, NOW())
-                        ');
-                        
-                        $stmt->execute([
-                            'name' => $company_name,
-                            'address' => !empty($address) ? $address : null,
-                            'city' => !empty($city) ? $city : null,
-                            'country' => !empty($country) ? $country : null,
-                            'owner_user_id' => $user_id,
-                            'company_type' => 'Other', // Default type, user can update later
-                        ]);
-                        
-                        $company_id = $pdo->lastInsertId();
-                        
-                        // Link user to company
-                        $stmt = $pdo->prepare('UPDATE users SET company_id = :company_id WHERE id = :user_id');
-                        $stmt->execute([
-                            'company_id' => $company_id,
-                            'user_id' => $user_id
-                        ]);
-                        
-                        error_log("Company created successfully: ID $company_id for user $user_id");
-                    } catch (PDOException $e) {
-                        // Company creation failed, but user is still created
-                        error_log("Company creation failed: " . $e->getMessage());
-                    }
-                }
-
-                // Create 3-month free trial subscription
-                require_once __DIR__ . '/../../database/classes/subscriptions.php';
-                $subscription_created = Subscription::createTrialSubscription($pdo, $user_id, $notification_email, $name);
-
-                // Send welcome email using Rust mailer
+                // Send registration notification email BEFORE committing
+                $emailSent = false;
+                $emailError = '';
+                
                 try {
                     require_once __DIR__ . '/../../app/Services/RustMailer.php';
                     $rustMailer = new App\Services\RustMailer();
-                    $welcomeResult = $rustMailer->sendWelcomeEmail($notification_email, $name);
                     
-                    if (!$welcomeResult['success']) {
-                        error_log("Welcome email failed: " . $welcomeResult['message']);
+                    $emailBody = '
+                        <h2 style="color: #333;">Registration Received</h2>
+                        <p>Dear ' . htmlspecialchars($name) . ',</p>
+                        <p>Thank you for registering with Glass Market. Your account has been created and is pending admin approval.</p>
+                        <p><strong>What happens next?</strong></p>
+                        <ul>
+                            <li>Our admin team will review your registration</li>
+                            <li>You will receive an email once your account is approved</li>
+                            <li>After approval, you will receive a 3-month free trial</li>
+                        </ul>
+                        <p>This process typically takes 24-48 hours.</p>
+                        <p>Best regards,<br>Glass Market Team</p>
+                    ';
+                    
+                    $emailResult = $rustMailer->send(
+                        $notification_email,
+                        'Glass Market - Registration Pending Approval',
+                        $emailBody,
+                        true,
+                        $name
+                    );
+                    
+                    if ($emailResult['success']) {
+                        $emailSent = true;
+                    } else {
+                        $emailError = $emailResult['message'] ?? 'Unknown email error';
+                        error_log("Registration notification email failed: " . $emailError);
                     }
                 } catch (Exception $e) {
-                    error_log("Welcome email exception: " . $e->getMessage());
+                    $emailError = $e->getMessage();
+                    error_log("Registration notification email exception: " . $emailError);
                 }
-
-                if ($subscription_created) {
-                    $success_message = 'Registration successful! You have been granted a 3-month free trial. Check your email for details. You can now log in to your account.';
+                
+                // Only commit if email was sent successfully
+                if ($emailSent) {
+                    $pdo->commit();
+                    $success_message = 'Registration successful! Your account is pending admin approval. You will receive an email notification once approved (typically within 24-48 hours).';
                 } else {
-                    $success_message = 'Registration successful! However, there was an issue creating your trial subscription. Check your email and contact support if needed.';
-                    error_log("Trial subscription creation failed for user_id: $user_id");
+                    // Email failed - rollback registration
+                    $pdo->rollBack();
+                    $error_message = 'Registration failed: Unable to send confirmation email. Please verify your email address is correct and try again. If the problem persists, contact support.';
+                    error_log("Registration rolled back for $notification_email due to email failure: $emailError");
                 }
             }
-        } catch (PDOException $e) {
-            $error_message = 'Registration failed: ' . $e->getMessage();
-            error_log("Registration error: " . $e->getMessage());
+        } catch (Exception $e) {
+            // Rollback any active transaction
+            if (isset($pdo) && $pdo instanceof PDO && $pdo->inTransaction()) {
+                $pdo->rollBack();
+                error_log("Transaction rolled back due to error");
+            }
+            
+            // User-friendly error message
+            if (strpos($e->getMessage(), 'Duplicate entry') !== false) {
+                $error_message = 'Registration failed: This email address is already in use.';
+            } elseif (strpos($e->getMessage(), 'email') !== false) {
+                $error_message = 'Registration failed: Unable to send confirmation email. Please check your email address and try again.';
+            } else {
+                $error_message = 'Registration failed: ' . $e->getMessage();
+            }
+            
+            error_log("Registration error for $notification_email: " . $e->getMessage());
         }
     }
 }
@@ -415,50 +407,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     >
                 </div>
 
-                <div class="form-group">
-                    <label for="company_name">Company name <span style="color: #999; font-size: 11px;">(Optional)</span></label>
-                    <input
-                        type="text"
-                        id="company_name"
-                        name="company_name"
-                        value="<?php echo htmlspecialchars($_POST['company_name'] ?? ''); ?>"
-                        placeholder="Company name (optional)..."
-                    >
-                </div>
-
-                <div class="form-group">
-                    <label for="address">Address <span style="color: #999; font-size: 11px;">(Optional)</span></label>
-                    <input
-                        type="text"
-                        id="address"
-                        name="address"
-                        value="<?php echo htmlspecialchars($_POST['address'] ?? ''); ?>"
-                        placeholder="Address (optional)"
-                    >
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="city">City <span style="color: #999; font-size: 11px;">(Optional)</span></label>
-                        <input
-                            type="text"
-                            id="city"
-                            name="city"
-                            value="<?php echo htmlspecialchars($_POST['city'] ?? ''); ?>"
-                            placeholder="City (optional)"
-                        >
-                    </div>
-                    <div class="form-group">
-                        <label for="country">Country <span style="color: #999; font-size: 11px;">(Optional)</span></label>
-                        <input
-                            type="text"
-                            id="country"
-                            name="country"
-                            value="<?php echo htmlspecialchars($_POST['country'] ?? ''); ?>"
-                            placeholder="Country (optional)"
-                        >
-                    </div>
-                </div>
 
                 <!-- Email Addresses -->
                 <div class="section-title">Email Addresses</div>

@@ -48,6 +48,67 @@ try {
     $company_types = ['Glass Recycle Plant', 'Glass Factory', 'Collection Company', 'Trader', 'Other'];
 }
 
+// Handle cover image upload
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_cover_image'])) {
+    if (isset($_FILES['cover_image']) && $_FILES['cover_image']['error'] === UPLOAD_ERR_OK) {
+        $allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+        $max_size = 5 * 1024 * 1024; // 5MB
+        
+        $file_type = $_FILES['cover_image']['type'];
+        $file_size = $_FILES['cover_image']['size'];
+        
+        if (!in_array($file_type, $allowed_types)) {
+            $error_message = 'Invalid file type. Please upload JPG, PNG, GIF, or WebP images only.';
+        } elseif ($file_size > $max_size) {
+            $error_message = 'File too large. Maximum size is 5MB.';
+        } else {
+            // Create upload directory if it doesn't exist
+            $upload_dir = __DIR__ . '/../../../public/uploads/companies';
+            if (!is_dir($upload_dir)) {
+                mkdir($upload_dir, 0755, true);
+            }
+            
+            // Generate unique filename
+            $file_extension = pathinfo($_FILES['cover_image']['name'], PATHINFO_EXTENSION);
+            $filename = 'company_' . $company['id'] . '_cover_' . time() . '.' . $file_extension;
+            $upload_path = $upload_dir . '/' . $filename;
+            $db_path = 'uploads/companies/' . $filename;
+            
+            if (move_uploaded_file($_FILES['cover_image']['tmp_name'], $upload_path)) {
+                // Delete old cover image if it exists and is not fallback
+                if (!empty($company['cover_image']) && $company['cover_image'] !== 'uploads/default/fallback_company.png') {
+                    $old_image = __DIR__ . '/../../../public/' . $company['cover_image'];
+                    if (file_exists($old_image)) {
+                        unlink($old_image);
+                    }
+                }
+                
+                // Update database
+                try {
+                    $stmt = $pdo->prepare('UPDATE companies SET cover_image = :cover_image WHERE owner_user_id = :owner_user_id');
+                    $stmt->execute([
+                        'cover_image' => $db_path,
+                        'owner_user_id' => $user_id
+                    ]);
+                    
+                    $success_message = 'Cover image uploaded successfully!';
+                    
+                    // Reload company data
+                    $stmt = $pdo->prepare('SELECT * FROM companies WHERE owner_user_id = :user_id');
+                    $stmt->execute(['user_id' => $user_id]);
+                    $company = $stmt->fetch(PDO::FETCH_ASSOC);
+                } catch (PDOException $e) {
+                    $error_message = 'Failed to update cover image: ' . $e->getMessage();
+                }
+            } else {
+                $error_message = 'Failed to upload image. Please try again.';
+            }
+        }
+    } else {
+        $error_message = 'Please select an image to upload.';
+    }
+}
+
 // Handle company update
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_company'])) {
     $company_name = trim($_POST['company_name'] ?? '');
@@ -78,8 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_company'])) {
                     postal_code = :postal_code,
                     country = :country,
                     phone = :phone,
-                    website = :website,
-                    updated_at = NOW()
+                    website = :website
                 WHERE owner_user_id = :owner_user_id
             ');
             
@@ -118,40 +178,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_company'])) {
     <title>Edit Company - Glass Market</title>
     <link rel="stylesheet" href="<?php echo CSS_URL; ?>/app.css">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            background: #f9fafb;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f7fa;
             min-height: 100vh;
+            padding-top: 80px;
         }
 
         .container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 40px 20px;
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
         }
 
         .page-header {
-            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
-            color: white;
+            background: white;
+            border-radius: 12px;
             padding: 40px;
-            border-radius: 16px;
-            margin-bottom: 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             display: flex;
             align-items: center;
-            gap: 24px;
+            gap: 32px;
+            border: 1px solid #e5e7eb;
         }
 
         .company-avatar {
-            width: 100px;
-            height: 100px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 20px;
+            width: 120px;
+            height: 120px;
+            background: #1f2937;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 48px;
+            font-size: 56px;
             color: white;
-            font-weight: 700;
+            font-weight: 800;
             flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .company-header-info {
@@ -159,27 +229,67 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_company'])) {
         }
 
         .company-header-info h1 {
-            font-size: 32px;
-            font-weight: 800;
+            font-size: 36px;
+            font-weight: 700;
             margin: 0 0 8px;
+            color: #1f2937;
         }
 
         .company-header-info p {
-            font-size: 14px;
-            opacity: 0.8;
+            font-size: 16px;
+            color: #6b7280;
+            margin: 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e5e7eb;
+            transition: all 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0 0 8px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #6b7280;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
             margin: 0;
         }
 
         .company-card {
             background: white;
-            border-radius: 16px;
+            border-radius: 12px;
             padding: 40px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             margin-bottom: 24px;
+            border: 1px solid #e5e7eb;
         }
 
         .form-section {
-            margin-bottom: 36px;
+            margin-bottom: 40px;
         }
 
         .form-section:last-child {
@@ -190,13 +300,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_company'])) {
             font-size: 20px;
             font-weight: 700;
             color: #1f2937;
-            margin: 0 0 24px;
+            margin: 0 0 20px;
             padding-bottom: 12px;
             border-bottom: 2px solid #e5e7eb;
         }
 
         .form-group {
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
 
         .form-group label {
@@ -209,6 +319,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_company'])) {
 
         .form-group label .required {
             color: #ef4444;
+            font-weight: 700;
         }
 
         .form-group input,
@@ -216,30 +327,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_company'])) {
         .form-group textarea {
             width: 100%;
             padding: 12px 16px;
-            border: 2px solid #d1d5db;
-            border-radius: 10px;
-            font-size: 15px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
             color: #1f2937;
             transition: all 0.2s ease;
             font-family: inherit;
+            background: white;
+        }
+
+        .form-group input:hover,
+        .form-group select:hover,
+        .form-group textarea:hover {
+            border-color: #9ca3af;
         }
 
         .form-group input:focus,
         .form-group select:focus,
         .form-group textarea:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
 
         .form-group textarea {
             resize: vertical;
             min-height: 120px;
+            line-height: 1.6;
         }
 
         .form-group small {
             display: block;
-            font-size: 13px;
+            font-size: 12px;
             color: #6b7280;
             margin-top: 6px;
         }
@@ -258,30 +377,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_company'])) {
 
         .alert {
             padding: 16px 20px;
-            border-radius: 12px;
+            border-radius: 8px;
             margin-bottom: 24px;
             font-size: 14px;
             font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
         .alert-error {
-            background: #fee2e2;
+            background: #fef2f2;
             color: #991b1b;
-            border: 1px solid #fca5a5;
+            border: 1px solid #fecaca;
         }
 
         .alert-success {
-            background: #d1fae5;
-            color: #065f46;
-            border: 1px solid #6ee7b7;
+            background: #f0fdf4;
+            color: #166534;
+            border: 1px solid #bbf7d0;
         }
 
         .btn-primary {
-            padding: 14px 28px;
-            background: #667eea;
+            padding: 12px 32px;
+            background: #1f2937;
             color: white;
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             font-size: 15px;
             font-weight: 600;
             cursor: pointer;
@@ -289,78 +411,82 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_company'])) {
         }
 
         .btn-primary:hover {
-            background: #5568d3;
-            transform: translateY(-1px);
+            background: #111827;
         }
 
         .btn-secondary {
-            display: inline-block;
-            padding: 14px 28px;
-            background: #f3f4f6;
+            padding: 12px 32px;
+            background: white;
             color: #374151;
-            border: none;
-            border-radius: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
             font-size: 15px;
             font-weight: 600;
-            text-decoration: none;
             cursor: pointer;
             transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
         }
 
         .btn-secondary:hover {
-            background: #e5e7eb;
+            background: #f9fafb;
+            border-color: #9ca3af;
         }
 
-        .button-group {
+        .form-actions {
             display: flex;
             gap: 12px;
-            margin-top: 32px;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            margin-bottom: 32px;
-        }
-
-        .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 24px;
-            border-radius: 12px;
-            color: white;
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 36px;
-            font-weight: 800;
-            margin: 0 0 4px;
-        }
-
-        .stat-label {
-            font-size: 13px;
-            opacity: 0.9;
-            margin: 0;
+            padding-top: 24px;
+            border-top: 1px solid #e5e7eb;
         }
 
         @media (max-width: 768px) {
-            .company-card {
-                padding: 24px;
+            body {
+                padding-top: 60px;
+            }
+
+            .container {
+                margin: 20px auto;
             }
 
             .page-header {
                 flex-direction: column;
+                padding: 24px;
                 text-align: center;
+            }
+
+            .company-avatar {
+                width: 100px;
+                height: 100px;
+                font-size: 48px;
+            }
+
+            .company-header-info h1 {
+                font-size: 28px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .company-card {
+                padding: 24px;
             }
 
             .form-row,
             .form-row-triple {
                 grid-template-columns: 1fr;
+                gap: 16px;
             }
 
-            .stats-grid {
-                grid-template-columns: 1fr;
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .btn-primary,
+            .btn-secondary {
+                width: 100%;
             }
         }
     </style>
@@ -467,6 +593,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_company'])) {
                     </div>
                 </div>
 
+                <!-- Company Cover Image -->
+                <div class="form-section">
+                    <h2 class="form-section-title">Company Cover Image</h2>
+                    
+                    <?php 
+                    // Get cover image or use fallback
+                    $coverImage = !empty($company['cover_image']) 
+                        ? PUBLIC_URL . '/' . $company['cover_image']
+                        : PUBLIC_URL . '/uploads/default/fallback_company.png';
+                    ?>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 12px; font-size: 14px; font-weight: 600; color: #374151;">Current Cover Image</label>
+                        <div style="width: 100%; max-width: 600px; height: 200px; border-radius: 12px; overflow: hidden; border: 2px solid #e5e7eb; background: #f9fafb;">
+                            <img src="<?php echo htmlspecialchars($coverImage); ?>" alt="Company Cover" style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                    </div>
+                    
+                    <form method="POST" enctype="multipart/form-data" style="margin-top: 20px;">
+                        <div class="form-group">
+                            <label>Upload New Cover Image</label>
+                            <input 
+                                type="file" 
+                                name="cover_image" 
+                                accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                                style="padding: 10px; border: 2px dashed #d1d5db; background: #f9fafb;"
+                            >
+                            <small>Recommended size: 1200x400px. Max 5MB. JPG, PNG, GIF, or WebP</small>
+                        </div>
+                        <button type="submit" name="upload_cover_image" class="btn-primary">
+                            📤 Upload Cover Image
+                        </button>
+                    </form>
+                </div>
+
                 <!-- Contact & Location -->
                 <div class="form-section">
                     <h2 class="form-section-title">Contact & Location</h2>
@@ -546,12 +707,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_company'])) {
                     </div>
                 </div>
 
-                <div class="button-group">
+                <div class="form-actions">
                     <button type="submit" name="update_company" class="btn-primary">
-                        💾 Save Changes
+                        Save Changes
                     </button>
                     <a href="<?php echo VIEWS_URL; ?>/profile.php?tab=company" class="btn-secondary">
-                        Back to Profile
+                        Cancel
                     </a>
                 </div>
             </form>

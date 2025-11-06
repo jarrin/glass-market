@@ -14,17 +14,25 @@ try {
         FROM listings l
         LEFT JOIN companies c ON l.company_id = c.id
         LEFT JOIN listing_images li ON l.id = li.listing_id AND li.is_main = 1
-        WHERE l.user_id = :user_id
+        WHERE l.user_id = :user_id AND l.company_id IS NULL
         ORDER BY l.created_at DESC
     ');
     $stmt->execute(['user_id' => $user['id']]);
     $user_listings = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Debug: Log the query and results
+    error_log("Listings query for user_id: " . $user['id']);
+    error_log("Found " . count($user_listings) . " listings");
 } catch (PDOException $e) {
-    // Silent fail
+    error_log("Listings query error: " . $e->getMessage());
 }
 ?>
 <div class="tab-panel" id="tab-listings">
     <h2 class="section-title">My Listings</h2>
+
+    <?php if (!$subscription_status['has_access']): ?>
+        <?php include __DIR__ . '/../components/subscription-required-message.php'; ?>
+    <?php else: ?>
     
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
         <p style="margin: 0; font-size: 14px; color: #6b7280;">
@@ -169,5 +177,7 @@ try {
                 ➕ Create Your First Listing
             </a>
         </div>
-    <?php endif; ?>
+    <?php endif; // End subscription check ?>
+
+    <?php endif; // End foreach listings ?>
 </div>

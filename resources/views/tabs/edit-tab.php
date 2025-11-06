@@ -1,10 +1,14 @@
 <?php
 // Edit Profile Tab Content
-// Expects: $user, $company, $error_message, $success_message
+// Expects: $user, $company, $error_message, $success_message, $subscription_status
 ?>
 <div class="tab-panel" id="tab-edit">
     <h2 class="section-title">Edit Profile</h2>
-    
+
+    <?php if (!$subscription_status['has_access']): ?>
+        <?php include __DIR__ . '/../components/subscription-required-message.php'; ?>
+    <?php else: ?>
+
     <div style="background: white; padding: 32px; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); max-width: 600px;">
         <form method="POST" enctype="multipart/form-data">
             <!-- Avatar Upload -->
@@ -202,4 +206,6 @@
             Change Password
         </a>
     </div>
+
+    <?php endif; // End subscription check ?>
 </div>

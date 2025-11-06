@@ -6,7 +6,11 @@
 ?>
 <div class="tab-panel" id="tab-notifications">
     <h2 class="section-title">Notification Preferences</h2>
-    
+
+    <?php if (!$subscription_status['has_access']): ?>
+        <?php include __DIR__ . '/../components/subscription-required-message.php'; ?>
+    <?php else: ?>
+
     <p style="font-size: 14px; color: #6b7280; margin-bottom: 24px;">
         Control what notifications you receive and how you want to be notified.
     </p>
@@ -94,38 +98,6 @@
                         <div class="toggle-slider"></div>
                     </div>
                 </label>
-
-                <!-- Marketing Emails -->
-                <label style="
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    padding: 16px;
-                    background: #f9fafb;
-                    border-radius: 10px;
-                    cursor: pointer;
-                    transition: background 0.2s;
-                " onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='#f9fafb'">
-                    <div style="flex: 1;">
-                        <div style="font-weight: 600; font-size: 15px; color: #1f2937; margin-bottom: 4px;">
-                            Newsletter & Tips
-                        </div>
-                        <div style="font-size: 13px; color: #6b7280;">
-                            Market insights, tips, and special offers
-                        </div>
-                    </div>
-                    <div class="toggle-switch">
-                        <input 
-                            type="checkbox" 
-                            name="notify_newsletter" 
-                            id="notify_newsletter" 
-                            value="1"
-                            <?php echo (!empty($user['notify_newsletter']) ? 'checked' : ''); ?>
-                            style="display: none;"
-                        >
-                        <div class="toggle-slider"></div>
-                    </div>
-                </label>
             </div>
         </div>
 
@@ -172,38 +144,6 @@
                             id="push_new_listings" 
                             value="1"
                             <?php echo (!empty($user['push_new_listings']) ? 'checked' : ''); ?>
-                            style="display: none;"
-                        >
-                        <div class="toggle-slider"></div>
-                    </div>
-                </label>
-
-                <!-- Message Notifications -->
-                <label style="
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    padding: 16px;
-                    background: #f9fafb;
-                    border-radius: 10px;
-                    cursor: pointer;
-                    transition: background 0.2s;
-                " onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='#f9fafb'">
-                    <div style="flex: 1;">
-                        <div style="font-weight: 600; font-size: 15px; color: #1f2937; margin-bottom: 4px;">
-                            Messages
-                        </div>
-                        <div style="font-size: 13px; color: #6b7280;">
-                            Notifications when you receive messages
-                        </div>
-                    </div>
-                    <div class="toggle-switch">
-                        <input 
-                            type="checkbox" 
-                            name="push_messages" 
-                            id="push_messages" 
-                            value="1"
-                            <?php echo (!empty($user['push_messages']) ? 'checked' : ''); ?>
                             style="display: none;"
                         >
                         <div class="toggle-slider"></div>
@@ -374,3 +314,5 @@ function requestPushPermission() {
     });
 }
 </script>
+
+<?php endif; // End subscription check ?>

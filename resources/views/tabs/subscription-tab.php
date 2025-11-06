@@ -4,14 +4,14 @@
 ?>
 <div class="tab-panel" id="tab-subscription">
     <h2 class="section-title">My Subscriptions</h2>
-    
-    <?php if ($success_message && isset($_POST['cancel_subscription'])): ?>
+
+    <?php if ($success_message): ?>
         <div class="alert alert-success">
             <?php echo htmlspecialchars($success_message); ?>
         </div>
     <?php endif; ?>
-    
-    <?php if ($error_message && isset($_POST['cancel_subscription'])): ?>
+
+    <?php if ($error_message): ?>
         <div class="alert alert-error">
             <?php echo htmlspecialchars($error_message); ?>
         </div>

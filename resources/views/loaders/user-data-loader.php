@@ -43,15 +43,14 @@ try {
         }
     }
     
-    // Get user's listings count
+    // Get user's personal listings count (exclude company listings)
     $stmt = $pdo->prepare('
         SELECT COUNT(*) as count
         FROM listings l
-        WHERE l.user_id = :user_id OR l.company_id = :company_id
+        WHERE l.user_id = :user_id AND l.company_id IS NULL
     ');
     $stmt->execute([
-        'user_id' => $user['id'],
-        'company_id' => $dbUser['company_id'] ?? 0
+        'user_id' => $user['id']
     ]);
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
     $user_listings_count = $result['count'] ?? 0;

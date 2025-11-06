@@ -2,6 +2,7 @@
 session_start();
 
 require_once __DIR__ . '/../../config.php';
+require_once __DIR__ . '/../../includes/subscription-check.php';
 
 // Require authentication
 if (!isset($_SESSION['user_logged_in']) || $_SESSION['user_logged_in'] !== true) {

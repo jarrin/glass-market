@@ -1,6 +1,7 @@
 <?php
 session_start();
 require __DIR__ . '/../../config.php';
+require __DIR__ . '/../../includes/subscription-check.php';
 require __DIR__ . '/../../includes/db_connect.php';
 
 // Check if listing ID is provided

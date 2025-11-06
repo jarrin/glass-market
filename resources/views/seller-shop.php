@@ -1,5 +1,6 @@
 <?php session_start(); ?>
 <?php require_once __DIR__ . '/../../config.php'; ?>
+<?php require_once __DIR__ . '/../../includes/subscription-check.php'; ?>
 <!doctype html>
 <html lang="en">
 <head>
@@ -8,19 +9,24 @@
     <title>Seller Shop - Glass Market</title>
     <link rel="stylesheet" href="<?php echo CSS_URL; ?>/app.css">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: #f9f7f5;
-            color: #2a2623;
-            margin: 0;
-            line-height: 1.6;
+            background: #f5f7fa;
+            min-height: 100vh;
+            padding-top: 80px;
         }
         
         /* Seller Header Section */
         .seller-header {
-            background: linear-gradient(180deg, #fff 0%, #f9f7f5 100%);
-            border-bottom: 1px solid #e8e3dd;
-            padding: 100px 20px 60px;
+            padding: 40px 20px 60px;
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
         }
         
         .seller-header-content {
@@ -34,33 +40,12 @@
         .seller-avatar-large {
             width: 200px;
             height: 200px;
-            border-radius: 16px;
+            border-radius: 12px;
             background-size: cover;
             background-position: center;
             flex-shrink: 0;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-            position: relative;
-        }
-        
-        .seller-avatar-large .verified-badge {
-            position: absolute;
-            bottom: 12px;
-            right: 12px;
-            background: rgba(255,255,255,0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 50%;
-            width: 48px;
-            height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
-        
-        .seller-avatar-large .verified-badge svg {
-            width: 28px;
-            height: 28px;
-            color: #059669;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e5e7eb;
         }
         
         .seller-header-info {
@@ -68,54 +53,93 @@
         }
         
         .seller-name-large {
-            font-family: Georgia, 'Times New Roman', serif;
-            font-size: 48px;
+            font-size: 36px;
             font-weight: 700;
-            color: #1a1614;
+            color: #1f2937;
             margin: 0 0 12px 0;
-            letter-spacing: -0.5px;
         }
         
         .seller-specialty-large {
             display: inline-block;
-            background: #f3ede5;
-            color: #6b6460;
-            padding: 8px 20px;
-            border-radius: 20px;
-            font-size: 14px;
+            background: #f3f4f6;
+            color: #4b5563;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
             font-weight: 600;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
         
         .seller-description {
-            font-size: 18px;
-            color: #6b6460;
-            line-height: 1.7;
-            margin: 0 0 24px 0;
+            font-size: 15px;
+            color: #6b7280;
+            line-height: 1.6;
+            margin: 0 0 20px 0;
             max-width: 700px;
+        }
+
+        .company-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+            max-width: 700px;
+        }
+
+        .company-info-item {
+            padding: 12px;
+            background: #f9fafb;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .company-info-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .company-info-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .company-info-value a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        .company-info-value a:hover {
+            text-decoration: underline;
         }
         
         .seller-location-large {
             display: flex;
             align-items: center;
             gap: 8px;
-            color: #6b6460;
-            font-size: 16px;
-            margin-bottom: 24px;
+            color: #6b7280;
+            font-size: 15px;
+            margin-bottom: 20px;
+            font-weight: 500;
         }
         
         .seller-location-large svg {
-            width: 20px;
-            height: 20px;
-            color: #8c8278;
+            width: 18px;
+            height: 18px;
+            color: #9ca3af;
         }
         
         .seller-stats-large {
             display: flex;
-            gap: 48px;
+            gap: 40px;
             flex-wrap: wrap;
+            margin-top: 24px;
         }
         
         .seller-stat-large {
@@ -125,43 +149,43 @@
         }
         
         .seller-stat-value-large {
-            font-family: Georgia, 'Times New Roman', serif;
-            font-size: 36px;
+            font-size: 32px;
             font-weight: 700;
-            color: #1a1614;
+            color: #1f2937;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
         
         .seller-stat-value-large svg {
-            width: 28px;
-            height: 28px;
-            color: #d4a574;
+            width: 24px;
+            height: 24px;
+            color: #6b7280;
         }
         
         .seller-stat-label-large {
-            font-size: 14px;
-            color: #6b6460;
+            font-size: 12px;
+            color: #6b7280;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            font-weight: 600;
         }
         
         /* Contact Section */
         .seller-contact {
-            background: #fff;
-            border: 1px solid #e8e3dd;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
             border-radius: 12px;
             padding: 24px;
-            margin-top: 32px;
-            max-width: 400px;
+            margin-top: 24px;
+            max-width: 350px;
         }
         
         .seller-contact h3 {
             margin: 0 0 16px 0;
-            font-size: 20px;
+            font-size: 16px;
             font-weight: 700;
-            color: #1a1614;
+            color: #1f2937;
         }
         
         .contact-info {
@@ -173,53 +197,50 @@
         .contact-item {
             display: flex;
             align-items: center;
-            gap: 12px;
-            color: #6b6460;
+            gap: 10px;
+            color: #4b5563;
             font-size: 14px;
+            font-weight: 500;
         }
         
         .contact-item svg {
-            width: 20px;
-            height: 20px;
-            color: #8c8278;
+            width: 18px;
+            height: 18px;
+            color: #6b7280;
             flex-shrink: 0;
         }
         
         .contact-item a {
-            color: #2a2623;
+            color: #2563eb;
             text-decoration: none;
-            transition: color 0.2s ease;
         }
         
         .contact-item a:hover {
-            color: #8c8278;
+            text-decoration: underline;
         }
         
         .contact-btn {
             width: 100%;
-            padding: 14px 24px;
-            background: #2a2623;
+            padding: 12px 20px;
+            background: #1f2937;
             color: #fff;
             border: none;
             border-radius: 8px;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             margin-top: 16px;
-            box-shadow: 0 4px 12px rgba(42,38,35,0.15);
         }
         
         .contact-btn:hover {
-            background: #1a1614;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(42,38,35,0.25);
+            background: #111827;
         }
         
         /* Products Section */
         .products-section {
             max-width: 1280px;
-            margin: 60px auto;
+            margin: 40px auto 60px;
             padding: 0 20px;
         }
         
@@ -227,56 +248,55 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 32px;
+            margin-bottom: 24px;
             padding-bottom: 16px;
-            border-bottom: 2px solid #e8e3dd;
+            border-bottom: 2px solid #e5e7eb;
         }
         
         .section-title {
-            font-family: Georgia, 'Times New Roman', serif;
-            font-size: 32px;
+            font-size: 24px;
             font-weight: 700;
-            color: #1a1614;
+            color: #1f2937;
             margin: 0;
         }
         
         .product-count {
-            font-size: 16px;
-            color: #6b6460;
+            font-size: 14px;
+            color: #6b7280;
             font-weight: 500;
         }
         
         /* Filter Tabs */
         .filter-tabs {
             display: flex;
-            gap: 12px;
-            margin-bottom: 32px;
+            gap: 10px;
+            margin-bottom: 28px;
             overflow-x: auto;
             padding-bottom: 8px;
         }
         
         .filter-tab {
             padding: 10px 20px;
-            background: #fff;
-            border: 1px solid #d4c5b3;
-            border-radius: 24px;
-            font-size: 14px;
-            font-weight: 500;
-            color: #6b6460;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #6b7280;
             cursor: pointer;
             transition: all 0.2s ease;
             white-space: nowrap;
         }
         
         .filter-tab:hover {
-            border-color: #8c8278;
-            color: #2a2623;
+            border-color: #9ca3af;
+            color: #374151;
         }
         
         .filter-tab.active {
-            background: #2a2623;
+            background: #1f2937;
             color: #fff;
-            border-color: #2a2623;
+            border-color: #1f2937;
         }
         
         /* Product Grid */
@@ -288,8 +308,8 @@
         }
         
         .product-card {
-            background: #fff;
-            border: 1px solid #e8e3dd;
+            background: white;
+            border: 1px solid #e5e7eb;
             border-radius: 12px;
             overflow: hidden;
             transition: all 0.3s ease;
@@ -298,14 +318,14 @@
         
         .product-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 12px 32px rgba(0,0,0,0.12);
-            border-color: #d4c5b3;
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+            border-color: #d1d5db;
         }
         
         .product-image {
             width: 100%;
-            height: 280px;
-            background: #e8e3dd;
+            height: 240px;
+            background: #f3f4f6;
             background-size: cover;
             background-position: center;
             position: relative;
@@ -315,24 +335,25 @@
             position: absolute;
             top: 12px;
             right: 12px;
-            background: rgba(255,255,255,0.95);
-            backdrop-filter: blur(10px);
-            padding: 6px 14px;
-            border-radius: 16px;
-            font-size: 12px;
-            font-weight: 600;
-            color: #2a2623;
+            background: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #1f2937;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
         .product-badge.wts {
-            background: rgba(5, 150, 105, 0.95);
-            color: #fff;
+            background: #10b981;
+            color: white;
         }
         
         .product-badge.wtb {
-            background: rgba(37, 99, 235, 0.95);
-            color: #fff;
+            background: #3b82f6;
+            color: white;
         }
         
         .product-info {
@@ -340,64 +361,66 @@
         }
         
         .product-title {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 700;
-            color: #1a1614;
-            margin: 0 0 8px 0;
+            color: #1f2937;
+            margin: 0 0 6px 0;
             line-height: 1.3;
         }
         
         .product-type {
-            font-size: 13px;
-            color: #8c8278;
+            font-size: 11px;
+            color: #6b7280;
             margin-bottom: 12px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            font-weight: 600;
         }
         
         .product-details {
             display: flex;
             flex-direction: column;
             gap: 8px;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
         }
         
         .product-detail {
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 14px;
-            color: #6b6460;
+            font-size: 13px;
+            color: #4b5563;
         }
         
         .product-detail svg {
             width: 16px;
             height: 16px;
-            color: #8c8278;
+            color: #6b7280;
             flex-shrink: 0;
         }
         
         .product-detail strong {
-            color: #2a2623;
+            color: #1f2937;
             font-weight: 600;
         }
         
         .product-price {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
             color: #059669;
             margin-top: 12px;
             padding-top: 12px;
-            border-top: 1px solid #f3ede5;
+            border-top: 1px solid #f3f4f6;
         }
         
         .product-location {
             display: flex;
             align-items: center;
             gap: 6px;
-            font-size: 13px;
-            color: #6b6460;
+            font-size: 12px;
+            color: #6b7280;
             margin-top: 8px;
+            font-weight: 500;
         }
         
         .product-location svg {
@@ -409,31 +432,39 @@
         .empty-state {
             text-align: center;
             padding: 80px 20px;
-            color: #6b6460;
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
         }
         
         .empty-state svg {
-            width: 80px;
-            height: 80px;
-            color: #d4c5b3;
-            margin-bottom: 24px;
+            width: 64px;
+            height: 64px;
+            color: #d1d5db;
+            margin-bottom: 16px;
         }
         
         .empty-state h3 {
-            font-size: 24px;
-            color: #2a2623;
-            margin: 0 0 12px 0;
+            font-size: 20px;
+            color: #1f2937;
+            margin: 0 0 8px 0;
+            font-weight: 700;
         }
         
         .empty-state p {
-            font-size: 16px;
+            font-size: 14px;
             margin: 0;
+            color: #6b7280;
         }
         
         /* Responsive Design */
         @media (max-width: 768px) {
+            body {
+                padding-top: 60px;
+            }
+
             .seller-header {
-                padding: 80px 20px 40px;
+                padding: 20px 20px 40px;
             }
             
             .seller-header-content {
@@ -448,10 +479,14 @@
             }
             
             .seller-name-large {
-                font-size: 32px;
+                font-size: 28px;
             }
             
             .seller-description {
+                max-width: 100%;
+            }
+
+            .company-info-grid {
                 max-width: 100%;
             }
             
@@ -461,7 +496,7 @@
             
             .seller-stats-large {
                 justify-content: center;
-                gap: 32px;
+                gap: 24px;
             }
             
             .seller-contact {
@@ -469,7 +504,7 @@
             }
             
             .section-title {
-                font-size: 24px;
+                font-size: 20px;
             }
             
             .products-grid {
@@ -510,13 +545,18 @@
                     c.id,
                     c.name,
                     c.company_type,
+                    c.description,
                     c.phone,
                     c.website,
+                    c.owner_user_id,
+                    c.cover_image,
+                    u.email as seller_email,
                     COUNT(l.id) as listing_count
                 FROM companies c
+                LEFT JOIN users u ON c.owner_user_id = u.id
                 LEFT JOIN listings l ON c.id = l.company_id AND l.published = 1
                 WHERE c.id = ?
-                GROUP BY c.id, c.name, c.company_type, c.phone, c.website
+                GROUP BY c.id
             ");
             $stmt->execute([$sellerId]);
             $seller = $stmt->fetch();
@@ -547,8 +587,9 @@
                     l.storage_location,
                     l.quality_notes,
                     l.created_at,
-                    l.image_path
+                    COALESCE(li.image_path, l.image_path) as image_path
                 FROM listings l
+                LEFT JOIN listing_images li ON l.id = li.listing_id AND li.is_main = 1
                 WHERE l.company_id = ? AND l.published = 1
                 ORDER BY l.created_at DESC
             ");
@@ -565,12 +606,10 @@
             ];
             $specialty = $specialtyMap[$seller['company_type']] ?? 'Glass Products';
             
-            // Generate avatar
-            $avatarUrl = "https://picsum.photos/seed/seller{$seller['id']}/600/600";
-            
-            // Generate random rating and reviews for demo
-            $rating = number_format(4.6 + (rand(0, 30) / 100), 1);
-            $reviewCount = rand(100, 400);
+            // Use company cover image or fallback
+            $avatarUrl = !empty($seller['cover_image']) 
+                ? PUBLIC_URL . '/' . $seller['cover_image']
+                : PUBLIC_URL . '/uploads/default/fallback_company.png';
             
             // Extract unique location from listings
             $locations = [];
@@ -586,6 +625,7 @@
             echo '<div style="padding: 100px 20px; text-align: center;">';
             echo '<h1>Error</h1>';
             echo '<p>An error occurred while loading the seller information.</p>';
+            echo '<p style="color: #ef4444; font-family: monospace; font-size: 12px;">' . htmlspecialchars($e->getMessage()) . '</p>';
             echo '<a href="' . VIEWS_URL . '/sellers.php" style="color: #2a2623;">← Back to Sellers</a>';
             echo '</div>';
             include __DIR__ . '/../../includes/footer.php';
@@ -596,44 +636,51 @@
     <!-- Seller Header -->
     <section class="seller-header">
         <div class="seller-header-content">
-            <div class="seller-avatar-large" style="background-image: url('<?php echo htmlspecialchars($avatarUrl, ENT_QUOTES, 'UTF-8'); ?>');">
-                <div class="verified-badge" title="Verified Seller">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                </div>
-            </div>
+            <div class="seller-avatar-large" style="background-image: url('<?php echo htmlspecialchars($avatarUrl, ENT_QUOTES, 'UTF-8'); ?>');"></div>
             
             <div class="seller-header-info">
                 <h1 class="seller-name-large"><?php echo htmlspecialchars($seller['name'], ENT_QUOTES, 'UTF-8'); ?></h1>
                 
                 <span class="seller-specialty-large"><?php echo htmlspecialchars($specialty, ENT_QUOTES, 'UTF-8'); ?></span>
                 
+                <?php if (!empty($seller['description'])): ?>
                 <p class="seller-description">
-                    Welcome to our shop! We specialize in high-quality glass products and materials. 
-                    Browse through our collection of carefully curated items, from recycled glass cullet 
-                    to premium glass products. All our listings meet industry standards and quality requirements.
+                    <?php echo nl2br(htmlspecialchars($seller['description'], ENT_QUOTES, 'UTF-8')); ?>
                 </p>
+                <?php endif; ?>
                 
-                <div class="seller-location-large">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    </svg>
-                    <span><?php echo htmlspecialchars($location, ENT_QUOTES, 'UTF-8'); ?></span>
+                <div class="company-info-grid">
+                    <div class="company-info-item">
+                        <div class="company-info-label">Company Type</div>
+                        <div class="company-info-value"><?php echo htmlspecialchars($seller['company_type'], ENT_QUOTES, 'UTF-8'); ?></div>
+                    </div>
+                    <div class="company-info-item">
+                        <div class="company-info-label">Location</div>
+                        <div class="company-info-value"><?php echo htmlspecialchars($location, ENT_QUOTES, 'UTF-8'); ?></div>
+                    </div>
+                    <?php if (!empty($seller['phone'])): ?>
+                    <div class="company-info-item">
+                        <div class="company-info-label">Phone</div>
+                        <div class="company-info-value">
+                            <a href="tel:<?php echo htmlspecialchars($seller['phone'], ENT_QUOTES, 'UTF-8'); ?>">
+                                <?php echo htmlspecialchars($seller['phone'], ENT_QUOTES, 'UTF-8'); ?>
+                            </a>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                    <?php if (!empty($seller['website'])): ?>
+                    <div class="company-info-item">
+                        <div class="company-info-label">Website</div>
+                        <div class="company-info-value">
+                            <a href="<?php echo htmlspecialchars($seller['website'], ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">
+                                Visit Website
+                            </a>
+                        </div>
+                    </div>
+                    <?php endif; ?>
                 </div>
                 
                 <div class="seller-stats-large">
-                    <div class="seller-stat-large">
-                        <div class="seller-stat-value-large">
-                            <svg fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                            </svg>
-                            <?php echo $rating; ?>
-                        </div>
-                        <div class="seller-stat-label-large"><?php echo number_format($reviewCount); ?> Reviews</div>
-                    </div>
-                    
                     <div class="seller-stat-large">
                         <div class="seller-stat-value-large">
                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -688,7 +735,7 @@
                         </div>
                     </div>
                     
-                    <button class="contact-btn" onclick="alert('Contact functionality coming soon!')">
+                    <button class="contact-btn" onclick="contactSeller()">
                         Send Message
                     </button>
                 </div>
@@ -696,7 +743,7 @@
         </div>
     </section>
     
-    <!-- Products Section -->
+
     <section class="products-section">
         <div class="section-header">
             <h2 class="section-title">Available Products</h2>
@@ -706,7 +753,6 @@
         <!-- Filter Tabs -->
         <div class="filter-tabs">
             <button class="filter-tab active" data-filter="all">All Products</button>
-            <button class="filter-tab" data-filter="WTS">For Sale</button>
             <button class="filter-tab" data-filter="WTB">Wanted to Buy</button>
             <button class="filter-tab" data-filter="recycled">Recycled</button>
             <button class="filter-tab" data-filter="tested">Tested</button>
@@ -799,6 +845,8 @@
         </div>
         <?php endif; ?>
     </section>
+        </div><!-- End Products Tab -->
+
     
     <?php include __DIR__ . '/../../includes/footer.php'; ?>
     
@@ -834,6 +882,38 @@
                 productCount.textContent = visibleCards.length + ' listing' + (visibleCards.length !== 1 ? 's' : '');
             });
         });
+        
+        // Tab switching functionality
+        function switchTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById('tab-' + tabName).classList.add('active');
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+        }
+        
+        // Contact seller functionality
+        function contactSeller() {
+            <?php if (!empty($seller['seller_email'])): ?>
+                const sellerName = <?php echo json_encode($seller['name']); ?>;
+                const subject = encodeURIComponent('Inquiry about: ' + sellerName);
+                const body = encodeURIComponent('Hello,\n\nI am interested in your company listings on Glass Market.\n\nCompany: ' + sellerName + '\n\nShop URL: ' + window.location.href + '\n\nThank you.');
+                
+                window.location.href = 'mailto:<?= htmlspecialchars($seller['seller_email']) ?>?subject=' + subject + '&body=' + body;
+            <?php else: ?>
+                alert('Contact information for this seller is not available.');
+            <?php endif; ?>
+        }
     </script>
 </body>
 </html>
